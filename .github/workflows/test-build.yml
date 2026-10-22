@@ -25,7 +25,9 @@ jobs:
       - name: Empacotar .dmg
         run: |
           mkdir -p dmgsrc && cp -R "dist/Tamagoshi Cripto.app" dmgsrc/ && ln -s /Applications dmgsrc/Applications
-          hdiutil create -volname "Tamagoshi Cripto" -srcfolder dmgsrc -ov -format UDZO dist/TamagoshiCripto-macos-$(uname -m).dmg
+          DMG=dist/TamagoshiCripto-macos-$(uname -m).dmg
+          for i in 1 2 3 4 5; do hdiutil create -volname "Tamagoshi Cripto" -srcfolder dmgsrc -ov -format UDZO "$DMG" && break; echo "hdiutil ocupado, tentando de novo ($i)"; sleep 5; done
+          test -f "$DMG"
           file "dist/Tamagoshi Cripto.app/Contents/MacOS/Tamagoshi Cripto"
           codesign -dv "dist/Tamagoshi Cripto.app" 2>&1 || true
           ls -la dist
