@@ -32,7 +32,12 @@ PADRAO = {
     "crt": False,           # scanlines estilo tubo
     "mudo": False,
     "segredos": [],         # easter eggs destravados (ex.: "satoshi")
-    "menubar_mac": False,   # ícone na menu bar do Mac (experimental)
+    "menubar_mac": False,
+    "unidade": "usd",       # "usd" ou "sats" (moscow time)
+    "carteira": "",         # endereço BTC PÚBLICO (watch-only). Nunca chave privada!
+    "api": True,            # API local em 127.0.0.1:8737
+    "onchain": {},          # blocos comidos (gerenciado pelo app)
+    "evolucao": {},         # xp (gerenciado pelo app)   # ícone na menu bar do Mac (experimental)
 }
 
 

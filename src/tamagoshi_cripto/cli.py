@@ -19,6 +19,8 @@ def parser():
     p.add_argument("--config", help="caminho alternativo do JSON de config")
     p.add_argument("--skins-dir", help="pasta extra com skins da comunidade")
     p.add_argument("--no-tray", action="store_true", help="não cria ícone na bandeja/menu bar")
+    p.add_argument("--no-api", action="store_true", help="desliga a API local http://127.0.0.1:8737/status")
+    p.add_argument("--status", action="store_true", help="imprime o JSON de uma instância rodando e sai")
     p.add_argument("--frames", type=int, default=0, help="(TUI) sai depois de N frames; útil pra testes")
     p.add_argument("--list-skins", action="store_true", help="lista skins disponíveis e sai")
     p.add_argument("--version", action="version", version=f"tamagoshi-cripto {__version__}")
@@ -31,7 +33,17 @@ def main(argv=None):
         from pathlib import Path
         config.CONFIG_PATH = Path(a.config).expanduser()
     opcoes = {"moeda": a.coin, "skin": a.skin, "escala": a.scale, "crt": True if a.crt else None,
-              "mudo": True if a.mute else None, "skins_dir": a.skins_dir, "sem_tray": a.no_tray}
+              "mudo": True if a.mute else None, "skins_dir": a.skins_dir, "sem_tray": a.no_tray,
+              "sem_api": a.no_api}
+    if a.status:
+        import urllib.request
+        from . import api
+        try:
+            print(urllib.request.urlopen(f"http://127.0.0.1:{api.PORTA}/status", timeout=3).read().decode())
+            return 0
+        except OSError:
+            print("nenhum tamagoshi rodando (ou API desligada)", file=sys.stderr)
+            return 1
     if a.list_skins:
         from . import arts, plugins
         print("Embutidas:", ", ".join(arts.SKINS_DISPONIVEIS))

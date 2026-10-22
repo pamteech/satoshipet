@@ -15,6 +15,7 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "src"))
 os.environ["TAMAGOSHI_CONFIG"] = str(Path(tempfile.mkdtemp()) / "cfg.json")
+os.environ.setdefault("TAMAGOSHI_API_PORT", "18737")
 
 import pytest  # noqa: E402
 
@@ -32,6 +33,27 @@ def _shot(app, nome):
     SHOTS.mkdir(parents=True, exist_ok=True)
     subprocess.run(["convert", str(tmp), "-crop", f"{app.LARG + 16}x{app.ALT + 16}+{x - 8}+{y - 8}",
                     "+repage", "-background", "#1a1c2c", "-flatten", str(SHOTS / f"{nome}.png")], check=True)
+
+
+def _gif(app, nome, n=16, ms=180, passo=None):
+    """Grava n frames da janela e monta docs/demo/<nome>.gif (só com SHOTS=1)."""
+    if not os.environ.get("SHOTS") or not shutil.which("import"):
+        for i in range(n):
+            passo and passo(i)
+            _bombear(app, ms)
+        return
+    from PIL import Image
+    pasta = Path(tempfile.mkdtemp())
+    x, y = app.root.winfo_x(), app.root.winfo_y()
+    for i in range(n):
+        passo and passo(i)
+        _bombear(app, ms)
+        subprocess.run(["import", "-window", "root", "-crop", f"{app.LARG + 16}x{app.ALT + 16}+{x - 8}+{y - 8}",
+                        str(pasta / f"{i:03d}.png")], check=True)
+    frames = [Image.open(p).convert("RGB").convert("P", palette=Image.ADAPTIVE) for p in sorted(pasta.glob("*.png"))]
+    (RAIZ / "docs" / "demo").mkdir(parents=True, exist_ok=True)
+    frames[0].save(RAIZ / "docs" / "demo" / f"{nome}.gif", save_all=True, append_images=frames[1:],
+                   duration=ms, loop=0)
 
 
 def _bombear(app, ms):
@@ -60,7 +82,11 @@ def _invocar_tudo(app):
 def executar():
     from tkinter import messagebox, simpledialog
 
-    from tamagoshi_cripto import config, license, logic, lore, main
+    import json
+    import time
+    import urllib.request
+
+    from tamagoshi_cripto import config, evolucao, license, logic, lore, main, onchain
 
     chamadas = []
     messagebox.askyesno = lambda *a, **k: (chamadas.append(("askyesno", a[0])), False)[1]
@@ -70,11 +96,22 @@ def executar():
     simpledialog.askfloat = lambda *a, **k: (chamadas.append(("askfloat", a[1])), next(floats))[1]
     email = "teste@exemplo.com"
     strs = iter([email, "CHAVE-ERRADA", email, license.gerar_chave(email)])
-    simpledialog.askstring = lambda *a, **k: (chamadas.append(("askstring", a[1])), next(strs))[1]
+    def _ask(*a, **k):
+        chamadas.append(("askstring", a[1]))
+        if a[0] != "Ativar Pro":  # carteira watch-only: endereço público, nunca chave
+            return "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+        return next(strs)
+    simpledialog.askstring = _ask
     precos = {"BTC": 100.0, "ETH": 50.0, "SOL": 10.0, "DOGE": 0.1, "PEPE": 0.00001}
     logic.buscar_precos = lambda simbolos, timeout=10: {s: precos[s] for s in simbolos}
     lore.fear_greed = lambda timeout=10: (72, "GANANCIA")
     lore.altura_bloco = lambda timeout=10: 921_337
+    onchain.ultimo_bloco = lambda timeout=10: (921_337, int(time.time()))
+    onchain.fees = lambda timeout=10: {"fastestFee": 80, "halfHourFee": 72, "hourFee": 40, "economyFee": 9, "minimumFee": 1}
+    onchain.mempool = lambda timeout=10: {"count": 53908, "vsize": 25_160_871}
+    onchain.hashrate = lambda timeout=10: 1.03e21
+    onchain.gas_eth = lambda timeout=8: 0.42
+    onchain.saldo_endereco = lambda e, timeout=10: {"confirmado": 5000, "pendente": 0, "total": 5000, "txs": 3}
     config.INTERVALO = 1
 
     falhas = []
@@ -123,6 +160,108 @@ def executar():
     assert "carinho_10" in app.conq.d["desbloqueadas"] and app.toast
     app.reacao = 0
     _shot(app, "conquista")
+    app.toast = None
+
+    # ---------- on-chain: come bloco novo ----------
+    app.console_aberto = False  # o menu "Console" ficou ligado no _invocar_tudo
+    app.alternar_sats(False)
+    app.eventos.append(("tip", 921_337, int(time.time())))
+    app._processar_eventos()
+    assert app.estomago.comidos == 0  # 1º tip só calibra
+    xp0 = app.evo.xp
+    app.eventos.append(("tip", 921_338, int(time.time())))
+    app.toast = None
+    _gif(app, "comendo", n=14)
+    assert app.estomago.comidos == 1 and app.evo.xp > xp0
+    assert "genesis" in app.conq.d["desbloqueadas"]
+    app.eventos.append(("tip", 921_339, int(time.time())))
+    _bombear(app, 600)
+    _shot(app, "comendo")
+    _bombear(app, 1500)
+    app.toast = None
+    # fee alta = suando; sem bloco há 31 min = dormindo
+    app.fee = 72
+    app.estomago.d["ts_bloco"] = time.time() - 31 * 60
+    _bombear(app, 400)
+    assert app.estomago.dormindo()
+    _shot(app, "dormindo")
+    app.estomago.d["ts_bloco"] = time.time()
+
+    # ---------- carteira watch-only ----------
+    assert "PRIVADA" in app.carteira("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi")[0]
+    assert app.carteira("bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh")[0].startswith("carteira")
+    assert "not_your_keys" in app.conq.d["desbloqueadas"]
+    app.eventos.append(("saldo", {"total": 5000, "confirmado": 5000, "pendente": 0, "txs": 3}))
+    app.eventos.append(("saldo", {"total": 7100, "confirmado": 5000, "pendente": 2100, "txs": 4}))
+    app._processar_eventos()
+    assert "2.100 sats" in app.frase_atual, app.frase_atual
+
+    # ---------- console hacker ----------
+    app.alternar_console()
+    app._exige_pro = lambda *a, **k: False  # sem diálogo de licença no meio do console
+    esperado = {"help": "comandos", "price": "BTC", "stats": "nível", "mempool": "fees", "halving": "halving",
+                "fng": "fear", "hashrate": "EH/s", "gas": "gwei", "wallet": "watch-only", "sats": "unidade",
+                "git blame": "Satoshi", "sudo moon": "sudo", "rm -rf /": "blockchain", "skin gato": "skin",
+                "coin ETH": "Pro", "neofetch": "Tamagoshi OS", "comando_que_nao_existe": "não encontrado"}
+    for cmd, trecho in esperado.items():
+        app.console_linhas = []
+        antes = 0
+        app.executar_console(cmd)
+        saida = " ".join(l for l in app.console_linhas[antes:] if isinstance(l, str))
+        assert trecho.lower() in saida.lower(), (cmd, saida)
+    assert {"sudo", "rm_rf", "moscow"} <= set(app.conq.d["desbloqueadas"])
+    del app._exige_pro
+    app.alternar_sats(False)
+    app.console_linhas = ["Tamagoshi OS - digite 'help'"]
+    app.panico_t = 0; app.toast = None
+    app.console_aberto = True
+    app.executar_console("neofetch")
+    _bombear(app, 300)
+    _shot(app, "console")
+    roteiro = list("price\r") + list("git blame\r") + list("sudo moon\r") + [None] * 8
+    def _digita(i):
+        ch = roteiro[i]
+        if ch == "\r":
+            app._tecla_console(type("E", (), {"keysym": "Return", "char": "\r"})())
+        elif ch:
+            app._tecla_console(type("E", (), {"keysym": "space" if ch == " " else ch, "char": ch})())
+    app.console_linhas = ["Tamagoshi OS - digite 'help'"]
+    app.console_input = ""
+    _gif(app, "console", n=len(roteiro), ms=140, passo=_digita)
+    app.console_aberto = True
+    # digitação via teclado de verdade (event_generate) + backtick fecha
+    app.console_aberto = True
+    app.console_input = ""
+    for ch in "ping":
+        app._tecla_console(type("E", (), {"keysym": ch, "char": ch})())
+    app._tecla_console(type("E", (), {"keysym": "Return", "char": "\r"})())
+    assert any("pong" in l.lower() for l in app.console_linhas if isinstance(l, str)), app.console_linhas[-3:]
+    app._tecla_console(type("E", (), {"keysym": "grave", "char": "`"})())
+    assert not app.console_aberto
+
+    # ---------- vim keys ----------
+    x_antes = app.root.winfo_x()
+    app._tecla(type("E", (), {"keysym": "l", "char": "l"})())
+    app.root.update()
+    assert app.cfg["posicao"][0] == x_antes + 10
+    app.root.geometry("+24+24"); app.root.update()
+
+    # ---------- API local ----------
+    st = json.loads(urllib.request.urlopen(f"http://127.0.0.1:{os.environ['TAMAGOSHI_API_PORT']}/status", timeout=3).read())
+    assert st["btc"]["comidos"] >= 1 and "nivel" in st and st["btc"]["fome"] == "MORRENDO DE FOME"
+    txt = urllib.request.urlopen(f"http://127.0.0.1:{os.environ['TAMAGOSHI_API_PORT']}/status.txt", timeout=3).read().decode()
+    assert "LV" in txt
+    html = urllib.request.urlopen(f"http://127.0.0.1:{os.environ['TAMAGOSHI_API_PORT']}/overlay", timeout=3).read().decode()
+    assert "fetch('/status')" in html
+
+    # ---------- evolução ----------
+    app.fee = 3
+    app.toast = None
+    app.evo.d["xp"] = 1990
+    app._ganhar_xp("bloco")
+    assert app.estagio == "whale" and "whale_alert" in app.conq.d["desbloqueadas"]
+    _gif(app, "evoluindo", n=16)
+    _shot(app, "whale")
     app.toast = None
 
     # Pro: chave errada, depois certa

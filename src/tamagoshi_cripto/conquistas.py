@@ -5,16 +5,25 @@ VIDA_MAX = 10.0  # 10 meios-corações = 5 corações na tela
 
 # id -> (título, descrição)
 LISTA = {
-    "primeiro_moon": ("Primeiro Moon", "Viu o bicho ir pra lua pela 1ª vez"),
-    "sobreviveu_1": ("Batismo de Fogo", "Sobreviveu ao 1º crash"),
-    "sobreviveu_3": ("Mão de Diamante", "Sobreviveu a 3 crashes"),
-    "hodl_1h": ("Paciência de Monge", "1 hora de HODL com o app aberto"),
-    "hodl_24h": ("HODL 24h", "24 horas acumuladas de HODL"),
+    "primeiro_moon": ("To the Moon", "Viu o bicho ir pra lua pela 1ª vez"),
+    "sobreviveu_1": ("Flash Crash", "Sobreviveu ao 1º crash"),
+    "sobreviveu_3": ("Byzantine General", "Sobreviveu a 3 crashes sem trair o HODL"),
+    "hodl_1h": ("Proof of Patience", "1 hora de HODL com o app aberto"),
+    "hodl_24h": ("Timechain", "24 horas acumuladas de HODL"),
     "carinho_10": ("Pet Lover", "Fez 10 carinhos no bicho"),
-    "coracao_cheio": ("Coração Cheio", "Vida no máximo"),
-    "quase_morreu": ("Quase Morreu", "Vida chegou a zero (e ele voltou!)"),
+    "coracao_cheio": ("Full Node", "Vida no máximo"),
+    "quase_morreu": ("Orphan Block", "Vida chegou a zero (e ele voltou!)"),
     "konami": ("Satoshi Revelado", "Digitou o código secreto"),
-    "halving_nerd": ("Nerd do Halving", "Descobriu a contagem do halving"),
+    "halving_nerd": ("Halvening", "Descobriu a contagem do halving"),
+    "genesis": ("Genesis", "Comeu o primeiro bloco"),
+    "pow_100": ("Proof of Work", "Comeu 100 blocos"),
+    "not_your_keys": ("Not Your Keys", "Configurou uma carteira watch-only (sem chaves!)"),
+    "whale_alert": ("Whale Alert", "Evoluiu pra forma Whale"),
+    "diamond_hands": ("Diamond Hands", "Evoluiu pra forma Diamond Hands"),
+    "sudo": ("sudo make me a lambo", "Usou sudo no console"),
+    "rm_rf": ("rm -rf / Survivor", "Tentou apagar a blockchain"),
+    "lv21": ("21 Million", "Chegou ao nível 21"),
+    "moscow": ("Moscow Time", "Passou a contar em sats"),
 }
 
 # quanto a vida muda por minuto em cada humor

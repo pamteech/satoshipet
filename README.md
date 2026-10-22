@@ -12,6 +12,10 @@
 
 <img src="docs/demo/btc.gif" width="144"> <img src="docs/demo/eth.gif" width="144"> <img src="docs/demo/sol.gif" width="144"> <img src="docs/demo/doge.gif" width="144"> <img src="docs/demo/pepe.gif" width="144">
 
+<img src="docs/demo/comendo.gif" width="180"> <img src="docs/demo/evoluindo.gif" width="180"> <img src="docs/demo/console.gif" width="180">
+
+*eats real Bitcoin blocks · evolves into a Whale · has a hacker console*
+
 [English](#english) · [Português](#português)
 
 </div>
@@ -65,14 +69,73 @@ Truecolor half-block rendering (`▀`), live prices, `space` to pet, `c` to cycl
 
 ```
 tamagoshi [--tui] [--coin BTC|ETH|SOL|DOGE|PEPE] [--skin NAME|plugin:ID] [--scale 1-6]
-          [--crt] [--mute] [--config PATH] [--skins-dir DIR] [--no-tray] [--list-skins] [--version]
+          [--crt] [--mute] [--config PATH] [--skins-dir DIR] [--no-tray] [--no-api] [--status]
+          [--list-skins] [--version]
 ```
 
 ### Controls
 - **Drag**: hold left click · **Pet**: click the creature (jump + hearts + sound) · **Menu**: right click (or ctrl-click on Mac)
-- Menu: coin, skin, settings, price alerts, achievements, mute, CRT, start at login, hide to tray, activate Pro, quit
+- **Keyboard** (widget focused): `h j k l` move 10 px, `H J K L` 50 px, <kbd>`</kbd> console
+- Menu: coin, skin, watch-only wallet, console, show in sats, settings, price alerts, achievements, mute, CRT, start at login, hide to tray, activate Pro, quit
 
-### Nerd stuff 🤓
+### What's inside
+| Feature | Source (keyless) | Offline? | Tier |
+|---|---|---|---|
+| ⛓️ **Eats every new BTC block** (flying block, crumbs, "bloco #N comido" toast, +25 XP) | mempool.space `/v1/blocks` | waits quietly | Free |
+| 🍔 **Hunger = mempool fee rate** (≤5 sat/vB fed … >60 starving + sweat drops) | mempool.space `/v1/fees/recommended` | `?` | Free |
+| 😴 **Sleeps when no block for 30+ min** ("esperando bloco... zzz") | block timestamp | — | Free |
+| ⛽ **ETH gas** mood (Vitalikinho) | public RPC `ethereum-rpc.publicnode.com` | `?` | Free (TUI) / Pro (window) |
+| ⚡ **Hash rate** stat | mempool.space `/v1/mining/hashrate/3d` | `?` | Free |
+| 🧬 **Evolution**: egg → baby → adult → **Whale** or **Diamond Hands** (3+ crashes survived), level + XP bar | local | ✅ | Free |
+| 👀 **Watch-only BTC address**: reacts to incoming tx / balance changes | mempool.space `/address/<addr>` | keeps last value | Free |
+| `>_` **Hacker console** (backtick) — also in `--tui` | — | ✅ | Free |
+| 🕹️ **hjkl** moves the widget (HJKL = big steps) | — | ✅ | Free |
+| 🇷🇺 **Moscow time / sats** toggle (`sats` or menu) | — | ✅ | Free |
+| 🏆 Nerd achievements (Genesis Block, Proof of Work 100, Not Your Keys, Whale Alert, `sudo`, `rm -rf /`, Moscow Time…) | local | ✅ | Free |
+| 🔌 **Local JSON API** `/status` for polybar / sketchybar / OBS | `127.0.0.1:8737` | ✅ | Free |
+
+<img src="docs/evolucao_preview.png" width="560">
+
+#### On-chain pet
+Every 60 s a background thread asks mempool.space for the tip. The **first** tip seen only calibrates
+(the pet doesn't binge on old blocks); after that every new height is eaten (max 6 at once after a long nap).
+No network? Everything shows `?`, the pet keeps reacting to price and nothing crashes.
+
+#### Watch-only wallet 🔒
+Menu → *Carteira watch-only* (or `wallet bc1q...` in the console). Paste a **public address** (`bc1…`, `1…`, `3…`).
+The pet celebrates incoming sats and cries on outgoing ones.
+
+> **⚠️ The app NEVER asks for, stores or needs a private key, seed phrase or xprv.** It is read-only:
+> only the public address is saved in your config and sent to mempool.space. If you paste anything that looks
+> like a private key / WIF / xprv / 12-24 word seed, it is **refused** with a warning and never stored.
+> (Privacy note: mempool.space learns which address you watch. Self-host mempool if that matters to you.)
+
+#### Hacker console
+Press <kbd>`</kbd> on the widget (or <kbd>`</kbd> / <kbd>:</kbd> in `--tui`). ↑/↓ history, `clear`, `exit`.
+
+| command | does |
+|---|---|
+| `help` | list everything |
+| `price` · `stats` · `neofetch` | price / XP, stage, uptime / a neofetch with the sprite |
+| `feed` · `pet` | snack (no XP, nice try) / pet |
+| `mempool` · `halving` · `hashrate` · `gas` · `fng` | live chain stats |
+| `wallet [addr]` · `sats` | watch-only address / Moscow-time toggle |
+| `skin <name>` · `coin <X>` | switch look / coin |
+| `sudo moon` | you are now root. still doesn't pump. |
+| `rm -rf /` | the pet panics |
+| `git blame` | it was the Fed |
+| `whoami` · `ls` · `cat` · `ping` | 🤫 |
+
+#### Local API (polybar / sketchybar / OBS)
+```bash
+curl -s localhost:8737/status | jq .btc      # {"bloco": 921339, "fee_sat_vb": 3, "fome": "SACIADO", ...}
+curl -s localhost:8737/status.txt            # 🚀 BTC $67,123.00 +2.41% LV7
+tamagoshi --status                           # same JSON from the CLI
+```
+Bound to `127.0.0.1` only. Port via `TAMAGOSHI_API_PORT`, off with `--no-api`. Ready-made
+[sketchybar plugin, polybar module and OBS overlay](examples/).
+
+### More nerd stuff 🤓
 - **Fear & Greed index** ([alternative.me](https://alternative.me/crypto/fear-and-greed-index/)) in the panel. Extreme greed slowly heals the pet; extreme fear hurts it.
 - **Block height + halving countdown**: pet Satoshinho 5 times (data from [mempool.space](https://mempool.space)).
 - **Lore phrases** per coin plus a degen phrasebook (`ser`, `few understand`, `probably nothing`...).
@@ -105,7 +168,11 @@ tamagoshi [--tui] [--coin BTC|ETH|SOL|DOGE|PEPE] [--skin NAME|plugin:ID] [--scal
 | `preco_referencia` | `{}` | e.g. `{"BTC": 65000}` (Pro). Empty means the first price seen |
 | `alertas` | `{}` | e.g. `{"BTC": {"acima": 70000, "abaixo": 60000}}` (Pro) |
 | `menubar_mac` | `false` | experimental macOS menu bar icon |
-| `progresso` | — | life and achievements (managed by the app) |
+| `unidade` | `"usd"` | `"sats"` = Moscow time |
+| `carteira` | `""` | public BTC address (watch-only). Never a key |
+| `api` | `true` | local HTTP API on 127.0.0.1 |
+| `onchain` | `true` | block/fee/hashrate/gas polling |
+| `progresso` / `evolucao` | — | life, achievements, XP (managed by the app) |
 
 ### Platform notes
 | | Windows | macOS | Linux |
@@ -142,6 +209,10 @@ pipx install git+https://github.com/OWNER/tamagoshi-cripto
 tamagoshi            # janela
 tamagoshi --tui      # no terminal
 ```
+
+**Modo nerd (v1.1):** o bicho **come cada bloco novo do Bitcoin** (mempool.space), fica com fome quando a fee da mempool sobe, **dorme** se passar 30 min sem bloco ("esperando bloco..."), mostra hash rate e gas do ETH, **evolui** (ovo → bebê → adulto → Whale ou Diamond Hands se sobreviver a 3 crashes) com nível e barra de XP, tem **console hacker** (tecla <kbd>`</kbd>: `help`, `neofetch`, `sudo moon`, `rm -rf /`, `git blame`...), teclas **hjkl** pra mover, modo **sats / Moscow time** e uma **API local** em `127.0.0.1:8737/status` pra polybar, sketchybar e OBS ([exemplos](examples/)). Tudo com APIs grátis sem chave; sem internet ele só mostra `?`.
+
+**Carteira watch-only:** cole só o **endereço público** (bc1/1/3). O app **nunca pede chave privada, seed ou xprv**; se você colar algo assim ele recusa e não salva. É só leitura.
 
 **Como usar:** arraste com o botão esquerdo, clique no bicho pra fazer carinho e use o botão direito (ou ctrl-clique no Mac) pro menu.
 

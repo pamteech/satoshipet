@@ -11,7 +11,8 @@ import time
 
 from PIL import Image
 
-from . import arts, config, conquistas, logic, plugins, recursos
+from . import arts, config, conquistas, evolucao, logic, onchain, plugins, recursos
+from .console import SPRITE, Console
 from .sprites import FRAMES, LINHAS
 
 RESET = "\x1b[0m"
@@ -36,11 +37,12 @@ def frame_ansi(img):
     return linhas
 
 
-def carregar(moeda, skin, extra_dir=None):
+def carregar(moeda, skin, extra_dir=None, estagio="adulto"):
+    from .sprites import nome_folha
     if skin and skin.startswith("plugin:"):
         caminho = plugins.descobrir(extra_dir)[skin]["_folha"]
     else:
-        caminho = recursos.sheet_path(moeda, skin or "padrao")
+        caminho = recursos.ASSETS / "sprites" / nome_folha(moeda, skin or "padrao", estagio)
     folha = Image.open(caminho).convert("RGBA")
     return {(l, f): folha.crop((f * 48, j * 48, (f + 1) * 48, (j + 1) * 48))
             for j, l in enumerate(LINHAS) for f in range(FRAMES)}
@@ -87,24 +89,124 @@ def painel(moeda, preco, var, estado, vida, frase):
             "\x1b[2m[c] trocar moeda  [espaço] carinho  [q] sair\x1b[0m"]
 
 
+class CtxTUI:
+    """Contexto do console no modo terminal (mesmos comandos da janela)."""
+
+    def __init__(self, est):
+        self.e = est
+
+    def status(self):
+        e = self.e
+        p = e["precos"].get(e["moeda"])
+        var = logic.variacao_pct(p, e["ref"].get(e["moeda"], p)) if p else 0.0
+        xp = e["evo"].xp
+        return {"nome": arts.NOMES[e["moeda"]], "moeda": e["moeda"], "preco": p,
+                "preco_fmt": logic.formatar_preco(p) if p else "carregando", "variacao_pct": var,
+                "humor": e["estado"], "nivel": evolucao.nivel(xp), "xp": xp,
+                "xp_pct": evolucao.progresso_nivel(xp), "estagio": evolucao.NOMES[e["estagio"]],
+                "vida": e["vida"].vida, "crashes": e["vida"].d["crashes"],
+                "conquistas": f"{len(e['vida'].d['desbloqueadas'])}/{len(conquistas.LISTA)}",
+                "uptime_min": int((time.time() - e["inicio"]) / 60),
+                "btc": {"bloco": e["estomago"].d.get("altura"), "comidos": e["estomago"].comidos,
+                        "fee_sat_vb": e.get("fee"), "fome": onchain.fome_por_fee(e.get("fee"))[1],
+                        "sats_por_dolar": onchain.sats_por_dolar(e["precos"].get("BTC"))}}
+
+    def alimentar(self):
+        self.e["pulo"] = FRAMES * 2
+        return "nhac!"
+
+    def carinho(self):
+        self.e["pulo"] = FRAMES * 2
+        self.e["vida"].carinho()
+        return arts.reacao(self.e["estado"])
+
+    def panico(self):
+        self.e["frase"] = "AAAAA NÃO APAGA MINHA BLOCKCHAIN"
+
+    def sudo_moon(self):
+        self.e["forcado"] = time.time() + 15
+
+    def skins(self):
+        return ["padrao", "cyberpunk", "gato", "sapo"] + list(plugins.descobrir())
+
+    def trocar_skin(self, sk):
+        try:
+            self.e["sprites"] = carregar(self.e["moeda"], sk, estagio=self.e["estagio"])
+            self.e["skin"] = sk
+            return f"skin: {sk}"
+        except (OSError, KeyError):
+            return f"skin desconhecida: {sk}"
+
+    def trocar_moeda(self, m):
+        if m not in config.MOEDAS:
+            return "moeda desconhecida"
+        self.e["moeda"] = m
+        self.e["sprites"] = carregar(m, self.e["skin"], estagio=self.e["estagio"])
+        return f"moeda: {m}"
+
+    def alternar_sats(self):
+        return "sats: só na janela, por enquanto"
+
+    def carteira(self, end):
+        if not end:
+            return ["uso: wallet bc1q...  (só endereço público)"]
+        ok, msg = onchain.validar_endereco(end)
+        if not ok:
+            return [msg]
+        s = onchain.saldo_endereco(end)
+        return [f"saldo watch-only: {s['total']:,} sats em {s['txs']} txs".replace(",", ".")]
+
+
+def _modo_comando(console, tec, est):
+    """Sai do cbreak, lê uma linha, mostra a saída e volta pro bicho."""
+    tec.__exit__()
+    sys.stdout.write("\x1b[2J\x1b[H\x1b[?25h\x1b[32mTamagoshi OS - 'help', 'exit' volta pro bicho\x1b[0m\n")
+    while True:
+        try:
+            linha = input("\x1b[92m$ \x1b[0m")
+        except EOFError:
+            break
+        if linha.strip() in ("exit", "quit", "q", ""):
+            break
+        for out in console.executar(linha):
+            if out == SPRITE:
+                print("\n".join(frame_ansi(est["sprites"][(est["estado"], 0)])))
+            else:
+                print("\x1b[32m" + out + "\x1b[0m")
+    tec.__enter__()
+    sys.stdout.write("\x1b[?25l\x1b[2J")
+
+
 def rodar(opcoes, frames=0):
-    moeda = opcoes.get("moeda") or "BTC"
-    skin = opcoes.get("skin") or "padrao"
+    cfg = config.carregar()  # a TUI compartilha XP/evolução com a janela
+    evo = evolucao.Evolucao(cfg.get("evolucao"))
+    vida = conquistas.Conquistas(cfg.get("progresso"))
+    estagio = evolucao.estagio(evo.xp, vida.d["crashes"])
+    est = {"moeda": opcoes.get("moeda") or "BTC", "skin": opcoes.get("skin") or "padrao",
+           "precos": {}, "ref": {}, "estado": "garimpando", "pulo": 0, "frase": "gm, fren! (` ou : abre o console)",
+           "evo": evo, "vida": vida, "estagio": estagio, "inicio": time.time(), "forcado": 0,
+           "estomago": onchain.Estomago(cfg.get("onchain")), "fee": None}
+    est["sprites"] = carregar(est["moeda"], est["skin"], opcoes.get("skins_dir"), estagio)
     escala = 2 if (opcoes.get("escala") or 1) >= 2 and shutil.get_terminal_size().columns >= 100 else 1
-    sprites = carregar(moeda, skin, opcoes.get("skins_dir"))
-    precos, ref = {}, {}
-    vida = conquistas.Conquistas()
+    console = Console(CtxTUI(est))
 
     def buscar():
         while True:
             try:
-                precos.update(logic.buscar_precos(list(config.MOEDAS)))
+                est["precos"].update(logic.buscar_precos(list(config.MOEDAS)))
+            except Exception:
+                pass
+            try:
+                h, ts = onchain.ultimo_bloco()
+                if est["estomago"].novo_tip(h, ts):
+                    est["pulo"], est["frase"] = FRAMES * 2, f"bloco #{h} comido! nhac"
+                est["fee"] = onchain.fees()["halfHourFee"]
             except Exception:
                 pass
             time.sleep(config.INTERVALO)
 
     threading.Thread(target=buscar, daemon=True).start()
-    estado, frase, t_frase, f, n, pulo = "garimpando", "gm, fren!", time.time(), 0, 0, 0
+    t_frase, f, n = time.time(), 0, 0
     sys.stdout.write("\x1b[?25l\x1b[2J")  # esconde cursor, limpa tela
     try:
         with _Teclado() as tec:
@@ -112,32 +214,36 @@ def rodar(opcoes, frames=0):
                 k = tec.tecla()
                 if k in ("q", "Q", "\x03"):
                     break
+                if k in ("`", ":"):
+                    _modo_comando(console, tec, est)
                 if k == "c":
                     moedas = list(config.MOEDAS)
-                    moeda = moedas[(moedas.index(moeda) + 1) % len(moedas)]
-                    sprites = carregar(moeda, skin if not skin.startswith("plugin:") else skin,
-                                       opcoes.get("skins_dir"))
+                    CtxTUI(est).trocar_moeda(moedas[(moedas.index(est["moeda"]) + 1) % len(moedas)])
                 if k == " ":
-                    pulo, frase = FRAMES * 2, arts.reacao(estado)
-                    vida.carinho()
-                p = precos.get(moeda)
+                    est["frase"] = CtxTUI(est).carinho()
+                moeda = est["moeda"]
+                p = est["precos"].get(moeda)
                 var = 0.0
                 if p:
-                    ref.setdefault(moeda, p)
-                    var = logic.variacao_pct(p, ref[moeda])
-                    novo = logic.estado_do_bicho(var)
-                    if novo != estado:
-                        estado, frase = novo, arts.frase(novo, moeda)
+                    est["ref"].setdefault(moeda, p)
+                    var = logic.variacao_pct(p, est["ref"][moeda])
+                    novo = "moon" if time.time() < est["forcado"] else logic.estado_do_bicho(var)
+                    if novo != est["estado"]:
+                        est["estado"], est["frase"] = novo, arts.frase(novo, moeda)
                 if time.time() - t_frase > 10:
-                    frase, t_frase = arts.frase(estado, moeda), time.time()
-                img = sprites[("pulo", (FRAMES * 2 - pulo) % FRAMES) if pulo else (estado, f)]
+                    est["frase"], t_frase = arts.frase(est["estado"], moeda), time.time()
+                pulo = est["pulo"]
+                img = est["sprites"][("pulo", (FRAMES * 2 - pulo) % FRAMES) if pulo else (est["estado"], f)]
                 if escala > 1:
                     img = img.resize((96, 96), Image.NEAREST)
-                saida = frame_ansi(img) + [""] + painel(moeda, p, var, estado, vida.vida, frase)
+                extra = f"bloco {est['estomago'].d.get('altura') or '?'}  fee {est['fee'] or '?'} sat/vB  " \
+                        f"LV{evolucao.nivel(evo.xp)} {evolucao.NOMES[est['estagio']]}"
+                saida = frame_ansi(img) + [""] + painel(moeda, p, var, est["estado"], vida.vida, est["frase"]) + \
+                    ["\x1b[2m" + extra + "  [`] console\x1b[0m"]
                 sys.stdout.write("\x1b[H" + "\n".join(l + "\x1b[K" for l in saida) + "\n")
                 sys.stdout.flush()
                 f = (f + 1) % FRAMES
-                pulo = max(0, pulo - 1)
+                est["pulo"] = max(0, pulo - 1)
                 n += 1
                 if frames and n >= frames:
                     break

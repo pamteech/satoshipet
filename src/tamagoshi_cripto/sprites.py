@@ -498,21 +498,126 @@ def acessorio(s, skin):
         s.ret(cx - 1, t - 3, 3, 1, "amarelo", "ouro")
 
 
-def desenhar(moeda, skin, linha, frame, extra=None):
-    """Renderiza um frame. linha: garimpando/moon/rekt/pulo."""
+# ======================= evolução =======================
+ESTAGIOS = ("ovo", "bebe", "adulto", "whale", "diamond")
+COR_OVO = {"BTC": "laranja", "ETH": "cristal", "SOL": "sol", "DOGE": "creme", "PEPE": "verde"}
+SIMBOLO = {"BTC": "B", "ETH": "Ξ", "SOL": "S", "DOGE": "D", "PEPE": "P"}
+
+
+def ovo(s, e, f, moeda):
+    """Ovo da criatura: balança no garimpo, ganha foguetinho no moon, racha no rekt."""
+    chao(s, "verde")
+    sombra(s, 24, 8)
+    balanco = [-1, 0, 1, 0][f] if e != "rekt" else 0
+    s.tf = (24, 44, s.tf[2], s.tf[3], s.tf[4] + balanco, s.tf[5])
+    rampa = COR_OVO.get(moeda, "laranja")
+    s.esfera(24, 32, 9.5, 12, rampa)
+    s.esfera(24, 34, 7, 6, rampa, luz=0.15)
+    for x, y in ((19, 27), (28, 33), (22, 39)):  # pintinhas
+        s.ret(x, y, 2, 2, "branco" if rampa != "creme" else "laranja", rampa)
+    s.texto(23, 30, SIMBOLO.get(moeda, "B"), "roxo")
+    if e == "moon":
+        olhos(s, 19, 25, 7, "oculos")
+        for i in range(2 + f % 2):
+            s.efeito(22 + i * 2, 45 + (i % 2), "amarelo")
+        faiscas(s, [(8, 12 + f), (40, 9 - f)], ("amarelo", "branco"))
+    elif e == "rekt":
+        s.linha([(15, 28), (19, 31), (22, 27), (26, 32), (30, 28), (33, 31)], "preto")
+        s.ret(26, 22, 6, 2, "branco", "barba")  # band-aid
+        s.ret(28, 22, 2, 2, "laranja", "pele")
+        chuva(s, f)
+    elif f == 2:
+        s.efeito(35, 22, "branco"); s.efeito(13, 24, "branco")
+    s.marcar_ancora(24, 21, 8)
+
+
+def baleia(s, e, f, k):
+    """Forma final 'Whale' do Satoshinho: baleia mineradora."""
+    if e == "rekt":
+        for x in range(2, 46):  # encalhada na areia
+            s.set(x, 44, "amarelo", "pele"); s.set(x, 45, "laranja", "pele"); s.set(x, 46, "preto")
+        rampa = "pedra"
+    else:
+        for x in range(0, 48):  # ondas animadas
+            y = 42 + round(math.sin((x + f * 3) / 3.0))
+            s.set(x, y, "celeste", "azul"); s.set(x, y + 1, "azul", "azul")
+            for yy in range(y + 2, 47):
+                s.set(x, yy, "marinho", "azul")
+        rampa = "azul"
+    dy = -3 if (e == "moon" and f % 2) else 0
+    s.tf = (24, 44, 1, 1, 0, dy)
+    s.poly([(8, 28), (0, 19 + f % 2), (3, 28), (0, 37 - f % 2)], rampa, 0.45)  # cauda
+    s.esfera(25, 29, 19, 12.5, rampa)
+    s.esfera(26, 36, 15, 5, "barba", clip=lambda x, y: y > 32)
+    for x in range(15, 38, 3):  # pregas da barriga
+        s.ret(x, 36, 1, 4, "cinza_claro", "barba")
+    s.esfera(30, 40, 5, 2.2, rampa, luz=-0.1)  # nadadeira
+    s.esfera(24, 18, 8.5, 6, "laranja", clip=lambda x, y: y < 18.5)  # capacete
+    s.caixa(14.5, 17.5, 33.5, 20, "laranja", raio=1)
+    s.esfera(24, 15, 2.2, 2, "ciano")
+    if e == "moon":
+        olhos(s, 33, 25, 5, "oculos")
+        for i in range(6):  # chafariz de moedas
+            y = 11 - ((f * 3 + i * 4) % 11)
+            x = 24 + (i % 3 - 1) * (3 + (16 - y) // 4)
+            s.efeito(x, y, "amarelo"); s.efeito(x + 1, y, "laranja"); s.efeito(x, y + 1, "laranja")
+    elif e == "rekt":
+        olhos(s, 33, 25, 5, "x")
+        s.linha([(42, 44), (42, 33)], "vinho", "madeira", 2)
+        s.caixa(36, 27, 47.5, 34, "papelao", raio=0)
+        s.texto(37, 28, "HODL", "roxo") if False else s.texto(37, 28, "SOS", "branco")
+    else:
+        olhos(s, 33, 25, 5, "pisca" if f == 3 else "normal")
+        for i in range(3):  # chafariz d'água
+            y = 11 - ((f * 2 + i * 3) % 8)
+            s.efeito(23 + i, y, "ciano"); s.efeito(22 + i * 2, y + 1, "celeste")
+    s.ret(33, 31, 8, 1, "marinho" if rampa == "azul" else "grafite")  # sorrisão
+    s.marcar_ancora(24, 12, 8)
+
+
+def coroa(s, cor="ouro"):
+    cx, t, w = s.ancora
+    t = max(t, 7)
+    s.poly([(cx - 6, t), (cx - 6, t - 5), (cx - 3, t - 2), (cx, t - 6), (cx + 3, t - 2), (cx + 6, t - 5),
+            (cx + 6, t)], cor, 0.8)
+    s.ret(int(cx) - 1, int(t) - 3, 2, 2, "vinho" if cor == "ouro" else "branco", cor)
+
+
+def maos_diamante(s):
+    """Dois diamantes brilhando nas laterais: diamond hands literal."""
+    for x0 in (6, 38):
+        s.poly([(x0, 30), (x0 + 3, 26), (x0 + 6, 30), (x0 + 3, 35)], "cristal", 0.85, grad=0.4)
+        s.efeito(x0 + 2, 28, "branco")
+
+
+def desenhar(moeda, skin, linha, frame, extra=None, estagio="adulto"):
+    """Renderiza um frame. linha: garimpando/moon/rekt/pulo. estagio: ovo..diamond."""
     estado = "garimpando" if linha == "pulo" else linha
     sx, sy, dy = (PULO if linha == "pulo" else IDLE)[frame]
     if linha == "rekt":
         sx, sy, dy = 1.0, 1.0, 0.0  # túmulo não respira (né?)
+    if estagio == "bebe":
+        sx, sy = sx * 0.7, sy * 0.7  # chibi: corpo menor, olhos do mesmo tamanho = fofura
     s = Sprite(sx, sy, 0, dy)
     if linha == "pulo":
         s.pulo = True
-    fn = extra or PERSONAGENS[moeda]
-    fn(s, estado, frame if linha != "pulo" else 0, None)
+    f_logico = frame if linha != "pulo" else 0
+    if extra:
+        extra(s, estado, f_logico, None)
+    elif estagio == "ovo":
+        ovo(s, estado, f_logico, moeda)
+    elif estagio == "whale" and moeda == "BTC":
+        baleia(s, estado, f_logico, None)
+    else:
+        PERSONAGENS[moeda](s, estado, f_logico, None)
+    if estagio == "whale" and moeda != "BTC":
+        coroa(s, "ouro")
+    if estagio == "diamond":
+        maos_diamante(s)
+        coroa(s, "cristal")
     if linha == "pulo":
-        # carinha feliz por cima no pulo + coraçõezinhos
         faiscas(s, [(6, 18 - frame * 3), (42, 14 - frame * 3)], ("vinho", "laranja"))
-    if skin in ("gato", "sapo", "cyberpunk", "satoshi"):
+    if skin in ("gato", "sapo", "cyberpunk", "satoshi") and estagio not in ("whale", "diamond"):
         acessorio(s, skin)
     img = s.finalizar()
     if skin == "cyberpunk":
@@ -523,14 +628,22 @@ def desenhar(moeda, skin, linha, frame, extra=None):
         img = _tingir(img, "#38b764", 0.35)
     elif skin == "satoshi":
         img = _glow(_remap_lum(img, DOURADO), "#ffcd75", "#b13e53")
+    if estagio == "diamond" and skin == "padrao":
+        img = _glow(img, "#73eff7", "#3b5dc9")
+    elif estagio == "whale" and skin == "padrao" and moeda != "BTC":
+        img = _glow(img, "#ffcd75", "#ef7d57")
     return img
 
 
-def sheet(moeda, skin):
+def nome_folha(moeda, skin, estagio="adulto"):
+    return f"{moeda}_{skin}.png" if estagio == "adulto" else f"{moeda}_{skin}_{estagio}.png"
+
+
+def sheet(moeda, skin, estagio="adulto"):
     s = Image.new("RGBA", (W * FRAMES, W * len(LINHAS)), (0, 0, 0, 0))
     for j, linha in enumerate(LINHAS):
         for f in range(FRAMES):
-            s.paste(desenhar(moeda, skin, linha, f), (f * W, j * W))
+            s.paste(desenhar(moeda, skin, linha, f, estagio=estagio), (f * W, j * W))
     return s
 
 
@@ -557,24 +670,47 @@ def gif_demo(moeda, skin, destino, escala=4):
     frames[0].save(destino, save_all=True, append_images=frames[1:], duration=160, loop=0, disposal=2)
 
 
+def gif_evolucao(moeda, destino, escala=4):
+    """Ovo -> bebê -> adulto -> whale -> diamond, com flash branco entre estágios."""
+    frames = []
+    for est in ESTAGIOS:
+        sh = sheet(moeda, "padrao", est)
+        for rep in range(3):
+            for f in range(FRAMES):
+                fr = Image.new("RGBA", (W, W), (34, 32, 52, 255))
+                fr.alpha_composite(sh.crop((f * W, 0, (f + 1) * W, W)))
+                frames.append(fr)
+        flash = Image.new("RGBA", (W, W), (244, 244, 244, 255))
+        frames += [flash, flash]
+    frames = [f.resize((W * escala, W * escala), Image.NEAREST).convert("P", palette=Image.ADAPTIVE) for f in frames]
+    frames[0].save(destino, save_all=True, append_images=frames[1:], duration=150, loop=0, disposal=2)
+
+
 def gerar_tudo(preview=None, gifs=None):
     PASTA.mkdir(parents=True, exist_ok=True)
     sheets = []
+    evol = []
     for m in PERSONAGENS:
         for sk in SKINS:
-            sh = sheet(m, sk)
-            sh.save(PASTA / f"{m}_{sk}.png")
-            sheets.append(sh)
+            for est in ESTAGIOS:
+                sh = sheet(m, sk, est)
+                sh.save(PASTA / nome_folha(m, sk, est))
+                if est == "adulto":
+                    sheets.append(sh)
+                if sk == "padrao":
+                    evol.append(sh)
     icone = desenhar("BTC", "padrao", "garimpando", 0)
     icone.save(ASSETS / "icone.png")
     icone.resize((256, 256), Image.NEAREST).save(ASSETS / "icone.ico")
     if preview:
         contato(sheets).save(preview)
+        contato(evol).save(Path(preview).with_name("evolucao_preview.png"))
     if gifs:
         Path(gifs).mkdir(parents=True, exist_ok=True)
         for m in PERSONAGENS:
             gif_demo(m, "padrao", Path(gifs) / f"{m.lower()}.gif")
         gif_demo("ETH", "cyberpunk", Path(gifs) / "eth_cyberpunk.gif")
+        gif_evolucao("BTC", Path(gifs) / "evolucao_btc.gif")
     return len(sheets)
 
 

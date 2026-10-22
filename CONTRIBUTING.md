@@ -69,3 +69,18 @@ and commit the results. A test checks that committed sheets match the generator.
 
 ## Code style
 Small modules, comments welcome (pt-BR or English), tests for any logic. The GUI only touches widgets from the Tk main thread; network calls live in background threads.
+
+## Evolution stages (v1.1)
+Each creature has one sheet per stage: `COIN_SKIN_ovo.png`, `COIN_SKIN_bebe.png`, `COIN_SKIN.png` (adult),
+`COIN_SKIN_whale.png`, `COIN_SKIN_diamond.png` — same 192×192 / 4×4 layout. Run `python -m tamagoshi_cripto.sprites`
+to regenerate all 125 (~16 s). Plugin skins currently use their single sheet for every stage; a missing built-in stage sheet falls back to the adult one.
+
+## Adding a console command
+Add a `cmd_<name>(self, args)` method to `console.Console` returning a list of lines (pt-BR, fun tone),
+add it to `AJUDA`, and add a case to `tests/test_nerd.py` (use the fake `Ctx`, never the network).
+It works in the window and in `--tui` automatically.
+
+## Rules for on-chain features
+- Keyless, free, public APIs only, with timeouts. Never block the Tk thread; push events to the queue.
+- Offline must degrade to `?`, never a crash.
+- **Never** add anything that asks for private keys, seeds or signing. Watch-only forever.
