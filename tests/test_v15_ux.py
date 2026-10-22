@@ -33,7 +33,9 @@ def test_ui_cores():
 
 
 def test_idioma_mac_sem_lang(monkeypatch):
-    import subprocess, sys
+    import subprocess
+    import sys
+
     from tamagoshi_cripto import i18n
     for v in ("LC_ALL", "LC_MESSAGES", "LANG", "LANGUAGE"):
         monkeypatch.delenv(v, raising=False)
@@ -41,3 +43,23 @@ def test_idioma_mac_sem_lang(monkeypatch):
     monkeypatch.setattr(sys, "platform", "darwin")
     monkeypatch.setattr(subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(a, 0, '(\n    "pt-BR",\n    "en-US"\n)\n', ""))
     assert i18n.detectar() == "pt"
+
+
+def test_janela_sem_borda_mac_e_outros(monkeypatch):
+    from tamagoshi_cripto import sistema
+    class R:
+        def __init__(s): s.chamadas = []; s._w = "."; s.tk = s
+        def call(s, *a): s.chamadas.append(a)
+        def overrideredirect(s, v): s.chamadas.append(("override", v))
+        def after(s, ms, f): s.chamadas.append(("after", ms)); f()
+        def lift(s): s.chamadas.append(("lift",))
+        def focus_force(s): s.chamadas.append(("focus_force",))
+        def focus_set(s): s.chamadas.append(("focus_set",))
+    monkeypatch.setattr(sistema, "MAC", True)
+    r = R()
+    assert sistema.janela_sem_borda(r) == "mac-plain" and ("override", True) not in r.chamadas
+    sistema.focar_teclado(r)
+    assert ("after", 80) in r.chamadas and ("focus_set",) in r.chamadas
+    monkeypatch.setattr(sistema, "MAC", False)
+    r = R()
+    assert sistema.janela_sem_borda(r) == "override" and r.chamadas == [("override", True)]

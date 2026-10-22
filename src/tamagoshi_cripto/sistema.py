@@ -138,3 +138,36 @@ def definir_autostart(ligar):
 
 def nome_autostart():
     return "Abrir ao iniciar o Mac" if MAC else "Iniciar com o Windows"
+
+
+def janela_sem_borda(root):
+    """Tira a moldura da janela.
+
+    No macOS, overrideredirect(True) cria uma janela que NUNCA vira "key window":
+    o teclado some (onboarding, console, ajustes...). Lá usamos o estilo 'plain' do Tk,
+    que também não tem borda mas aceita foco. Se o Tk for velho e não souber, cai no
+    overrideredirect de sempre. Windows/Linux: nada muda.
+    """
+    if MAC:
+        try:
+            root.tk.call("::tk::unsupported::MacWindowStyle", "style", root._w, "plain", "none")
+            return "mac-plain"
+        except Exception:
+            pass
+    root.overrideredirect(True)
+    return "override"
+
+
+def focar_teclado(root, widget=None, atraso=80):
+    """Traz a janela pra frente e pede o teclado (no Mac precisa de um after, senão o Cocoa ignora)."""
+    def _f():
+        try:
+            root.lift()
+            root.focus_force()
+            (widget or root).focus_set()
+        except Exception:
+            pass
+    if MAC:
+        root.after(atraso, _f)
+    else:
+        _f()

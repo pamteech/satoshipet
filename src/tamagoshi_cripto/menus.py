@@ -94,6 +94,7 @@ class MixinMenus:
         from .ajustes import Ajustes
         self.console_aberto = False
         self.cena = Ajustes(self, aba)
+        sistema.focar_teclado(self.root, self.cv)
         if msg:
             self.cena._dizer(msg)
         self._desenhar()
@@ -260,4 +261,5 @@ class MixinMenus:
 
     def rever_intro(self):
         self.cena = cenas.Onboarding(self)
+        sistema.focar_teclado(self.root, self.cv)
         self._desenhar()

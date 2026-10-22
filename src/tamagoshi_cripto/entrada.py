@@ -6,6 +6,7 @@ import webbrowser
 from . import (
     cenas,
     config,
+    sistema,
 )
 
 
@@ -25,7 +26,7 @@ class MixinEntrada:
             self.clique_balao()
         self._x, self._y = e.x_root - self.root.winfo_x(), e.y_root - self.root.winfo_y()
         self._press = (e.x_root, e.y_root, e.x, e.y)
-        self.root.focus_force()  # pra janela sem borda receber o código konami
+        sistema.focar_teclado(self.root, self.cv)  # janela sem borda recebe teclado (konami, nome, console)
 
     def arrastando(self, e):
         if self.cena or getattr(self, "_press", 1) is None:
@@ -77,7 +78,7 @@ class MixinEntrada:
     # ---------- console hacker ----------
     def alternar_console(self):
         self.console_aberto = not self.console_aberto
-        self.root.focus_force()
+        sistema.focar_teclado(self.root, self.cv)
         self._desenhar()
 
     def _tecla_console(self, e):

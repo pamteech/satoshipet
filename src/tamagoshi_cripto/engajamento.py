@@ -6,7 +6,7 @@ o "código do pet" é só texto que você cola no zap do amigo.
 import random
 import time
 
-from . import batalha, cenas, config, evolucao, genetica, hardcore
+from . import batalha, cenas, config, evolucao, genetica, hardcore, sistema
 
 ADULTOS = ("adulto", "whale", "diamond")
 
@@ -253,7 +253,7 @@ class MixinEngajamento:
         self.console_aberto = True
         self.console_input = ("breed " if acao == "cruzar" else "battle ")
         self.console_linhas = (self.console_linhas + ["cole o código do amigo (Ctrl+V) e ENTER"])[-60:]
-        self.root.focus_force()
+        sistema.focar_teclado(self.root, self.cv)
         self._desenhar()
 
     def _menu_info(self, linhas):

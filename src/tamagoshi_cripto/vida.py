@@ -19,6 +19,7 @@ from . import (
     papel,
     ranking,
     share,
+    sistema,
 )
 from .graficos import (
     SKINS_PRO,
@@ -144,7 +145,7 @@ class MixinVida:
             return ["já tá jogando!"]
         self.console_aberto = False
         self.cena = cenas.PegaSats(self)
-        self.root.focus_force()
+        sistema.focar_teclado(self.root, self.cv)
         self.root.after(int(cenas.PegaSats.DT * 1000), self._loop_jogo)
         return ["Pega os Sats! ← → por 20s. boa sorte, anon"]
 

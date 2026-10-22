@@ -111,7 +111,7 @@ class Tamagoshi(MixinVida, MixinDesenho, MixinEntrada, MixinMenus, MixinRede,
 
         self.root = tk.Tk()
         self.root.title("Tamagoshi Cripto")
-        self.root.overrideredirect(True)
+        self.estilo_janela = sistema.janela_sem_borda(self.root)
         self.root.attributes("-topmost", True)
         self.root.configure(bg=COR_TRANSP)
         self.root.report_callback_exception = self._erro_tk
@@ -143,6 +143,7 @@ class Tamagoshi(MixinVida, MixinDesenho, MixinEntrada, MixinMenus, MixinRede,
         self.root.geometry(f"+{x}+{y}")
         if not self.cfg.get("onboarding_ok") and not op.get("sem_onboarding"):
             self.cena = cenas.Onboarding(self)
+            sistema.focar_teclado(self.root, self.cv, 300)
         self._desenhar()
         if self.cfg.get("musica"):
             self.som.musica(True)
