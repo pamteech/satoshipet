@@ -26,7 +26,69 @@ LISTA = {
     "lv21": ("21 Million", "Chegou ao nível 21"),
     "moscow": ("Moscow Time", "Passou a contar em sats"),
     "stacker": ("Stacking Sats", "Pegou 25 sats no mini-game"),
+    # v1.7: conquistas de mercado
+    "crash_10": ("Survivor -10%", "Sobreviveu a uma queda de 10% em 24h"),
+    "ath_vivo": ("ATH ao vivo", "Viu um All-Time High acontecer com o app aberto"),
+    "hodl_30d": ("HODL 30 dias", "30 dias com o mesmo bicho"),
+    "baleia_cedo": ("Acordou com baleia", "Alerta de baleia nos 10 min depois de abrir o app"),
+    "bloco_halving": ("Bloco do Halving", "Comeu o bloco do halving"),
+    "medo_extremo": ("Medo Extremo", "Viu o Fear & Greed em medo extremo (<= 20)"),
 }
+
+# v1.7: medalhas 8x8 (pixel). "1" = cor da medalha, "2" = brilho
+BADGES = {
+    "crash_10": ("#b13e53", ["...11...", "..1221..", ".122221.", "11222211", "...22...", "...22...", "..2222..", "...22..."]),
+    "ath_vivo": ("#38b764", ["...11...", "..1111..", ".111111.", "11122111", "...22...", "...22...", "...22...", "...22..."]),
+    "hodl_30d": ("#73eff7", ["11111111", "12222221", "11111111", "12121211", "11212121", "12121211", "11111111", "........"]),
+    "baleia_cedo": ("#41a6f6", ["........", "...1...1", "..11..11", ".1111111", "11211111", "11111111", ".111111.", "........"]),
+    "bloco_halving": ("#ef7d57",
+                      [".111111.", "11222211", "12211221", "12122121", "12211221", "12222221", "11222211", ".111111."]),
+    "medo_extremo": ("#5d275d", [".111111.", "11111111", "11211211", "11111111", "11122111", "11211211", "11111111", ".1.11.1."]),
+}
+BADGE_PADRAO = ("#ffcd75", ["..1111..", ".122221.", "12211221", "12122121", "12211221", ".122221.", "..1111..", ".11..11."])
+
+
+class Mercado:
+    """Rastreador PURO das conquistas de mercado (amostras de preço ficam só na memória)."""
+
+    JANELA = 24 * 3600
+
+    def __init__(self, agora: Callable = time.time):
+        self.agora = agora
+        self.amostras: Dict[str, list] = {}   # moeda -> [(t, preço)]
+        self.ath: Dict[str, float] = {}       # moeda -> ATH conhecido (CoinGecko)
+        self.inicio = agora()
+
+    def preco(self, moeda: str, p: float) -> list:
+        t = self.agora()
+        a = self.amostras.setdefault(moeda, [])
+        if not a or t - a[-1][0] >= 60:
+            a.append((t, p))
+        while a and t - a[0][0] > self.JANELA:
+            a.pop(0)
+        novas = []
+        topo = max(x for _, x in a)
+        if topo > 0 and p <= topo * 0.9:
+            novas.append("crash_10")
+        ath = self.ath.get(moeda)
+        if ath and p > ath:
+            novas.append("ath_vivo")
+            self.ath[moeda] = p
+        return novas
+
+    def baleia(self) -> list:
+        return ["baleia_cedo"] if self.agora() - self.inicio <= 600 else []
+
+    @staticmethod
+    def bloco(altura: int) -> list:
+        return ["bloco_halving"] if altura and altura % 210_000 == 0 else []
+
+    @staticmethod
+    def fng(valor: Optional[int]) -> list:
+        return ["medo_extremo"] if valor is not None and valor <= 20 else []
+
+    def hodl(self, nasceu_em: float) -> list:
+        return ["hodl_30d"] if nasceu_em and self.agora() - nasceu_em >= 30 * 86400 else []
 
 # quanto a vida muda por minuto em cada humor
 TAXA_MIN = {"moon": +0.5, "garimpando": +0.1, "rekt": -0.3}

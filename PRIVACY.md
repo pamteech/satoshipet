@@ -38,3 +38,12 @@ Apague `~/.tamagoshi_cripto.json`, `~/.tamagoshi_api_token` e, se usou, a entrad
 
 ## Saldo das carteiras (v1.6)
 O saldo das carteiras watch-only é consultado em APIs públicas (mempool.space, publicnode, Solana RPC) e cotado na CoinGecko. Ele fica **só na memória**: não é salvo em disco, não aparece na API local, no card, no ranking, no overlay nem é enviado pra IA. `saldo off` esconde os valores na tela.
+
+## Clima (v1.7) - desligado por padrão
+Se você ligar, o app consulta a **Open-Meteo** (sem conta/chave) com latitude/longitude **arredondadas em 2 casas (~1 km)**. Você escolhe a cidade (a busca do nome vai pro geocoding da Open-Meteo) ou digita `lat,lon`. O modo **auto** consulta **ipwho.is** uma vez pra estimar a cidade pelo seu IP; só acontece se você escolher "auto". Ficam salvos só o nome da cidade e a lat/lon arredondada. Desligue em Ajustes > Geral > Clima.
+
+## Amigos na LAN (v1.7) - desligado por padrão
+Ligado, o app manda um pacote UDP de broadcast **só na sua rede local** (porta 47474) com: um id aleatório que muda a cada abertura, nome do bicho, moeda, skin e humor. **Nunca** carteira, saldo, e-mail, licença, IP ou nome do computador. O endereço de quem mandou é descartado na hora. O firewall do macOS/Windows pode perguntar se o app pode receber conexões: negar só desliga os amigos.
+
+## Voz (v1.7) - desligado por padrão
+Os anúncios usam a voz do próprio sistema (`say` no macOS, SAPI no Windows, `spd-say` no Linux), tudo local.

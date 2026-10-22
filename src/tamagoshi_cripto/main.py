@@ -47,12 +47,13 @@ from .graficos import (  # noqa: F401  (re-export: cenas/testes usam main._png_p
     carregar_frames,
 )
 from .menus import MixinMenus
+from .mundo import MixinMundo
 from .rede import MixinRede
 from .sprites import FRAMES
 from .vida import MixinVida
 
 
-class Tamagoshi(MixinAnimacao, MixinVida, MixinDesenho, MixinEntrada, MixinMenus, MixinRede,
+class Tamagoshi(MixinAnimacao, MixinMundo, MixinVida, MixinDesenho, MixinEntrada, MixinMenus, MixinRede,
                 engajamento.MixinEngajamento, mercado.MixinMercado, lojinha.MixinLoja):
     def __init__(self, opcoes=None):
         op = opcoes or {}
@@ -109,6 +110,7 @@ class Tamagoshi(MixinAnimacao, MixinVida, MixinDesenho, MixinEntrada, MixinMenus
         self.escala = max(1, min(6, int(self.cfg.get("escala", 3))))
         self._init_mercado()
         self._init_efeitos()
+        self._init_mundo()
         self._medidas()
 
         self.root = tk.Tk()
@@ -141,6 +143,7 @@ class Tamagoshi(MixinAnimacao, MixinVida, MixinDesenho, MixinEntrada, MixinMenus
             self.cv.bind(b, self.abrir_menu)
         self.root.bind("<Key>", self._tecla)
         self._iniciar_efeitos()
+        self._iniciar_mundo()
 
         x, y = self.cfg.get("posicao", [100, 100])
         self.root.geometry(f"+{x}+{y}")
@@ -208,7 +211,7 @@ class Tamagoshi(MixinAnimacao, MixinVida, MixinDesenho, MixinEntrada, MixinMenus
 
 
     def _nova_frase(self):
-        if self.frase_noticia() or self.frase_papel():
+        if self.frase_evento() or self.frase_noticia() or self.frase_papel():
             return
         extras = self.plugins.get(self.cfg["skin"], {}).get("frases")
         self.frase_atual = arts.frase(self.estado, self.cfg["moeda"], extras)
@@ -227,6 +230,7 @@ class Tamagoshi(MixinAnimacao, MixinVida, MixinDesenho, MixinEntrada, MixinMenus
             self._processar_eventos()  # tela travada/ninguém olhando: não desenha nada (CPU ~0)
             return
         self._tick_efeitos()
+        self._tick_mundo()
         if self.cena:
             if not self.cena.tick():
                 self.cena = None

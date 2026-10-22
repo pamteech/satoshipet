@@ -83,8 +83,19 @@ tamagoshi [--tui] [--coin BTC|ETH|SOL|DOGE|PEPE] [--skin NAME|plugin:ID] [--scal
 
 ### Controls
 - **Drag**: hold left click · **Pet**: click the creature (jump + hearts + sound) · **Menu**: right click (or ctrl-click on Mac)
-- **Keyboard** (widget focused): `h j k l` move 10 px, `H J K L` 50 px, <kbd>`</kbd> console
+- **Keyboard** (widget focused): `h j k l` move 10 px, `H J K L` 50 px, <kbd>`</kbd> console, `S` settings, `M` menu, `Tab` tooltips
 - Menu: coin, skin, watch-only wallet, console, show in sats, settings, price alerts, achievements, mute, CRT, start at login, hide to tray, activate Pro, quit
+
+### New in v1.7 🌦️ (unreleased)
+- **Real weather** (Open-Meteo, no key, **off by default**): pick a city or `lat,lon` in Settings (or opt into IP auto-detect).
+  Rain + umbrella, sunglasses on sunny days, snow, fog, stars and moon at night. Refreshes every ~30 min, cached, offline-safe.
+- **Crypto calendar**: Genesis (03/01), Bitcoin Pizza Day (22/05), Whitepaper Day (31/10), Christmas, Carnaval and the **halving**
+  (countdown from the block height, party at the halving block) with hats, items, toasts and themed lines.
+- **Market achievements** with pixel badges: survived -10% in 24h, live ATH, 30-day HODL, woke up to a whale, halving block, extreme fear.
+- **LAN friends** (opt-in): other Tamagoshis on your Wi-Fi visit from the screen edge and swap an emote. Only name/species/skin/mood
+  travel (UDP 47474); your OS firewall may ask once.
+- **Accessibility**: Reduce motion (also follows macOS/Windows), Large text (2x), high contrast, optional voice announcements,
+  `M`/Shift+F10 opens the menu, `Tab` walks through the tooltips.
 
 ### New in v1.5 ✨ (quality release)
 One tabbed **Settings** screen (press `S`) instead of a pile of dialogs, **keyboard navigation everywhere** (TAB/ENTER/arrows/ESC),
@@ -322,6 +333,8 @@ tamagoshi --tui      # no terminal
 
 **Free:** Satoshinho (BTC), animações, carinho, vida em corações, conquistas, sons 8-bit, Fear & Greed, contagem do halving (5 carinhos no Satoshinho), código konami (skin secreta), criaturas da comunidade, modo terminal e botão de afiliado.
 **Pro:** ETH, SOL, DOGE e PEPE na janela, skins premium, limites e preço de referência configuráveis, alertas de preço, mini gráfico e "abrir ao iniciar".
+
+**Novidades v1.7 (em andamento):** **clima de verdade** (Open-Meteo, desligado por padrão; cidade/lat,lon ou auto por IP) com chuva e guarda-chuva, óculos no sol, neve, neblina e céu estrelado; **calendário cripto** (Genesis, Pizza Day, Whitepaper, Natal, Carnaval e o **halving** com contagem); **conquistas de mercado** com medalhas pixel; **amigos na LAN** (opt-in, só nome/espécie/skin/humor); **acessibilidade**: reduzir movimento, fonte grande, voz opcional, `M` abre o menu e `Tab` passeia pelas dicas.
 
 **Novidades v1.5 (qualidade):** tela única de **Ajustes** com abas (tecla `S`), **teclado em tudo**, interface **pt-BR/EN** com auto-detecção, formas finais únicas pra ETH/SOL/DOGE/PEPE, estágios nos pacotes da loja, chave da IA no **chaveiro do sistema**, API local blindada e [PRIVACY.md](PRIVACY.md). Detalhes no [CHANGELOG.md](CHANGELOG.md).
 

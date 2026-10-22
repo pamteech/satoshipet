@@ -9,9 +9,9 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "src"))
 os.environ["HOME"] = tempfile.mkdtemp()
-from PIL import Image  # noqa: E402
+from PIL import Image
 
-from tamagoshi_cripto import baleias, config, logic, lore, main, multichain, noticias, onchain  # noqa: E402
+from tamagoshi_cripto import baleias, config, logic, lore, main, multichain, noticias, onchain
 
 OUT = Path(sys.argv[1] if len(sys.argv) > 1 else "preview")
 OUT.mkdir(parents=True, exist_ok=True)
@@ -61,7 +61,8 @@ def gif(nome, n, preparo=None, passo=None):
         fr[i].save(OUT / f"{nome}_{i:02d}.png")
 
 
-from tamagoshi_cripto import evolucao  # noqa: E402
+from tamagoshi_cripto import evolucao
+
 xp = 0
 while evolucao.estagio(xp, app.conq.d["crashes"]) != "adulto":
     xp += 50

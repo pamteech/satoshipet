@@ -73,7 +73,30 @@ NOEL = [
     ".155555555555555551",
     "..1111111111111111.",
 ]
+FESTA = [  # chapéu de festa (aniversário do whitepaper / genesis / halving)
+    "........5.......",
+    ".......515......",
+    ".......121......",
+    "......13231.....",
+    "......12221.....",
+    ".....1233321....",
+    ".....1222221....",
+    "....123333321...",
+    "....122222221...",
+    "...11111111111..",
+]
+PLUMAS = [  # carnaval: tiara de plumas
+    "..5...4...5...4...",
+    ".545.343.545.343..",
+    ".545.343.545.343..",
+    "..5...4...5...4...",
+    "..1...1...1...1...",
+    ".1233333333333321.",
+    "..11111111111111..",
+]
 CORES_CHAPEU = {
+    "festa": {"1": "preto", "2": "celeste", "3": "amarelo", "5": "branco"},
+    "carnaval": {"1": "preto", "2": "amarelo", "3": "laranja", "4": "verde", "5": "celeste"},
     "halloween": {"1": "preto", "2": "roxo", "3": "vinho", "4": "laranja", "5": "amarelo"},
     "natal": {"1": "preto", "2": "vinho", "3": "laranja", "5": "branco"},
 }
@@ -83,7 +106,7 @@ def aplicar_chapeu(fr, tipo):
     """fr: frame RGBA 48x48 (cópia é devolvida)."""
     if tipo not in CORES_CHAPEU:
         return fr
-    arte = BRUXA if tipo == "halloween" else NOEL
+    arte = {"halloween": BRUXA, "natal": NOEL, "festa": FESTA, "carnaval": PLUMAS}[tipo]
     cores = CORES_CHAPEU[tipo]
     out = fr.copy()
     cx, topo = _topo_cabeca(fr)

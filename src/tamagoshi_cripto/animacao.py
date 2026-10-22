@@ -63,18 +63,19 @@ class MixinAnimacao:
         self.dica = None
 
     def _zonas(self):
-        L, y = self.LARG, self.Y_PAINEL
+        L, y, G = self.LARG, self.Y_PAINEL, getattr(self, "G", 1)
+        l2, l3 = y + 10 + 16 * G, y + 10 + 32 * G
         z = {
-            "vida": (44, self.Y_VIDA - 2, 48 + 5 * 24, self.Y_VIDA + 18),
-            "xp": (8, self.Y_XP - 2, L - 8, self.Y_XP + 10),
-            "pro": (12, y + 6, 12 + 8 * 8, y + 20),
-            "preco": (12 + 8 * 8, y + 6, L - 12, y + 38),
-            "info": (12, y + 40, L - 12, y + 56),
-            "botao": (6, self.Y_BOTAO, L - 6, self.Y_BOTAO + 36),
+            "vida": (8, self.Y_VIDA - 2, (48 if G == 1 else 84) + 5 * 24 * G, self.Y_VIDA + 18 * G),
+            "xp": (8, self.Y_XP - 2, L - 8, self.Y_XP + 10 * G),
+            "pro": (12, y + 6, 12 + 8 * 8 * G, y + 10 + 10 * G),
+            "preco": (12 + 8 * 8 * G, y + 6, L - 12, l2 + 10 * G),
+            "info": (12, l3 - 2, L - 12, l3 + 10 * G),
+            "botao": (6, self.Y_BOTAO, L - 6, self.Y_BOTAO + self.H_BOTAO),
         }
         if not self.pro:
-            z["preco"] = (12, y + 6, L - 12, y + 38)
-            z["pro"] = (L - 16 - 8 * 8, y + 24, L - 12, y + 38)  # "PRO:graf"
+            z["preco"] = (12, y + 6, L - 12, l2 - 2)
+            z["pro"] = (L - 16 - 8 * 8 * G, l2 - 2, L - 12, l2 + 10 * G)  # "PRO:graf"
         return z
 
     def _texto_dica(self, chave):
@@ -94,21 +95,21 @@ class MixinAnimacao:
         txt = self._texto_dica(self.dica[0])
         if not txt:
             return
-        L = self.LARG
-        cols = (L - 28) // 8
+        L, G = self.LARG, getattr(self, "G", 1)
+        cols = (L - 28) // (8 * G)
         linhas = self.fonte.quebrar(i18n.t(txt), cols)[:4]
-        w = max(len(s) for s in linhas) * 8 + 12
-        h = len(linhas) * 10 + 10
+        w = max(len(s) for s in linhas) * 8 * G + 12
+        h = len(linhas) * 10 * G + 10
         mx, my = self.mouse
         x0 = max(4, min(L - w - 4, mx - w // 2))
         y0 = my - h - 10 if my - h - 10 > 4 else my + 16
         self._moldura(x0, y0, x0 + w, y0 + h, "#f4f4f4", luz="#ffffff", sombra="#94b0c2", tags=("fx",))
         for i, s in enumerate(linhas):
-            self._txt(x0 + 6, y0 + 6 + i * 10, s, C_TINTA, anchor="nw", tags=("fx",))
+            self._txt(x0 + 6, y0 + 6 + i * 10 * G, s, C_TINTA, anchor="nw", tags=("fx",), escala=G)
 
     # ---------- transições ----------
     def transicao(self, tipo="dissolve", duracao=6):
-        if self.cfg.get("juice", True):
+        if self.cfg.get("juice", True) and not self.movimento_reduzido():
             self.fx_trans = efeitos.Transicao(tipo, duracao)
 
     def _checar_cena(self):
@@ -143,12 +144,18 @@ class MixinAnimacao:
         if self.fx_evo:
             return self.fx_evo.imagem(img), 0, 0
         dx = dy = 0
+        v = getattr(self, "visita", None)
+        if v:  # abre espaço pro amigo: chega pro lado enquanto ele está aqui
+            f = min(v.t, 10, max(0, v.DURACAO - v.t)) / 10
+            dx -= int(self.S // 4 * f) * v.lado
         if not dormindo and not self.reacao and not self.comendo and not self.panico_t:
             if self.idle.olhos_fechados():
                 img = frames.get(("garimpando", 3), img)
             cx, cy = self.LARG // 2, self.Y_SPRITE + self.S // 2
             mx, my = self.mouse if self.mouse else (None, None)
-            dx, dy = self.idle.deslocamento(cx, cy, mx, my, self.escala)
+            if not self.movimento_reduzido():  # reduzir movimento: pisca sim, mexe não
+                ex, ey = self.idle.deslocamento(cx, cy, mx, my, self.escala)
+                dx, dy = dx + ex, dy + ey
         return img, dx, dy
 
     def _overlay_fx(self):

@@ -76,6 +76,14 @@ PADRAO = {
     "carteira_sol": "",      # endereço PÚBLICO (watch-only)
     "saldo_fiat": "auto",    # v1.6: auto (R$ em pt, US$ no resto) | brl | usd
     "economia": True,        # v1.6: bateria = menos FPS; tela travada = pausa
+    "clima": "off",          # v1.7: off | cidade | auto (auto = geolocalização por IP, só se você escolher)
+    "clima_cidade": "",
+    "clima_lat": None,       # arredondado em 2 casas (~1 km)
+    "clima_lon": None,
+    "amigos_lan": False,     # v1.7: opt-in. Só nome/espécie/skin/humor do bicho na rede local
+    "reduzir_movimento": False,
+    "fonte_grande": False,
+    "voz": False,            # v1.7: anúncios por voz (say / SAPI / spd-say)
     "saldo_oculto": False,   # v1.6: True = mostra •••• (modo gravação). O SALDO em si nunca vai pro disco.
     "baleias": True,         # alerta de baleia (mempool.space, sem chave)
     "baleia_btc": 50,        # tx acima de X BTC = susto

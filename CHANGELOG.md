@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [não lançado] v1.7 (em andamento)
+- **Clima real** (Open-Meteo, sem chave, DESLIGADO por padrão): cidade (geocoding Open-Meteo) ou `lat,lon` em Ajustes > Geral; "auto" por IP (ipwho.is) só se você escolher. Chuva + guarda-chuva, óculos escuros no sol (em cima dos olhos detectados na folha), neve, neblina pontilhada, tempestade com relâmpago, estrelas e lua à noite. Atualiza a cada ~30 min, cache, backoff, offline usa o último clima.
+- **Calendário cripto**: Genesis (03/01), Pizza Day (22/05, com fatia de pizza), Whitepaper Day (31/10), Natal, Carnaval (calculado pela Páscoa) e **halving** (próximo pela altura do bloco; contagem nos últimos ~2016 blocos; festa no bloco do halving). Chapéus novos: festa e tiara de plumas.
+- **Conquistas de mercado** com medalhas 8x8: Survivor -10% (24h), ATH ao vivo (ATH da CoinGecko a cada 6 h), HODL 30 dias, Acordou com baleia, Bloco do Halving, Medo Extremo.
+- **Amigos na LAN** (opt-in): broadcast UDP 47474 com só nome/espécie/skin/humor/emote e um id aleatório por sessão; validação estrita, limite de taxa e de amigos; visita entra pela borda, troca emote e vai embora (no máx. 1 a cada 10 min).
+- **Acessibilidade**: Reduzir movimento (segue o macOS "Reduzir movimento" e as animações do Windows), Fonte grande (2x, layout maior), alto contraste, voz opcional (say/SAPI/spd-say, 1 fala a cada 10 s), `M`/Shift+F10 abre o menu pelo teclado, `Tab`/Shift+Tab passeia pelas dicas (e fala).
+
 ## [não lançado] v1.6 (em andamento)
 - **SALDO no painel**: carteiras watch-only BTC/ETH/SOL viram `SALDO 0.0123 BTC ≈ R$ 7.450` (R$ em pt-BR, US$ no resto; Ajustes > "Saldo em").
 - **Esconder saldo** (`saldo off` / Ajustes): mostra `••••`, ideal pra gravar vídeo. Marcos (0.01 BTC, 1 ETH...) ganham comemoração leve.

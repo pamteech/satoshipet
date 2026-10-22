@@ -140,6 +140,7 @@ class MixinMercado:
             return False
         self.ultima_baleia = agora
         self.panico_t = 12
+        self._comemorar(self.conq_mercado.baleia())
         self.som.tocar("panico")
         self.juice.tremor = 6
         self.toast = [baleias.frase(b), 30, "ALERTA DE BALEIA"]

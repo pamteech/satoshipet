@@ -73,10 +73,22 @@ PREFIXOS = [
     ("patrocínio: ", "sponsor: "), ("skin: ", "skin: "), ("unidade: ", "unit: "), ("moeda trocada: ", "coin changed: "),
     ("comprou ", "bought "), ("vendeu ", "sold "), ("você não tem ", "you don't have "),
     ("saldo fictício insuficiente", "not enough fake balance"), ("HARDCORE: morre em ~", "HARDCORE: dies in ~"),
-    ("SALDO ", "BALANCE "), ("Tamanho ", "Size "), ("nível ", "level "), ("idioma: ", "language: "),
+    ("SALDO ", "BALANCE "), ("HALVING em ~", "HALVING in ~"), ("HALVING EM ", "HALVING IN "),
+    ("conquista: ", "achievement: "), ("Tamanho ", "Size "), ("nível ", "level "), ("idioma: ", "language: "),
 ]
 
 EN = {
+    "Clima": "Weather", "Cidade/lat,lon": "City/lat,lon", "Amigos na LAN": "LAN friends", "cidade": "city",
+    "Reduzir movimento": "Reduce motion", "Fonte grande": "Large text", "Voz (leitor)": "Voice (reader)",
+    "ATH ao vivo": "Live ATH", "HODL 30 dias": "30-day HODL", "Acordou com baleia": "Woke up to a whale",
+    "Bloco do Halving": "Halving Block", "Medo Extremo": "Extreme Fear",
+    "10.000 BTC por 2 pizzas. vale a pena?": "10,000 BTC for 2 pizzas. worth it?",
+    "hoje é dia de pizza (em sats)": "today is pizza day (in sats)", "laszlo, a gente te ama": "laszlo, we love you",
+    "feliz aniversário, timechain!": "happy birthday, timechain!", "bloco 0. o começo de tudo.": "block 0. where it all began.",
+    "9 páginas que mudaram tudo": "9 pages that changed everything", "leu o whitepaper hoje?": "read the whitepaper today?",
+    "ho ho HODL": "ho ho HODL", "pedi um full node pro papai noel": "asked santa for a full node",
+    "subsídio cortado pela metade. escassez!": "block subsidy cut in half. scarcity!",
+    "FELIZ NATAL": "MERRY CHRISTMAS",
     "EVOLUIU!": "EVOLVED!", "Modo economia": "Power saver",
     "Corações = vida. Alimente (blocos) e faça carinho pra encher.": "Hearts = life. Feed (blocks) and pet to refill.",
     "Barra de XP: blocos, carinho e tempo com você fazem o bicho evoluir.":

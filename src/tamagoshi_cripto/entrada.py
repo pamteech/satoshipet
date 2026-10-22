@@ -43,7 +43,7 @@ class MixinEntrada:
             x0, y0, x1, y1 = self.SPRITE_BOX
             if x0 <= cx <= x1 and y0 <= cy <= y1:
                 self.carinho()
-            elif self.Y_BOTAO <= cy <= self.Y_BOTAO + 36:
+            elif self.Y_BOTAO <= cy <= self.Y_BOTAO + self.H_BOTAO:
                 webbrowser.open(config.LINK_AFILIADO)
             return
         self.cfg["posicao"] = [self.root.winfo_x(), self.root.winfo_y()]
@@ -62,6 +62,12 @@ class MixinEntrada:
             return self.brincar()
         if e.keysym in ("s", "S") and not self.console_aberto:
             return self.abrir_ajustes()
+        if not self.console_aberto and (e.keysym in ("m", "M", "Menu", "App") or
+                                        (e.keysym == "F10" and getattr(e, "state", 0) & 0x1)):
+            return self.abrir_menu_teclado()  # v1.7: menu sem mouse (setas + Enter navegam)
+        if not self.console_aberto and e.keysym in ("Tab", "ISO_Left_Tab"):
+            self.focar_proxima_dica(-1 if e.keysym == "ISO_Left_Tab" or getattr(e, "state", 0) & 0x1 else 1)
+            return self._desenhar()
         if self.console_aberto:
             return self._tecla_console(e)
         if e.char == "`" or e.keysym in ("grave", "dead_grave"):

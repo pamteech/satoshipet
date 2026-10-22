@@ -30,18 +30,25 @@ class MixinDesenho:
     def _medidas(self):
         S = 48 * self.escala
         self.S = S
-        self.LARG = max(272, S + 48)
-        self.Y_SPRITE = 58
+        G = self.G = 2 if self.cfg.get("fonte_grande") else 1  # v1.7: Fonte grande = texto 2x
+        self.LARG = max(272, S + 48) if G == 1 else max(408, S + 48)
+        self.Y_BALAO = 48 if G == 1 else 84
+        self.Y_SPRITE = self.Y_BALAO + 10
         y = self.Y_SPRITE + S + 4
-        self.Y_NOME, self.Y_VIDA = y, y + 14
-        self.Y_XP = y + 36
-        self.Y_PAINEL = y + 52
-        self.Y_BOTAO = self.Y_PAINEL + 66
-        self.ALT = self.Y_BOTAO + 40
+        self.Y_NOME, self.Y_VIDA = y, y + 14 * G
+        self.Y_XP = self.Y_VIDA + 22 * G
+        self.Y_PAINEL = self.Y_XP + 16 * G
+        self.H_PAINEL = 60 if G == 1 else 108
+        self.Y_BOTAO = self.Y_PAINEL + self.H_PAINEL + 6
+        self.H_BOTAO = 36 if G == 1 else 72
+        self.ALT = self.Y_BOTAO + self.H_BOTAO + 4
         cx = self.LARG // 2
         self.SPRITE_BOX = (cx - S // 2, self.Y_SPRITE, cx + S // 2, self.Y_SPRITE + S)
 
     def _txt(self, x, y, texto, cor, anchor="center", escala=1, max_chars=None, sombra=None, tags=()):
+        g = getattr(self, "_g_txt", 1)
+        if g > 1 and escala == 1:
+            escala, max_chars = g, (max_chars // g if max_chars else max_chars)
         img = self.fonte.imagem(i18n.t(texto), cor, escala, max_chars, sombra)
         self.cv.create_image(x, y, image=img, anchor=anchor, tags=tags)
 
@@ -116,6 +123,7 @@ class MixinDesenho:
                 self.som.tocar(novo)
                 self._nova_frase()
                 self.transicao("mosaico" if novo == "rekt" else "wipe", 4)  # troca de humor com estilo
+                self.anunciar(f"{self.cfg['moeda']} {arts.TITULOS[novo]}")
                 if novo in ("moon", "rekt") and self.cfg.get("juice", True):
                     self.juice.emitir(novo, self.LARG // 2, self.Y_SPRITE + self.S // 2, self.escala)
             linha_preco, linha_var = self._fmt_preco(moeda, preco), f"{'+' if var >= 0 else ''}{var:.2f}%"
@@ -124,23 +132,27 @@ class MixinDesenho:
         cor = arts.CORES[self.estado]
         c, L = self.cv, self.LARG
         c.delete("all")
+        G, YB = self.G, self.Y_BALAO
+        self._g_txt = G  # só o widget principal cresce; as cenas têm layout próprio
         mc = (L - 30) // 8  # colunas que cabem no balão
+        self._desenhar_clima_fundo()
         # ----- balão / toast -----
         if dormindo and not self.toast and not self.console_aberto:
             self.frase_atual = "esperando bloco... zzz"
         if self.toast:
             fundo = "#ffff00" if ac else ("#73eff7" if len(self.toast) > 2 and self.update else "#ffcd75")
-            self._moldura(6, 2, L - 6, 48, fundo, luz=None if ac else "#fff4c0", sombra=None if ac else "#ef7d57")
-            self._txt(L // 2, 16, self.toast[2] if len(self.toast) > 2 else "CONQUISTA!", C_TINTA if ac else "#b13e53")
-            self._txt(L // 2, 32, self.toast[0], C_TINTA, max_chars=mc)
+            self._moldura(6, 2, L - 6, YB, fundo, luz=None if ac else "#fff4c0", sombra=None if ac else "#ef7d57")
+            self._txt(L // 2, 16 * G, self.toast[2] if len(self.toast) > 2 else "CONQUISTA!", C_TINTA if ac else "#b13e53")
+            self._txt(L // 2, 32 * G + (6 if G > 1 else 0), self.toast[0], C_TINTA, max_chars=mc)
+            self._desenhar_badge()
         else:
             fundo = "#ffffff" if ac else C_PAPEL
-            self._moldura(6, 2, L - 6, 48, fundo, luz="#ffffff", sombra=None if ac else "#94b0c2")
-            self._txt(L // 2, 25, self.frase_atual, C_TINTA, max_chars=mc)
+            self._moldura(6, 2, L - 6, YB, fundo, luz="#ffffff", sombra=None if ac else "#94b0c2")
+            self._txt(L // 2, YB // 2 + 1, self.frase_atual, C_TINTA, max_chars=mc)
         m = L // 2
         for i, w in enumerate((8, 5, 2)):
-            c.create_rectangle(m - w - 3, 45 + i * 3, m + w + 3, 48 + i * 3, fill=C_TINTA, width=0)
-            c.create_rectangle(m - w, 45 + i * 3, m + w, 48 + i * 3, fill=fundo, width=0)
+            c.create_rectangle(m - w - 3, YB - 3 + i * 3, m + w + 3, YB + i * 3, fill=C_TINTA, width=0)
+            c.create_rectangle(m - w, YB - 3 + i * 3, m + w, YB + i * 3, fill=fundo, width=0)
         # ----- bicho -----
         frames = self._sprites()
         if self.reacao or (self.comendo and self.comendo <= 4):
@@ -150,10 +162,11 @@ class MixinDesenho:
         else:
             img = frames[(self.estado, self.frame)]
         tremor = random.randint(-3, 3) if self.panico_t else 0
-        sx, sy = self.juice.deslocamento() if self.cfg.get("juice", True) else (0, 0)
+        sx, sy = self.juice.deslocamento() if self.cfg.get("juice", True) and not self.movimento_reduzido() else (0, 0)
         cy = self.Y_SPRITE + self.S // 2
         img, ix, iy = self._sprite_vivo(img, frames, dormindo)  # v1.6: piscar, olhar o mouse, evolução
         c.create_image(L // 2 + tremor + sx + ix, cy + sy + iy, image=img)
+        self._desenhar_acessorios(L // 2 + tremor + sx + ix, cy + sy + iy)
         if self.cfg.get("juice", True):
             self.juice.desenhar(c)
         E = self.escala
@@ -199,44 +212,50 @@ class MixinDesenho:
             self._txt(13, self.Y_SPRITE + 4, "PATROCINADO", C_TINTA, anchor="nw")
         self._txt(10, self.Y_VIDA + 2, "VIDA", "#f4f4f4", anchor="nw", sombra=C_TINTA)
         vida = self.conq.vida
+        hx = 48 if G == 1 else 84
         for i in range(5):
             r = vida - i * 2
-            self._coracao(48 + i * 24, self.Y_VIDA, "#b13e53" if r >= 1 else "#4a3a5a",
+            self._coracao(hx + i * 24 * G, self.Y_VIDA, "#b13e53" if r >= 1 else "#4a3a5a", P=3 * G, dir_=
                           "#b13e53" if r >= 2 else "#4a3a5a")
         # ----- nível + barra de XP -----
         y = self.Y_XP
         nv = evolucao.nivel(self.evo.xp)
         self._txt(10, y, f"LV{nv:<2}", "#ffcd75", anchor="nw", sombra=C_TINTA)
-        bx0, bx1 = 48, L - 10 - 8 * min(13, len(evolucao.NOMES[self.estagio])) - 6
-        c.create_rectangle(bx0, y, bx1, y + 8, fill=C_TINTA, width=0)
-        c.create_rectangle(bx0 + 2, y + 2, bx1 - 2, y + 6, fill="#333c57", width=0)
+        bx0, bx1 = 48 * G + (6 if G > 1 else 0), L - 10 - 8 * G * min(13, len(evolucao.NOMES[self.estagio])) - 6
+        yb = y + 4 * (G - 1)
+        c.create_rectangle(bx0, yb, bx1, yb + 8, fill=C_TINTA, width=0)
+        c.create_rectangle(bx0 + 2, yb + 2, bx1 - 2, yb + 6, fill="#333c57", width=0)
         cheio = int((bx1 - bx0 - 4) * evolucao.progresso_nivel(self.evo.xp))
         if cheio > 0:
-            c.create_rectangle(bx0 + 2, y + 2, bx0 + 2 + cheio, y + 6, fill="#41a6f6", width=0)
-            c.create_rectangle(bx0 + 2, y + 2, bx0 + 2 + cheio, y + 3, fill="#73eff7", width=0)
+            c.create_rectangle(bx0 + 2, yb + 2, bx0 + 2 + cheio, yb + 6, fill="#41a6f6", width=0)
+            c.create_rectangle(bx0 + 2, yb + 2, bx0 + 2 + cheio, yb + 3, fill="#73eff7", width=0)
         self._txt(L - 10, y, evolucao.NOMES[self.estagio][:13], "#73eff7", anchor="ne", sombra=C_TINTA)
         # ----- painel -----
         y = self.Y_PAINEL
-        self._moldura(6, y, L - 6, y + 60, pal[0], borda="#ffffff" if ac else C_TINTA, luz=pal[1], sombra=pal[2])
+        l2, l3 = y + 10 + 16 * G, y + 10 + 32 * G
+        self._moldura(6, y, L - 6, y + self.H_PAINEL, pal[0], borda="#ffffff" if ac else C_TINTA, luz=pal[1], sombra=pal[2])
         if not ac:
             juice.desenhar_icone_ceu(c, L // 2 - 7, y + 8, pal[4], self.frame)
         self._txt(16, y + 10, ("PRO " if self.pro else "") + moeda, "#ffcd75" if self.pro else "#f4f4f4", anchor="nw")
         self._txt(L - 16, y + 10, linha_var, cor, anchor="ne")
         if self.update and not self.toast:
             self._txt(L // 2 + 12, y + 10, "UPD", "#73eff7", anchor="nw")
-        self._txt(16, y + 26, self.erro or linha_preco, "#ef7d57" if self.erro else "#f4f4f4", anchor="nw")
+        self._txt(16, l2, self.erro or linha_preco, "#ef7d57" if self.erro else "#f4f4f4", anchor="nw")
         if self.pro:
-            self._sparkline(moeda, L - 92, y + 22, L - 16, y + 38, cor)
+            self._sparkline(moeda, L - 92, l2 - 4, L - 16, l2 + 12, cor)
         else:
-            self._txt(L - 16, y + 26, "PRO:graf", "#566c86", anchor="ne")
+            self._txt(L - 16, l2, "PRO:graf", "#566c86", anchor="ne")
         info = self._infos_nerd(moeda)
         if info:
             txt, cor_i = info[(self.rodizio // 22) % len(info)]
-            self._txt(16, y + 42, txt[:(L - 32) // 8], cor_i, anchor="nw")
+            self._txt(16, l3, txt[:(L - 32) // (8 * G)], cor_i, anchor="nw")
         # ----- botão de afiliado -----
         y = self.Y_BOTAO
-        self._moldura(6, y, L - 6, y + 36, "#ef7d57", luz="#ffcd75", sombra="#b13e53", tags=("botao",))
-        self._txt(L // 2, y + 18, "COMPRAR A QUEDA ANTES\nQUE ELE MORRA!", C_TINTA, tags=("botao",))
+        self._moldura(6, y, L - 6, y + self.H_BOTAO, "#ef7d57", luz="#ffcd75", sombra="#b13e53", tags=("botao",))
+        self._txt(L // 2, y + self.H_BOTAO // 2, "COMPRAR A QUEDA ANTES\nQUE ELE MORRA!", C_TINTA, tags=("botao",))
+        self._g_txt = 1
+        self._desenhar_clima_frente()
+        self._desenhar_amigo()
         if self.console_aberto:
             self._desenhar_console()
         self._overlay_fx()
@@ -308,7 +327,7 @@ class MixinDesenho:
         return self.cache_sprites[chave]
 
     def _chapeu(self):
-        return juice.chapeu_do_dia() if self.cfg.get("chapeus", True) else None
+        return (self.chapeu_evento() or juice.chapeu_do_dia()) if self.cfg.get("chapeus", True) else None
 
     def _caminho_folha(self):
         moeda, skin = self.cfg["moeda"], self.cfg["skin"]

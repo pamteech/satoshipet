@@ -626,6 +626,44 @@ def executar():
     app.modo_energia = "bateria"
     assert app.fator_frame() == 2 and app.fator_rede() == 2
     app.modo_energia = "normal"
+    # v1.7: clima, evento, medalha, visita da LAN, fonte grande, reduzir movimento, Tab nas dicas
+    import datetime as _dt
+    for tipo, dia in (("chuva", True), ("sol", True), ("neve", True), ("neblina", True), (None, False)):
+        app.clima_dado = {"tipo": tipo, "dia": dia, "temp": 20.0}
+        n0 = len(app.cv.find_all())
+        app._desenhar()
+        assert len(app.cv.find_all()) > 0, tipo
+    assert n0 > 0
+    app.clima_dado = None
+    app._checar_calendario(_dt.date(2027, 5, 22))
+    assert app.evento["id"] == "pizza" and app.toast[2] == "BITCOIN PIZZA DAY"
+    app._desenhar()
+    app.evento = None; app.toast = None
+    app._comemorar(app.conq.especial("medo_extremo"))
+    assert app.badge == "medo_extremo"
+    app._desenhar()
+    app.toast = None
+    app.iniciar_visita({"id": "00000001", "nome": "Vizinho", "moeda": "ETH", "skin": "padrao", "humor": "moon",
+                        "emote": "wagmi"}, lado=1)
+    for _ in range(15):
+        app._tick_mundo()
+    app._desenhar()
+    assert app.visita and app.visita.emote()
+    app.visita = None
+    assert "amigos" not in json.dumps(app.status(), ensure_ascii=False)
+    alt0 = app.ALT
+    app.cfg["fonte_grande"] = True
+    app.mudar_escala(app.escala)
+    assert app.G == 2 and app.ALT > alt0 and app.LARG >= 408
+    app._desenhar()
+    app.cfg["fonte_grande"] = False
+    app.mudar_escala(app.escala)
+    app.cfg["reduzir_movimento"] = True
+    app.transicao("dissolve")
+    assert app.fx_trans is None
+    app.cfg["reduzir_movimento"] = False
+    assert app.focar_proxima_dica() in app._zonas()
+    app._mouse_sai()
     app.toast = None
     app.manchetes = _news.buscar()
     app._desenhar()  # estabiliza o humor (troca de humor sorteia frase nova)

@@ -106,6 +106,7 @@ class MixinVida:
         if self.conq.d["crashes"] > crashes:
             self._ganhar_xp("crash")
         self._ganhar_xp("minuto", 10)
+        self._checar_conq_mercado()
         d = max(0.0, float(self.cfg.get("diversao", 100.0)) - 100 / (3 * 360))  # zera em ~3 h sem brincar
         self.cfg["diversao"] = d
         if d < 25 and random.random() < 0.15 and not self.toast:
@@ -125,6 +126,8 @@ class MixinVida:
     def _comemorar(self, novas):
         for cid in novas:
             self.toast = [conquistas.LISTA[cid][0], 22]  # ~4s em frames de 180ms
+            self.badge = cid  # v1.7: medalha pixel no toast
+            self.anunciar("conquista: " + conquistas.LISTA[cid][0])
             self.som.tocar("conquista")
             self._salvar_progresso()
 

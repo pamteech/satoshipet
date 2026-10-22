@@ -63,6 +63,11 @@ class Ajustes(_Cena):
                 Item("Som", lambda: _sim(not cfg.get("mudo")), "bool", self._mudar_som),
                 b(("Música", "musica")),
                 b(("Modo economia", "economia")),
+                Item("Clima", lambda: {"off": i18n.t("desligado"), "cidade": i18n.t("cidade"), "auto": "auto (IP)"}
+                     .get(cfg.get("clima", "off"), "off"), "escolha", self._mudar_clima),
+                Item("Cidade/lat,lon", lambda: (cfg.get("clima_cidade") or "-")[:12], "texto", self._cidade,
+                     inicial=lambda: cfg.get("clima_cidade", "")),
+                b(("Amigos na LAN", "amigos_lan")),
                 Item("Iniciar c/ sistema", lambda: _sim(a.autostart_ligado()), "bool", a.alternar_autostart,
                      ativo=a.autostart_suportado),
             ]
@@ -71,6 +76,9 @@ class Ajustes(_Cena):
                 Item("Tamanho", lambda: f"{a.escala}x", "numero", lambda d: a.mudar_escala(a.escala + d)),
                 b(("Alto contraste", "alto_contraste")), b(("Paleta dia/noite", "dia_noite")),
                 b(("Chapéus de época", "chapeus")), b(("Tremidinha", "juice")), b(("Efeito CRT", "crt")),
+                b(("Reduzir movimento", "reduzir_movimento")),
+                Item("Fonte grande", lambda: _sim(cfg.get("fonte_grande")), "bool", self._fonte_grande),
+                b(("Voz (leitor)", "voz")),
             ]
         if self.aba == 2:
             m = cfg["moeda"]
@@ -188,6 +196,24 @@ class Ajustes(_Cena):
         alvo[lado] = v
         self.app.aplicar_alertas(alvo.get("acima"), alvo.get("abaixo"))
         self._dizer("salvo!")
+
+    def _mudar_clima(self, d: int) -> None:
+        ops = ["off", "cidade", "auto"]
+        atual = self.app.cfg.get("clima", "off")
+        self.app.cfg["clima"] = ops[(ops.index(atual) + d) % 3] if atual in ops else "off"
+        self.app.clima_cache.prox = 0  # busca já
+        if self.app.cfg["clima"] == "off":
+            self.app.clima_dado = None
+        config.salvar(self.app.cfg)
+        if self.app.cfg["clima"] == "auto":
+            self._dizer(["auto: descobre a cidade pelo seu IP (ipwho.is), uma vez", "prefere privacidade? use 'cidade'"])
+
+    def _cidade(self, s: str) -> None:
+        self._dizer(self.app.definir_cidade(s))
+
+    def _fonte_grande(self) -> None:
+        self.app.cfg["fonte_grande"] = not self.app.cfg.get("fonte_grande")
+        self.app.mudar_escala(self.app.escala)  # refaz o layout e o tamanho da janela
 
     def _mudar_fiat(self, d: int) -> None:
         ops = ["auto", "brl", "usd"]
