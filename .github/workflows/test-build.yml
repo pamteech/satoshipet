@@ -1,0 +1,32 @@
+# Build de TESTE (manual): gera só o .dmg do macOS (Apple Silicon) como artifact.
+# Não cria release nem tag. Sem TAMAGOSHI_LICENSE_SECRET -> usa o segredo de dev (chaves de dev).
+name: Test build (macOS)
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  macos:
+    runs-on: macos-latest   # arm64
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build .app
+        run: ./tools/build_mac.sh
+      - name: Empacotar .dmg
+        run: |
+          mkdir -p dmgsrc && cp -R "dist/Tamagoshi Cripto.app" dmgsrc/ && ln -s /Applications dmgsrc/Applications
+          hdiutil create -volname "Tamagoshi Cripto" -srcfolder dmgsrc -ov -format UDZO dist/TamagoshiCripto-macos-arm64.dmg
+          file "dist/Tamagoshi Cripto.app/Contents/MacOS/Tamagoshi Cripto"
+          codesign -dv "dist/Tamagoshi Cripto.app" 2>&1 || true
+          ls -la dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TamagoshiCripto-macos-arm64
+          path: dist/TamagoshiCripto-macos-arm64.dmg
+          retention-days: 7
