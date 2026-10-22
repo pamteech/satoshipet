@@ -695,7 +695,8 @@ class Batalha(_Cena):
         # caixa de log
         a._moldura(6, yl, L - 6, yl + 50, PAPEL, luz="#ffffff", sombra="#94b0c2")
         for i, l in enumerate(self.log[-3:]):
-            a._txt(12, yl + 7 + i * 13, l, TINTA, anchor="nw", max_chars=(L - 24) // 8)
+            mx = (L - 24) // 8
+            a._txt(12, yl + 7 + i * 13, l if len(l) <= mx else l[:mx - 2] + "..", TINTA, anchor="nw")
         if self.fim:
             ganhou = self.fim == "a"
             a._moldura(30, 40, L - 30, 150, "#ffcd75" if ganhou else "#94b0c2", luz="#fff4c0",
@@ -716,3 +717,79 @@ class Batalha(_Cena):
             self.botao(x0, y0, x0 + w - 4, y0 + 22, rot, fundo="#ef7d57" if gname == "ESPECIAL" else "#38b764",
                        ativo=ativo, tag="g:" + gname)
         a.juice.desenhar(c)
+
+
+class Corretora(_Cena):
+    """Paper trading: compra/vende a moeda atual com DINHEIRO FICTÍCIO. Faixa de aviso sempre visível."""
+    PASSOS = (100, 1000)
+
+    def __init__(self, app):
+        super().__init__(app)
+        self.acabou = False
+        self.alvos = []
+        self.msg = "preço real, dinheiro de mentira"
+
+    def tecla(self, e):
+        if e.keysym in ("Escape", "q"):
+            self.acabou = True
+        elif e.char in ("b", "c"):
+            self.acao("buy:100")
+        elif e.char in ("s", "v"):
+            self.acao("sell:all")
+
+    def acao(self, tag):
+        a = self.app
+        if tag == "sair":
+            self.acabou = True
+        elif tag and ":" in tag:
+            lado, v = tag.split(":")
+            self.msg = a.paper([lado, a.cfg["moeda"], v])[0]
+            self.t = 0
+
+    def tick(self):
+        self.t += 1
+        return not self.acabou
+
+    def desenhar(self):
+        from . import papel
+        a, c, L, H = self.app, self.app.cv, self.app.LARG, self.app.ALT
+        self.alvos = []
+        c.delete("all")
+        a._moldura(2, 2, L - 2, H - 2, "#1a1c2c", borda=TINTA, luz="#333c57")
+        # faixa zebrada de aviso
+        for i, x in enumerate(range(4, L - 4, 12)):
+            c.create_rectangle(x, 6, x + 12, 26, fill="#ffcd75" if i % 2 else "#1a1c2c", width=0)
+        a._moldura(30, 6, L - 30, 26, "#ffcd75", luz="#fff4c0")
+        a._txt(L // 2, 17, papel.AVISO, "#b13e53")
+        m = a.cfg["moeda"]
+        preco = a.precos.get(m)
+        r = papel.resumo(a.corretora(), a.precos)
+        a._txt(L // 2, 40, "CORRETORA DE MENTIRINHA", "#94b0c2", sombra=TINTA)
+        a._txt(12, 58, m, "#f4f4f4", anchor="nw", escala=2, sombra=TINTA)
+        a._txt(L - 12, 62, a._fmt_preco(m, preco) if preco else "...", "#ffcd75", anchor="ne")
+        a._sparkline(m, 12, 80, L - 12, 104, "#38b764" if r["pnl"] >= 0 else "#b13e53")
+        # bicho reagindo ao PnL
+        h = papel.humor(r["pnl_pct"]) or "garimpando"
+        frames = a._sprites_mini()
+        c.create_image(L - 50, 150, image=frames[(h, self.t // 3 % 4)])
+        cor = "#38b764" if r["pnl"] >= 0 else "#b13e53"
+        y = 116
+        for k, v, cr in (("caixa", f"${r['usd']:,.2f}", "#f4f4f4"), ("total", f"${r['total']:,.2f}", "#f4f4f4"),
+                         ("PnL", f"{r['pnl']:+,.2f}", cor), ("", f"{r['pnl_pct']:+.2f}%", cor)):
+            a._txt(12, y, k, "#566c86", anchor="nw")
+            a._txt(60, y, v, cr, anchor="nw")
+            y += 14
+        pos = r["pos"].get(m)
+        a._txt(12, y + 2, f"{m}: {pos['qtd']:.6g}" if pos else f"sem {m}", "#73eff7", anchor="nw")
+        hist = a.corretora().get("hist", [])[-3:]
+        y = 196
+        for x in reversed(hist):
+            a._txt(12, y, f"{x['lado'][:1].upper()} {x['moeda']} ${x['usd']:,.0f}" +
+                   (f" {x['lucro']:+.0f}" if "lucro" in x else ""), "#94b0c2", anchor="nw")
+            y += 12
+        a._txt(L // 2, H - 92, self.msg[:60], "#ffcd75", max_chars=(L - 20) // 8)
+        w = (L - 24) // 3
+        for i, (rot, tag, cor_b) in enumerate((("+$100", "buy:100", "#38b764"), ("+$1K", "buy:1000", "#38b764"),
+                                                ("VENDER", "sell:all", "#ef7d57"))):
+            self.botao(10 + i * (w + 2), H - 66, 10 + i * (w + 2) + w, H - 40, rot, fundo=cor_b, tag=tag)
+        self.botao(L // 2 - 40, H - 36, L // 2 + 40, H - 10, "SAIR", fundo="#94b0c2", tag="sair")

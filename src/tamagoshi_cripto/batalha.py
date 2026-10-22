@@ -63,10 +63,10 @@ def _golpe(at, df, golpe, rnd):
         at.defendendo = True
         cura = max(1, at.s["max_hp"] // 12)
         at.hp = min(at.s["max_hp"], at.hp + cura)
-        return 0, f"{at.nome} segurou firme: HODL! (+{cura} HP)"
+        return 0, f"{at.nome}: HODL! +{cura} HP"
     if golpe == "FUD":
         df.fud = 2
-        return 0, f"{at.nome} espalhou FUD! ataque de {df.nome} caiu"
+        return 0, f"{at.nome} espalhou FUD! -25% atk"
     mult = 1.0
     if golpe in ("LASER EYES", "TO THE MOON"):
         if at.recarga:
@@ -75,14 +75,14 @@ def _golpe(at, df, golpe, rnd):
             at.recarga = 3
             mult = 1.7 if golpe == "LASER EYES" else 1.6
             if golpe == "TO THE MOON" and rnd.random() < .3:
-                return 0, f"{at.nome} tentou TO THE MOON... e errou (rug pull)"
+                return 0, f"{at.nome} errou o MOON (rug!)"
     atk = at.s["atk"] * (0.75 if at.fud else 1)
     critico = rnd.random() < .1
     dano = max(1, int((atk * rnd.uniform(.85, 1.15) * mult - df.s["def"] * .45) * (1.5 if critico else 1)))
     if df.defendendo:
         dano = max(1, dano // 2)
     df.hp = max(0, df.hp - dano)
-    return dano, f"{at.nome} usou {golpe}! -{dano}" + (" CRÍTICO!" if critico else "")
+    return dano, f"{at.nome}: {golpe} -{dano}" + (" CRIT!" if critico else "")
 
 
 def simular(pet_a, pet_b, var_a=0.0, var_b=0.0, semente=None, escolher_a=None, max_turnos=40):

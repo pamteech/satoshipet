@@ -39,6 +39,10 @@ AJUDA = [
     "  battle [code]   batalha (vs IA ou amigo)",
     "  hardcore on|off modo hardcore (pode morrer!)",
     "  rip             Cemitério de Honra",
+    "  paper ...       paper trading (DINHEIRO FICTÍCIO)",
+    "  wallet eth|sol <addr>  watch-only ETH/SOL",
+    "  news            últimas manchetes (RSS)",
+    "  whale           última baleia na mempool",
     "  clear / exit",
 ]
 
@@ -133,6 +137,11 @@ class Console:
         return [f"ETH gas: {g:.2f} gwei", onchain.humor_gas(g)]
 
     def cmd_wallet(self, a):
+        if a and a[0].lower() in ("eth", "sol"):
+            f = getattr(self.ctx, "carteira_multi", None)
+            if not f:
+                return ["ETH/SOL só na janela (por enquanto)"]
+            return f(a[0], " ".join(a[1:]) if a[1:] else None)
         if not a:
             return self.ctx.carteira(None)
         return self.ctx.carteira(a[0])
@@ -206,6 +215,24 @@ class Console:
         return self._so_janela("ver_cemiterio")
 
     cmd_cemiterio = cmd_rip
+
+    # ---- v1.4 fase 2: mercado ----
+    def cmd_paper(self, a):
+        return self._so_janela("paper", a)
+
+    def cmd_news(self, a):
+        m = getattr(self.ctx, "manchetes", None)
+        if m is None:
+            from . import noticias
+            m = noticias.buscar()
+        return [f"[{x['fonte']}] {x['titulo'][:70]}" for x in m[:6]] or ["sem manchetes ainda (RSS a cada 30 min)"]
+
+    def cmd_whale(self, a):
+        from . import baleias
+        txs = baleias.recentes()
+        grandes = sorted(txs, key=lambda t: -t.get("value", 0))[:3]
+        return [f"{t['value'] / 1e8:,.2f} BTC  {t['txid'][:16]}..." for t in grandes] + \
+            ["(alerta dispara acima de %s BTC)" % (getattr(self.ctx, "cfg", {}) or {}).get("baleia_btc", 50)]
 
     def cmd_coin(self, a):
         if not a:

@@ -133,6 +133,12 @@ def executar():
     logic.buscar_precos = lambda simbolos, timeout=10: {s: precos[s] for s in simbolos}
     lore.fear_greed = lambda timeout=10: (72, "GANANCIA")
     lore.altura_bloco = lambda timeout=10: 921_337
+    from tamagoshi_cripto import baleias as _bal, multichain as _mc, noticias as _news
+    _bal.recentes = lambda timeout=10: []
+    _news.buscar = lambda timeout=10: [{"titulo": "Bitcoin volta aos US$ 100 mil e o bicho comemora", "link":
+                                        "https://example.com/noticia", "fonte": "Teste"}]
+    _mc._rpc = lambda urls, metodo, params, timeout=10: ({"value": 4_200_000_000} if metodo == "getBalance"
+                                                         else hex(15 * 10 ** 17))
     onchain.ultimo_bloco = lambda timeout=10: (921_337, int(time.time()))
     onchain.fees = lambda timeout=10: {"fastestFee": 80, "halfHourFee": 72, "hourFee": 40, "economyFee": 9, "minimumFee": 1}
     onchain.mempool = lambda timeout=10: {"count": 53908, "vsize": 25_160_871}
@@ -477,6 +483,54 @@ def executar():
     app.cfg["hardcore"] = False
     app.cfg["chapeus"] = True
     app.cache_sprites.clear()
+
+    # ---------- v1.4 fase 2: paper trading, ETH/SOL, baleia, manchete ----------
+    app.cfg["moeda"], app.cfg["crt"] = "BTC", False
+    app.cache_sprites.clear()
+    for i in range(80):
+        app.historico.adicionar("BTC", 100 + 4 * math.sin(i / 7) + i * .1, t=i)
+    assert "FICTÍCIO" in app.console.executar("paper")[0]
+    app.abrir_corretora()
+    assert isinstance(app.cena, _cenas.Corretora)
+    app.cena.acao("buy:1000")
+    precos["BTC"] = 112.0; app.precos["BTC"] = 112.0
+    app.cena.acao("buy:100")
+    _bombear(app, 300)
+    _shot(app, "paper_trading")
+    app.cena.acao("sell:all")
+    assert app.cfg["papel"]["usd"] > 10_000 and "lucro" in app.cfg["papel"]["hist"][-1]
+    app.cena.acao("sair"); app.cena = None
+    assert app.status()["papel"]["aviso"] == "DINHEIRO FICTÍCIO"
+    assert "CHAVE PRIVADA" in app.console.executar("wallet eth 0x" + "ab" * 32)[0]
+    assert "salva" in app.console.executar("wallet eth 0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe")[0]
+    assert "salva" in app.console.executar("wallet sol vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg")[0]
+    app.eventos += [("saldo_multi", "eth", 1.5), ("saldo_multi", "sol", 4.2), ("saldo_multi", "sol", 5.0)]
+    app._processar_eventos()
+    assert app.saldos_multi == {"eth": 1.5, "sol": 5.0} and "SOL" in app.toast[2]
+    app.toast = None
+    app.manchetes = _news.buscar()
+    app._desenhar()  # estabiliza o humor (troca de humor sorteia frase nova)
+    import random as _rnd
+    _r0 = _rnd.random
+    _rnd.random = lambda: 0.0
+    app._nova_frase()
+    _rnd.random = _r0
+    assert app.frase_atual.startswith("NEWS:") and app.link_balao
+    app._desenhar()
+    _shot(app, "noticia")
+    n_ab = len(abertos)
+    app.inicio_arraste(type("E", (), {"x": 100, "y": 20, "x_root": 0, "y_root": 0})())
+    assert abertos[n_ab:] == ["https://example.com/noticia"]
+    app.fim_arraste(type("E", (), {"x": 100, "y": 20, "x_root": 0, "y_root": 0})())
+    app._press = None
+    app.eventos.append(("baleia", {"txid": "f" * 64, "btc": 1234.5, "url": "https://mempool.space/tx/" + "f" * 64}))
+    app._processar_eventos()
+    assert app.toast[2] == "ALERTA DE BALEIA" and app.panico_t
+    _gif(app, "baleia", n=12)
+    _shot(app, "baleia")
+    app.toast = None; app.link_balao = None
+    app.cfg["carteira_eth"] = app.cfg["carteira_sol"] = ""
+    app.saldos_multi.clear()
 
     # foto Pro: ETH cyberpunk em TO THE MOON com sparkline
     for w in app.root.winfo_children():

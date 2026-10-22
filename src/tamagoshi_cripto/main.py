@@ -16,7 +16,7 @@ from tkinter import messagebox, simpledialog
 
 from PIL import Image
 
-from . import __version__, api, engajamento, genetica, arts, cenas, config, conquistas, crashlog, juice, licencas, updates, evolucao, license, logic, lore, onchain, plugins, ranking, recursos, share, sistema, sons
+from . import __version__, api, engajamento, genetica, mercado, papel, arts, cenas, config, conquistas, crashlog, juice, licencas, updates, evolucao, license, logic, lore, onchain, plugins, ranking, recursos, share, sistema, sons
 from .console import SPRITE, Console
 from .fonte import FontePixel
 from .sprites import FRAMES, LINHAS, SKINS_SECRETAS, nome_folha
@@ -60,7 +60,7 @@ def carregar_frames(caminho, escala, crt=False, chapeu=None, genes=None, fantasm
     return frames
 
 
-class Tamagoshi(engajamento.MixinEngajamento):
+class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado):
     def __init__(self, opcoes=None):
         op = opcoes or {}
         self.cfg = config.carregar()
@@ -113,6 +113,7 @@ class Tamagoshi(engajamento.MixinEngajamento):
         self.tray = None
         self.ultimo_erro = None
         self.escala = max(1, min(6, int(self.cfg.get("escala", 3))))
+        self._init_mercado()
         self._medidas()
 
         self.root = tk.Tk()
@@ -155,6 +156,7 @@ class Tamagoshi(engajamento.MixinEngajamento):
             threading.Thread(target=self._revalidar_pro, daemon=True).start()
         threading.Thread(target=self.loop_lore, daemon=True).start()
         threading.Thread(target=self.loop_onchain, daemon=True).start()
+        threading.Thread(target=self.loop_mercado, daemon=True).start()
         self.api = api.iniciar(self.status) if (self.cfg.get("api", True) and not op.get("sem_api")) else None
         self.root.after(1000, self.atualizar_tela)
         self.root.after(FRAME_MS, self.animar)
@@ -340,6 +342,14 @@ class Tamagoshi(engajamento.MixinEngajamento):
         m.add_command(label="Ranking (opt-in)...", command=self.config_ranking)
         m.add_command(label="Brincar: Pega os Sats (P)", command=self.brincar)
         self.menu_genetica(m)
+        mm = tk.Menu(m, tearoff=0)
+        mm.add_command(label="Corretora de mentirinha (paper trading)", command=self.abrir_corretora)
+        mm.add_command(label="Carteiras ETH/SOL watch-only...", command=self.config_carteiras_multi)
+        for chave, rot in (("baleias", "Alerta de baleia (mempool.space)"), ("noticias", "Manchetes RSS no balão")):
+            v = self.vars_op_m = getattr(self, "vars_op_m", {})
+            v[chave] = tk.BooleanVar(value=bool(self.cfg.get(chave, True)))
+            mm.add_checkbutton(label=rot, variable=v[chave], command=lambda c=chave: self.alternar_opcao(c, self.vars_op_m[c]))
+        m.add_cascade(label="Mercado", menu=mm)
         ma = tk.Menu(m, tearoff=0)  # aparência e acessibilidade
         self.var_escala = tk.IntVar(value=self.escala)
         for e in range(1, 7):
@@ -531,6 +541,8 @@ class Tamagoshi(engajamento.MixinEngajamento):
             return
         if self.toast and len(self.toast) > 2 and self.update and e.y < 50:
             self.abrir_update()
+        elif e.y < 50 and self.link_balao:  # manchete / baleia: abre no navegador
+            self.clique_balao()
         self._x, self._y = e.x_root - self.root.winfo_x(), e.y_root - self.root.winfo_y()
         self._press = (e.x_root, e.y_root, e.x, e.y)
         self.root.focus_force()  # pra janela sem borda receber o código konami
@@ -749,6 +761,10 @@ class Tamagoshi(engajamento.MixinEngajamento):
             "raridade": genetica.raridade(self.genes())[0],
             "hardcore": bool(self.cfg.get("hardcore")), "fantasma": bool(self.cfg.get("fantasma")),
             "batalhas": dict(self.cfg.get("batalhas") or {}),
+            "papel": ({k: round(v, 2) for k, v in papel.resumo(self.cfg["papel"], self.precos).items()
+                       if k in ("total", "pnl", "pnl_pct")} | {"aviso": papel.AVISO})
+            if (self.cfg.get("papel") or {}).get("hist") else None,
+            "carteiras": {"eth": self.saldos_multi.get("eth"), "sol": self.saldos_multi.get("sol")},
         }
 
     def nome_pet(self):
@@ -814,6 +830,8 @@ class Tamagoshi(engajamento.MixinEngajamento):
         with self.lock:
             evs, self.eventos = self.eventos, []
         for ev in evs:
+            if self._evento_mercado(ev):
+                continue
             if ev[0] == "update":
                 self.update = ev[1]
                 self.toast = [f"v{ev[1]['versao']} - clique aqui", 60, "NOVA VERSÃO!"]
@@ -1218,6 +1236,11 @@ class Tamagoshi(engajamento.MixinEngajamento):
             out.append((f"GAS {self.gas:.1f} gwei", "#73eff7"))
         if self.saldo:
             out.append((f"WALLET {self.saldo['total']:,} sats".replace(",", "."), "#ffcd75"))
+        for rede, v in self.saldos_multi.items():
+            out.append((f"WALLET {v:.4f} {rede.upper()}", "#ffcd75"))
+        if (self.cfg.get("papel") or {}).get("hist"):
+            r = papel.resumo(self.cfg["papel"], self.precos)
+            out.append((f"PAPEL {r['pnl_pct']:+.2f}% (ficticio)", "#38b764" if r["pnl"] >= 0 else "#b13e53"))
         return out
 
     def _desenhar_console(self):
@@ -1252,6 +1275,8 @@ class Tamagoshi(engajamento.MixinEngajamento):
         self._txt(12, y1 - 18, ("$ " + self.console_input + cursor)[-cols:], "#f4f4f4", anchor="nw")
 
     def _nova_frase(self):
+        if self.frase_noticia() or self.frase_papel():
+            return
         extras = self.plugins.get(self.cfg["skin"], {}).get("frases")
         self.frase_atual = arts.frase(self.estado, self.cfg["moeda"], extras)
 
