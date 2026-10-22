@@ -3,13 +3,17 @@
 name: Test build (macOS)
 on:
   workflow_dispatch:
+    inputs:
+      runner:
+        description: "macos-latest (arm64) ou macos-15-intel (x86_64)"
+        default: macos-latest
 
 permissions:
   contents: read
 
 jobs:
   macos:
-    runs-on: macos-latest   # arm64
+    runs-on: ${{ inputs.runner }}
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -21,12 +25,12 @@ jobs:
       - name: Empacotar .dmg
         run: |
           mkdir -p dmgsrc && cp -R "dist/Tamagoshi Cripto.app" dmgsrc/ && ln -s /Applications dmgsrc/Applications
-          hdiutil create -volname "Tamagoshi Cripto" -srcfolder dmgsrc -ov -format UDZO dist/TamagoshiCripto-macos-arm64.dmg
+          hdiutil create -volname "Tamagoshi Cripto" -srcfolder dmgsrc -ov -format UDZO dist/TamagoshiCripto-macos-$(uname -m).dmg
           file "dist/Tamagoshi Cripto.app/Contents/MacOS/Tamagoshi Cripto"
           codesign -dv "dist/Tamagoshi Cripto.app" 2>&1 || true
           ls -la dist
       - uses: actions/upload-artifact@v4
         with:
-          name: TamagoshiCripto-macos-arm64
-          path: dist/TamagoshiCripto-macos-arm64.dmg
+          name: TamagoshiCripto-macos-${{ inputs.runner }}
+          path: dist/*.dmg
           retention-days: 7
