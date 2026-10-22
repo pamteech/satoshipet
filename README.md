@@ -86,6 +86,12 @@ tamagoshi [--tui] [--coin BTC|ETH|SOL|DOGE|PEPE] [--skin NAME|plugin:ID] [--scal
 - **Keyboard** (widget focused): `h j k l` move 10 px, `H J K L` 50 px, <kbd>`</kbd> console
 - Menu: coin, skin, watch-only wallet, console, show in sats, settings, price alerts, achievements, mute, CRT, start at login, hide to tray, activate Pro, quit
 
+### New in v1.5 ✨ (quality release)
+One tabbed **Settings** screen (press `S`) instead of a pile of dialogs, **keyboard navigation everywhere** (TAB/ENTER/arrows/ESC),
+**pt-BR / English** UI with auto-detect, unique final forms (**Ultrasound Archangel** ETH, **Supernova** SOL,
+**Astronaut Doge**, **Frog King** PEPE), stage art for shop packs, AI key in the **OS keychain**, a hardened local API
+(no open CORS, host check, token for write routes) and a [PRIVACY.md](PRIVACY.md). See [CHANGELOG.md](CHANGELOG.md).
+
 ### New in v1.4 🧬⚔️
 
 **Engagement**
@@ -137,7 +143,7 @@ tamagoshi [--tui] [--coin BTC|ETH|SOL|DOGE|PEPE] [--skin NAME|plugin:ID] [--scal
 <img src="docs/screenshots/onboarding_moeda.png" width="150"> <img src="docs/screenshots/onboarding_nome.png" width="150"> <img src="docs/screenshots/onboarding_dicas.png" width="150"> <img src="docs/screenshots/minigame_fim.png" width="150"> <img src="docs/screenshots/alto_contraste.png" width="150"> <img src="docs/screenshots/update.png" width="150">
 
 **Performance:** `xvfb-run -a python tools/medir_cpu.py 60` measures the idle widget (onboarding done, network threads on):
-**1.25 %** of one core on Linux/Xvfb in v1.4 (0.50 s CPU in 40 s; v1.3: 1.10 %). The 50 ms loop only runs while the mini-game is open.
+**1.12 %** of one core on Linux/Xvfb in v1.5 (0.45 s CPU in 40 s; v1.4: 1.25 %). The 50 ms loop only runs while the mini-game is open.
 
 ### What's inside
 | Feature | Source (keyless) | Offline? | Tier |
@@ -316,6 +322,8 @@ tamagoshi --tui      # no terminal
 
 **Free:** Satoshinho (BTC), animações, carinho, vida em corações, conquistas, sons 8-bit, Fear & Greed, contagem do halving (5 carinhos no Satoshinho), código konami (skin secreta), criaturas da comunidade, modo terminal e botão de afiliado.
 **Pro:** ETH, SOL, DOGE e PEPE na janela, skins premium, limites e preço de referência configuráveis, alertas de preço, mini gráfico e "abrir ao iniciar".
+
+**Novidades v1.5 (qualidade):** tela única de **Ajustes** com abas (tecla `S`), **teclado em tudo**, interface **pt-BR/EN** com auto-detecção, formas finais únicas pra ETH/SOL/DOGE/PEPE, estágios nos pacotes da loja, chave da IA no **chaveiro do sistema**, API local blindada e [PRIVACY.md](PRIVACY.md). Detalhes no [CHANGELOG.md](CHANGELOG.md).
 
 **Novidades v1.4:** **modo hardcore** opcional (o bicho pode morrer de abandono, vira fantasma e vai pro **Cemitério de Honra** com epitáfio; renasce do ovo), **DNA** (paleta, olhos, acessório, padrão, raridade) com **cruzamento** via código de pet `TAMA1-...` (texto, sem NFT/blockchain), **batalhas por turnos** (vs IA ou código de amigo; força vem do nível, DNA e da variação 24h), **paper trading** com DINHEIRO FICTÍCIO, carteiras **ETH/SOL watch-only** (mesma recusa de chave/seed), **alerta de baleia** (mempool.space), **manchetes RSS** clicáveis no balão, **card de perfil do GitHub** em SVG animado, **extensão do VS Code** (`vscode/`), `ask` com IA **BYO** (desligada: responde piada), **loja de skins** (sazonais, collab com artista via código, pacotes de marca sempre com selo **PATROCINADO**) e **overlay de streamer** pro OBS com chat da Twitch anônimo. Tudo sem chave de API.
 
