@@ -8,6 +8,7 @@ Regras (todas precisam valer ao mesmo tempo):
 """
 import random
 import time
+from typing import Any, Dict, Optional
 
 MORTE_MIN = 30
 ABANDONO_H = 4
@@ -18,12 +19,12 @@ EPITAFIOS = [
 ]
 
 
-def tocar(cfg, agora=None):
+def tocar(cfg: Dict[str, Any], agora: Optional[float]=None) -> None:
     """Chame em todo carinho / jogo: o bicho não está abandonado."""
     cfg["ultima_interacao"] = agora or time.time()
 
 
-def checar(cfg, vida, agora=None):
+def checar(cfg: Dict[str, Any], vida: float, agora: Optional[float]=None) -> bool:
     """Atualiza o relógio da morte. Retorna True se o bicho acabou de morrer."""
     agora = agora or time.time()
     if not cfg.get("hardcore") or cfg.get("fantasma"):
@@ -37,7 +38,7 @@ def checar(cfg, vida, agora=None):
     return abandono and agora - cfg["zero_desde"] >= MORTE_MIN * 60
 
 
-def risco(cfg, vida, agora=None):
+def risco(cfg: Dict[str, Any], vida: float, agora: Optional[float]=None) -> Optional[str]:
     """Texto de aviso (ou None) pra mostrar antes da tragédia."""
     if not cfg.get("hardcore") or cfg.get("fantasma") or vida > 2:
         return None
@@ -47,7 +48,7 @@ def risco(cfg, vida, agora=None):
     return "HARDCORE: vida baixa! faz carinho (ou joga)"
 
 
-def lapide(cfg, nome, st, agora=None, semente=None):
+def lapide(cfg: Dict[str, Any], nome: str, st: Dict[str, Any], agora: Any=None, semente: Optional[int]=None) -> Dict[str, Any]:
     """Monta o registro do Cemitério de Honra a partir do status() do app."""
     agora = agora or time.time()
     rnd = random.Random(semente)
@@ -59,7 +60,7 @@ def lapide(cfg, nome, st, agora=None, semente=None):
             "genes": cfg.get("genes") or {}}
 
 
-def enterrar(cfg, registro):
+def enterrar(cfg: Dict[str, Any], registro: Dict[str, Any]) -> None:
     cfg.setdefault("cemiterio", []).append(registro)
     cfg["cemiterio"] = cfg["cemiterio"][-50:]
     cfg["fantasma"] = True

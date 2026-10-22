@@ -1,11 +1,13 @@
 """baleias.py - alerta de baleia: tx gigante de BTC na mempool (mempool.space, sem chave) = bicho assustado."""
+from typing import Any, Dict, List
+
 import requests
 
 URL = "https://mempool.space/api/mempool/recent"
 UA = {"User-Agent": "TamagoshiCripto/1.4 (+github)"}
 
 
-def recentes(timeout=10):
+def recentes(timeout: float = 10) -> Any:
     r = requests.get(URL, timeout=timeout, headers=UA)
     r.raise_for_status()
     return r.json()
@@ -14,12 +16,12 @@ def recentes(timeout=10):
 class Radar:
     """Guarda txids já vistos pra não gritar duas vezes pela mesma baleia."""
 
-    def __init__(self, limite_btc=50):
+    def __init__(self, limite_btc: int=50):
         self.limite = float(limite_btc)
-        self.vistos = set()
+        self.vistos: set = set()
         self.primeira = True
 
-    def filtrar(self, txs):
+    def filtrar(self, txs: List[Dict[str, Any]]) -> Any:
         """Retorna baleias novas: [{"txid", "btc", "url"}], maiores primeiro."""
         novas = []
         for tx in txs or []:
@@ -34,5 +36,5 @@ class Radar:
         return sorted(novas, key=lambda b: -b["btc"])
 
 
-def frase(b):
+def frase(b: Dict[str, Any]) -> str:
     return f"BALEIA! {b['btc']:,.0f} BTC se mexeu".replace(",", ".")

@@ -248,8 +248,9 @@ class Sprite:
                         cor[y][x] = g2
         for y in range(W):
             for x in range(W):
-                if cor[y][x] is not None:
-                    out.putpixel((x, y), cor[y][x] + (255,))
+                c = cor[y][x]
+                if c is not None:
+                    out.putpixel((x, y), c + (255,))
         for x, y, c in self.fx:
             if 0 <= x < W and 0 <= y < W:
                 out.putpixel((x, y), c + (255,))

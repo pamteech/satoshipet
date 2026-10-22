@@ -6,6 +6,7 @@ import html
 import re
 import unicodedata
 import xml.etree.ElementTree as ET
+from typing import Any, Dict, List, Optional
 
 import requests
 
@@ -14,7 +15,7 @@ FEEDS = {"CoinDesk": "https://www.coindesk.com/arc/outboundfeeds/rss/",
 UA = {"User-Agent": "TamagoshiCripto/1.4 (+github)"}
 
 
-def limpar(t):
+def limpar(t: Optional[str]) -> str:
     """Tira HTML e caracteres que a fonte pixel não tem (fica só Latin-1)."""
     t = html.unescape(re.sub(r"<[^>]+>", "", t or "")).strip()
     t = t.replace("\u2019", "'").replace("\u2018", "'").replace("\u201c", '"').replace("\u201d", '"')
@@ -23,7 +24,7 @@ def limpar(t):
     return re.sub(r"\s+", " ", t).strip()
 
 
-def parse(xml_texto, fonte):
+def parse(xml_texto: bytes, fonte: str) -> Any:
     raiz = ET.fromstring(xml_texto)
     itens = []
     for it in raiz.iter("item"):
@@ -33,7 +34,7 @@ def parse(xml_texto, fonte):
     return itens[:15]
 
 
-def buscar(timeout=10):
+def buscar(timeout: float = 10) -> List[Dict[str, Any]]:
     todas = []
     for fonte, url in FEEDS.items():
         try:

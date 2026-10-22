@@ -1,14 +1,15 @@
-__pycache__/
+# segredo de licença do build oficial: NUNCA commitar
+*.db
+*.egg-info/
 *.pyc
+*.spec
+.coverage
+.pytest_cache/
+.venv/
+__pycache__/
 build/
 dist/
-*.spec
-*.egg-info/
-.venv/
-.pytest_cache/
-# segredo de licença do build oficial: NUNCA commitar
-src/tamagoshi_cripto/_segredo.py
 previews/
-*.db
 server/data/
+src/tamagoshi_cripto/_segredo.py
 vscode/*.vsix

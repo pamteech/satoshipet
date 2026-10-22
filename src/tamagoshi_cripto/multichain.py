@@ -4,6 +4,7 @@ Mesmas regras de sempre: endereço PÚBLICO e pronto. Se você colar chave priva
 ou aquele array de bytes do keypair do Solana, o app recusa e dá bronca. Nada é salvo.
 """
 import re
+from typing import Any, Tuple
 
 import requests
 
@@ -18,12 +19,12 @@ RE_B58_LONGO = re.compile(r"^[1-9A-HJ-NP-Za-km-z]{80,90}$")  # secret key Solana
 BRONCA = "ISSO PARECE CHAVE PRIVADA/SEED! Nunca cole isso em lugar nenhum. Só endereço público."
 
 
-def _perigo(t):
+def _perigo(t: str) -> Any:
     return (RE_HEX64.match(t) or RE_B58_LONGO.match(t) or len(t.split()) >= 12
             or (t.startswith("[") and t.count(",") >= 31))  # keypair.json do solana-keygen
 
 
-def validar(rede, texto):
+def validar(rede: str, texto: str) -> Tuple[bool, str]:
     """(ok, msg). rede = 'eth' ou 'sol'."""
     t = (texto or "").strip()
     if _perigo(t):
@@ -37,7 +38,7 @@ def validar(rede, texto):
     return False, "rede desconhecida"
 
 
-def _rpc(urls, metodo, params, timeout=10):
+def _rpc(urls: Any, metodo: str, params: Any, timeout: float = 10) -> Any:
     erro = None
     for url in urls:
         try:
@@ -52,14 +53,14 @@ def _rpc(urls, metodo, params, timeout=10):
     raise RuntimeError(f"nenhum RPC respondeu: {erro}")
 
 
-def saldo_eth(endereco, timeout=10):
+def saldo_eth(endereco: str, timeout: int=10) -> float:
     ok, msg = validar("eth", endereco)
     if not ok:
         raise ValueError(msg)
     return int(_rpc(ETH_RPCS, "eth_getBalance", [endereco, "latest"], timeout), 16) / 1e18
 
 
-def saldo_sol(endereco, timeout=10):
+def saldo_sol(endereco: str, timeout: int=10) -> float:
     ok, msg = validar("sol", endereco)
     if not ok:
         raise ValueError(msg)

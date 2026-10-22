@@ -15,7 +15,10 @@ import hashlib
 import hmac
 import json
 import re
+from datetime import date
 from pathlib import Path
+from pathlib._local import PosixPath
+from typing import Any, Dict, List, Optional
 
 from . import license, recursos
 
@@ -25,12 +28,12 @@ RE_ID = re.compile(r"^[a-z0-9_]{3,24}$")
 ROTULO_TIPO = {"sazonal": "SAZONAL", "colab": "COLAB", "patrocinado": "PATROCINADO"}
 
 
-def pastas(extra=None):
+def pastas(extra: Any=None) -> List[PosixPath]:
     p = [recursos.ASSETS / "loja", Path.home() / ".tamagoshi_cripto" / "loja"]
     return ([Path(extra)] if extra else []) + p
 
 
-def validar_pack(pasta):
+def validar_pack(pasta: PosixPath) -> Any:
     """(meta, erro). Regras de marca: disclosure 'patrocinado' obrigatório, autorização e vigência."""
     pasta = Path(pasta)
     try:
@@ -68,7 +71,7 @@ def validar_pack(pasta):
     return meta, None
 
 
-def catalogo(extra=None):
+def catalogo(extra: Any=None) -> Dict[str, Any]:
     out = {}
     for base in pastas(extra):
         if not base.exists():
@@ -83,12 +86,12 @@ def catalogo(extra=None):
     return out
 
 
-def _md(s, hoje):
+def _md(s: str, hoje: date) -> bool:
     m, d = map(int, s.split("-")[-2:])
     return (m, d) <= (hoje.month, hoje.day)
 
 
-def em_temporada(meta, hoje=None):
+def em_temporada(meta: Dict[str, Any], hoje: Optional[date]=None) -> bool:
     t = meta.get("temporada")
     if not t:
         return True
@@ -99,27 +102,27 @@ def em_temporada(meta, hoje=None):
     return _md(de, hoje) or not _md_depois(ate, hoje)  # vira o ano (ex.: dez -> jan)
 
 
-def _md_depois(s, hoje):
+def _md_depois(s: str, hoje: date) -> bool:
     m, d = map(int, s.split("-")[-2:])
     return (hoje.month, hoje.day) > (m, d)
 
 
-def vigente(meta, hoje=None):
+def vigente(meta: Dict[str, Any], hoje: Optional[date]=None) -> bool:
     """Patrocínio fora da vigência some da loja (a marca não paga pra sempre)."""
     v = meta.get("vigencia")
     if not v:
         return True
-    hoje = (hoje or dt.date.today()).isoformat()
-    return v.get("de", "0000") <= hoje <= v.get("ate", "9999")
+    dia = (hoje or dt.date.today()).isoformat()
+    return v.get("de", "0000") <= dia <= v.get("ate", "9999")
 
 
-def gerar_codigo(pack_id, email="*"):
+def gerar_codigo(pack_id: str, email: str="*") -> str:
     """Código de destrave. email='*' = código promocional (vale pra todo mundo, ex.: prêmio de concurso)."""
     msg = f"pack:{pack_id}:{(email or '*').strip().lower()}".encode()
     return f"SKIN-{pack_id.upper()}-" + hmac.new(license.SEGREDO, msg, hashlib.sha256).hexdigest()[:12].upper()
 
 
-def validar_codigo(codigo, email=""):
+def validar_codigo(codigo: str, email: str="") -> Optional[str]:
     """Retorna o pack_id se o código for válido (pro e-mail da licença ou promocional)."""
     c = (codigo or "").strip().upper()
     m = re.match(r"^SKIN-([A-Z0-9_]{3,24})-([0-9A-F]{12})$", c)
@@ -132,7 +135,7 @@ def validar_codigo(codigo, email=""):
     return None
 
 
-def destravado(meta, pro, codigos):
+def destravado(meta: Dict[str, Any], pro: bool, codigos: Any) -> bool:
     if meta["tier"] == "free":
         return True
     if meta["tier"] == "pro":
@@ -140,5 +143,5 @@ def destravado(meta, pro, codigos):
     return meta["id"] in codigos
 
 
-def folha(meta, moeda):
+def folha(meta: Dict[str, Any], moeda: str) -> str:
     return meta["_folhas"].get(moeda) or meta["_folhas"]["BTC"]

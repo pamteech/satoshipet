@@ -1,5 +1,6 @@
 # conquistas.py - vida do bicho e conquistas (lógica pura, sem GUI, fácil de testar)
 import time
+from typing import Any, Callable, Dict, Optional
 
 VIDA_MAX = 10.0  # 10 meios-corações = 5 corações na tela
 
@@ -31,7 +32,7 @@ LISTA = {
 TAXA_MIN = {"moon": +0.5, "garimpando": +0.1, "rekt": -0.3}
 
 
-def novo_estado():
+def novo_estado() -> Dict[str, Any]:
     return {"vida": 6.0, "crashes": 0, "segundos": 0.0, "carinhos": 0,
             "ultimo_estado": None, "desbloqueadas": {}}
 
@@ -39,22 +40,22 @@ def novo_estado():
 class Conquistas:
     """Guarda o progresso dentro do dicionário de config (cfg["progresso"])."""
 
-    def __init__(self, dados=None, agora=time.time):
+    def __init__(self, dados: Optional[Dict[str, Any]]=None, agora: Callable=time.time):
         self.d = novo_estado()
         self.d.update(dados or {})
         self.agora = agora
 
-    def _desbloquear(self, cid):
+    def _desbloquear(self, cid: str) -> Any:
         if cid not in self.d["desbloqueadas"]:
             self.d["desbloqueadas"][cid] = int(self.agora())
             return [cid]
         return []
 
-    def especial(self, cid):
+    def especial(self, cid: str) -> Any:
         """Conquistas disparadas por easter eggs."""
         return self._desbloquear(cid)
 
-    def tick(self, estado, segundos, bonus_min=0.0):
+    def tick(self, estado: str, segundos: int, bonus_min: float=0.0) -> Any:
         """Chame periodicamente com o humor atual. Retorna conquistas novas."""
         novas = []
         ant = self.d["ultimo_estado"]
@@ -81,7 +82,7 @@ class Conquistas:
             novas += self._desbloquear("quase_morreu")
         return novas
 
-    def carinho(self):
+    def carinho(self) -> Any:
         self.d["carinhos"] += 1
         self.d["vida"] = min(VIDA_MAX, self.d["vida"] + 0.2)
         novas = self._desbloquear("carinho_10") if self.d["carinhos"] >= 10 else []
@@ -90,10 +91,10 @@ class Conquistas:
         return novas
 
     @property
-    def vida(self):
+    def vida(self) -> float:
         return self.d["vida"]
 
-    def resumo(self):
+    def resumo(self) -> str:
         linhas = []
         for cid, (tit, desc) in LISTA.items():
             ok = cid in self.d["desbloqueadas"]

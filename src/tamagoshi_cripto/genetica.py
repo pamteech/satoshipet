@@ -10,7 +10,9 @@ import json
 import random
 import zlib
 from collections import Counter
+from typing import Any, Dict, List, Optional, Tuple, Union
 
+import PIL.Image
 from PIL import Image
 
 from .pixel import P, rgb
@@ -57,20 +59,20 @@ ACESSORIOS = {  # 1 contorno (preto), 2 cor principal, 3 brilho
 
 
 # ---------------- sorteio, raridade e cruzamento ----------------
-def _sortear(rnd, gene):
+def _sortear(rnd: random.Random, gene: str) -> str:
     ops = GENES[gene]
     return rnd.choices(list(ops), weights=[w for w, _ in ops.values()])[0]
 
 
-def aleatorio(semente=None, moeda="BTC"):
+def aleatorio(semente: Optional[Union[float, int]]=None, moeda: str="BTC") -> Dict[str, Any]:
     rnd = random.Random(semente)
-    g = {k: _sortear(rnd, k) for k in GENES}
+    g: Dict[str, Any] = {k: _sortear(rnd, k) for k in GENES}
     g.update({"moeda": moeda, "geracao": 1, "id": f"{rnd.getrandbits(32):08x}"})
     return g
 
 
-def raridade(g):
-    pontos = sum(GENES[k].get(g.get(k), (0, 0))[1] for k in GENES)
+def raridade(g: Dict[str, Any]) -> Tuple[str, int]:
+    pontos = sum(GENES[k].get(str(g.get(k)), (0, 0))[1] for k in GENES)
     nome = "comum"
     for minimo, n in RARIDADES:
         if pontos >= minimo:
@@ -78,10 +80,12 @@ def raridade(g):
     return nome, pontos
 
 
-def cruzar(a, b, semente=None, taxa_mutacao=0.08):
+def cruzar(a: Dict[str, Any], b: Dict[str, Any], semente: Optional[int] = None,
+           taxa_mutacao: float = 0.08) -> Tuple[Dict[str, Any], List[str]]:
     """Cada gene vem do pai ou da mãe; com taxa_mutacao vira uma opção sorteada (pode sair lendário!)."""
     rnd = random.Random(semente)
-    filho, mutou = {}, []
+    filho: Dict[str, Any] = {}
+    mutou: List[str] = []
     for k in GENES:
         if rnd.random() < taxa_mutacao:
             filho[k] = _sortear(rnd, k)
@@ -98,7 +102,7 @@ def cruzar(a, b, semente=None, taxa_mutacao=0.08):
 PREFIXO = "TAMA1-"
 
 
-def exportar(pet):
+def exportar(pet: Dict[str, Any]) -> str:
     """pet = {"nome", "genes", "nivel", "xp", "estagio"} -> 'TAMA1-....' (compacto, com checksum)."""
     leve = {"n": pet.get("nome", "")[:12], "g": {k: pet["genes"].get(k) for k in (*GENES, "moeda", "geracao", "id")},
             "lv": int(pet.get("nivel", 1)), "xp": int(pet.get("xp", 0)), "e": pet.get("estagio", "ovo")}
@@ -110,14 +114,14 @@ def exportar(pet):
 MAX_JSON = 4096
 
 
-def _int(v, lo, hi, padrao):
+def _int(v: Optional[Union[bool, int, str, float]], lo: int, hi: int, padrao: int) -> int:
     """int limitado; aceita só int/float finitos de verdade (bool e texto viram o padrão)."""
     if isinstance(v, bool) or not isinstance(v, (int, float)) or v != v or v in (float("inf"), float("-inf")):
         return padrao
     return max(lo, min(hi, int(v)))
 
 
-def importar(codigo):
+def importar(codigo: str) -> Any:
     """Retorna (pet, erro). Valida checksum e genes (código de amigo é dado NÃO confiável:
     o checksum só pega erro de cópia, qualquer um consegue forjar um)."""
     try:
@@ -161,17 +165,17 @@ _HEX = {k: rgb(v) for k, v in P.items()}
 _POR_RGB = {v: k for k, v in _HEX.items()}
 
 
-def _cor_corpo(fr):
-    cont = Counter(px[:3] for px in fr.getdata() if px[3] and px[:3] != _HEX["preto"])
+def _cor_corpo(fr: PIL.Image.Image) -> Any:
+    cont = Counter(px[:3] for px in list(fr.getdata()) if px[3] and px[:3] != _HEX["preto"])
     return cont.most_common(1)[0][0] if cont else None
 
 
-def aplicar(fr, g):
+def aplicar(fr: PIL.Image.Image, g: Any) -> PIL.Image.Image:
     """Devolve cópia do frame RGBA 48x48 com os genes aplicados (pixel exato, só cores da paleta)."""
     if not g:
         return fr
     out = fr.copy()
-    px = out.load()
+    px: Any = out.load()
     troca = {_HEX[a]: _HEX[b] for a, b in PALETAS.get(g.get("paleta"), {}).items()}
     corpo = _cor_corpo(fr)
     caixa = fr.getchannel("A").getbbox() or (0, 0, 48, 48)
@@ -184,7 +188,7 @@ def aplicar(fr, g):
             c = (r, gg, b)
             # olhos: pixels pretos internos (cercados de cor) na metade de cima
             if g.get("olhos") in COR_OLHOS and c == _HEX["preto"] and y < meio_y and 0 < x < 47 and 0 < y < 47:
-                viz = [fr.getpixel((x + dx, y + dy)) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))]
+                viz: List[Any] = [fr.getpixel((x + dx, y + dy)) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))]
                 if all(v[3] for v in viz) and sum(v[:3] != _HEX["preto"] for v in viz) >= 3:
                     px[x, y] = _HEX[COR_OLHOS[g["olhos"]]] + (255,)
                     continue
@@ -226,17 +230,18 @@ _ESCURO = {"amarelo": "laranja", "laranja": "vinho", "vinho": "roxo", "lima": "v
            "cinza_claro": "cinza", "cinza": "grafite"}
 
 
-def _escurecer(c):
+def _escurecer(c: Tuple[int, int, int]) -> Tuple[int, int, int]:
     nome = _POR_RGB.get(c)
     return _HEX[_ESCURO[nome]] if nome in _ESCURO else c
 
 
-def fantasma(fr):
+def fantasma(fr: PIL.Image.Image) -> PIL.Image.Image:
     """Versão fantasminha: silhueta ciano/branca com barra 'ondulada' e olhos vazados."""
     out = Image.new("RGBA", fr.size, (0, 0, 0, 0))
     a = fr.getchannel("A")
     caixa = a.getbbox() or (0, 0, 48, 48)
-    po, pi = out.load(), fr.load()
+    po: Any = out.load()
+    pi: Any = fr.load()
     for y in range(48):
         for x in range(48):
             if not pi[x, y][3]:

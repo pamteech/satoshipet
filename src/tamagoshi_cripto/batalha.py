@@ -4,6 +4,7 @@ Lógica 100% determinística dada a semente (pra dar pra testar e pra repetir re
 em dinheiro: o vencedor ganha XP e moral.
 """
 import random
+from typing import Any, Dict, Optional, Tuple
 
 from . import genetica
 
@@ -17,14 +18,14 @@ GOLPES = {
 }
 
 
-def stats(pet, var24h=0.0):
+def stats(pet: Dict[str, Any], var24h: float=0.0) -> Dict[str, Any]:
     """pet = {"nome", "nivel", "estagio", "genes"}; var24h em % (positivo = moeda subindo = mais força)."""
     lv = max(1, int(pet.get("nivel", 1)))
     g = pet.get("genes") or {}
     _, pts = genetica.raridade(g)
     v = max(-10.0, min(10.0, float(var24h or 0)))
     est = BONUS_ESTAGIO.get(pet.get("estagio", "adulto"), 10)
-    s = {"hp": 30 + lv * 2 + est + pts * 2,
+    s: Dict[str, Any] = {"hp": 30 + lv * 2 + est + pts * 2,
          "atk": 8 + lv * 0.8 + est * 0.3 + pts + v * 0.5 + (3 if g.get("olhos") == "laser" else 0),
          "def": 6 + lv * 0.6 + est * 0.3 + (4 if pet.get("estagio") == "diamond" else 0)
                 + (2 if g.get("paleta") == "noir" else 0),
@@ -35,17 +36,17 @@ def stats(pet, var24h=0.0):
 
 
 class Lutador:
-    def __init__(self, pet, var24h=0.0):
+    def __init__(self, pet: Dict[str, Any], var24h: float=0.0):
         self.pet, self.nome = pet, pet.get("nome", "anon")[:12]
         self.s = stats(pet, var24h)
         self.hp, self.recarga, self.fud, self.defendendo = self.s["hp"], 0, 0, False
 
     @property
-    def vivo(self):
+    def vivo(self) -> bool:
         return self.hp > 0
 
 
-def escolher_ia(eu, rival, rnd):
+def escolher_ia(eu: Lutador, rival: Lutador, rnd: random.Random) -> str:
     if eu.recarga == 0 and rnd.random() < .6:
         return eu.s["especial"]
     if eu.hp < eu.s["max_hp"] * .3 and rnd.random() < .5:
@@ -55,7 +56,7 @@ def escolher_ia(eu, rival, rnd):
     return "PUMP"
 
 
-def _golpe(at, df, golpe, rnd):
+def _golpe(at: Lutador, df: Lutador, golpe: str, rnd: random.Random) -> Tuple[int, str]:
     """Aplica o golpe. Retorna (dano, texto)."""
     if at.recarga:
         at.recarga -= 1
@@ -85,7 +86,8 @@ def _golpe(at, df, golpe, rnd):
     return dano, f"{at.nome}: {golpe} -{dano}" + (" CRIT!" if critico else "")
 
 
-def simular(pet_a, pet_b, var_a=0.0, var_b=0.0, semente=None, escolher_a=None, max_turnos=40):
+def simular(pet_a: Dict[str, Any], pet_b: Dict[str, Any], var_a: float = 0.0, var_b: float = 0.0,
+            semente: Optional[int] = None, escolher_a: Any = None, max_turnos: int = 40) -> Dict[str, Any]:
     """Roda a luta inteira. escolher_a(eu, rival, rnd) -> golpe (None = IA). Retorna dict com log e vencedor."""
     rnd = random.Random(semente)
     a, b = Lutador(pet_a, var_a), Lutador(pet_b, var_b)
@@ -110,7 +112,7 @@ def simular(pet_a, pet_b, var_a=0.0, var_b=0.0, semente=None, escolher_a=None, m
             "xp": 40 if venc == "a" else 10, "max_hp": (a.s["max_hp"], b.s["max_hp"])}
 
 
-def rival_ia(nivel, semente=None, moeda="BTC"):
+def rival_ia(nivel: int, semente: Optional[int]=None, moeda: str="BTC") -> Dict[str, Any]:
     rnd = random.Random(semente)
     nomes = ["Bot Bear", "Rug Puller", "Paper Hand", "Shitcoin Sam", "Gas Goblin", "FUD Bot", "Exit Liquidity"]
     lv = max(1, nivel + rnd.randint(-2, 2))

@@ -2,6 +2,7 @@
 import json
 import os
 from pathlib import Path
+from typing import Any, Dict
 
 CONFIG_PATH = Path(os.environ.get("TAMAGOSHI_CONFIG", Path.home() / ".tamagoshi_cripto.json"))
 
@@ -85,7 +86,7 @@ PADRAO = {
 VERSAO_CONFIG = 4
 
 
-def migrar(cfg):
+def migrar(cfg: Dict[str, Any]) -> Dict[str, Any]:
     """Leva configs antigas pra versão atual sem perder o bicho. Idempotente."""
     v = int(cfg.get("versao_config") or 1)
     if v < 2:  # v1.0/v1.1 -> v1.2: ranking virou opt-in explícito; nada de nick herdado
@@ -112,7 +113,7 @@ def migrar(cfg):
     return cfg
 
 
-def carregar():
+def carregar() -> Dict[str, Any]:
     """Lê o JSON do usuário; se estiver quebrado, recomeça do zero (tipo carteira pós-bear market)."""
     cfg = json.loads(json.dumps(PADRAO))
     try:
@@ -125,7 +126,7 @@ def carregar():
     return migrar(cfg)
 
 
-def salvar(cfg):
+def salvar(cfg: Dict[str, Any]) -> None:
     try:
         CONFIG_PATH.write_text(json.dumps(cfg, indent=2, ensure_ascii=False), encoding="utf-8")
     except OSError as erro:

@@ -66,3 +66,26 @@ branch = true
 
 [tool.coverage.report]
 skip_empty = true
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+check_untyped_defs = true
+warn_unused_ignores = true
+files = [
+    "src/tamagoshi_cripto/genetica.py", "src/tamagoshi_cripto/batalha.py", "src/tamagoshi_cripto/hardcore.py",
+    "src/tamagoshi_cripto/papel.py", "src/tamagoshi_cripto/loja.py", "src/tamagoshi_cripto/multichain.py",
+    "src/tamagoshi_cripto/config.py", "src/tamagoshi_cripto/logic.py", "src/tamagoshi_cripto/evolucao.py",
+    "src/tamagoshi_cripto/conquistas.py", "src/tamagoshi_cripto/license.py", "src/tamagoshi_cripto/baleias.py",
+    "src/tamagoshi_cripto/noticias.py", "src/tamagoshi_cripto/pixel.py",
+]
+
+# núcleo de regras do jogo: tudo tipado, sem desculpa 🧐
+[[tool.mypy.overrides]]
+module = [
+    "tamagoshi_cripto.batalha", "tamagoshi_cripto.hardcore", "tamagoshi_cripto.papel", "tamagoshi_cripto.loja",
+    "tamagoshi_cripto.multichain", "tamagoshi_cripto.config", "tamagoshi_cripto.logic", "tamagoshi_cripto.evolucao",
+    "tamagoshi_cripto.conquistas", "tamagoshi_cripto.license", "tamagoshi_cripto.baleias", "tamagoshi_cripto.noticias",
+    "tamagoshi_cripto.genetica",
+]
+disallow_untyped_defs = true

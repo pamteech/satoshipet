@@ -4,24 +4,25 @@ Ninguém aqui compra cripto de verdade, não tem corretora, não tem conta, não
 O bicho fica feliz com PnL verde e chora com PnL vermelho (igual você, mas sem prejuízo real).
 """
 import time
+from typing import Any, Dict, Optional, Tuple, Union
 
 SALDO_INICIAL = 10_000.0
 AVISO = "DINHEIRO FICTÍCIO"
 TAXA = 0.001  # 0,1% de "corretagem" de mentira pra ficar realista
 
 
-def nova():
+def nova() -> Dict[str, Any]:
     return {"usd": SALDO_INICIAL, "pos": {}, "custo": {}, "hist": [], "criada": int(time.time())}
 
 
-def _ok(c):
+def _ok(c: Dict[str, Any]) -> Dict[str, Any]:
     if not c or "usd" not in c:
         c.clear()
         c.update(nova())
     return c
 
 
-def comprar(c, moeda, usd, preco, agora=None):
+def comprar(c: Dict[str, Any], moeda: str, usd: float, preco: Optional[Union[float, int]], agora: Any=None) -> Tuple[bool, str]:
     """Compra `usd` dólares (fictícios) de `moeda`. Retorna (ok, msg)."""
     _ok(c)
     if not preco or preco <= 0:
@@ -43,7 +44,7 @@ def comprar(c, moeda, usd, preco, agora=None):
     return True, f"comprou {qtd:.6g} {moeda} a ${preco:,.2f} ({AVISO})"
 
 
-def vender(c, moeda, qtd, preco, agora=None):
+def vender(c: Dict[str, Any], moeda: str, qtd: Any, preco: float, agora: Any=None) -> Tuple[bool, str]:
     _ok(c)
     tem = c["pos"].get(moeda, 0)
     if not tem:
@@ -68,7 +69,7 @@ def vender(c, moeda, qtd, preco, agora=None):
     return True, f"vendeu {qtd:.6g} {moeda}: {'+' if lucro >= 0 else ''}${lucro:,.2f} ({AVISO})"
 
 
-def resumo(c, precos):
+def resumo(c: Dict[str, Any], precos: Dict[str, Any]) -> Dict[str, Any]:
     """Patrimônio, PnL total (vs $10k) e PnL aberto por moeda."""
     _ok(c)
     pos = {}
@@ -84,7 +85,7 @@ def resumo(c, precos):
             "trades": len(c["hist"]), "aviso": AVISO}
 
 
-def humor(pnl_pct):
+def humor(pnl_pct: float) -> Optional[str]:
     """Como o bicho reage ao PnL fictício: 'moon' / 'rekt' / None."""
     if pnl_pct >= 5:
         return "moon"

@@ -26,7 +26,7 @@ import hmac
 import os
 
 
-def _carregar_segredo():
+def _carregar_segredo() -> bytes:
     env = os.environ.get("TAMAGOSHI_LICENSE_SECRET")
     if env:
         return env.encode()
@@ -40,17 +40,17 @@ def _carregar_segredo():
 SEGREDO = _carregar_segredo()
 
 
-def _normaliza(email):
+def _normaliza(email: str) -> str:
     return email.strip().lower()
 
 
-def gerar_chave(email):
+def gerar_chave(email: str) -> str:
     """Gera a chave no formato XXXX-XXXX-XXXX-XXXX (usado pelo keygen.py)."""
     dig = hmac.new(SEGREDO, _normaliza(email).encode(), hashlib.sha256).hexdigest().upper()[:16]
     return "-".join(dig[i:i + 4] for i in range(0, 16, 4))
 
 
-def validar(email, chave):
+def validar(email: str, chave: str) -> bool:
     """True se a chave bate com o e-mail. Sem chave, sem lambo."""
     if not email or not chave:
         return False
