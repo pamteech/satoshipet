@@ -15,6 +15,23 @@ NOMES = {"auto": "auto", "pt": "português", "en": "English"}
 _atual = "pt"
 
 
+def _idioma_mac() -> str:
+    """App aberto pelo Finder não herda LANG: pergunta direto pro macOS (ex.: "pt-BR")."""
+    import sys
+    if sys.platform != "darwin":
+        return ""
+    import subprocess
+    for chave in ("AppleLanguages", "AppleLocale"):
+        try:
+            r = subprocess.run(["defaults", "read", "-g", chave], capture_output=True, text=True, timeout=2)
+        except (OSError, subprocess.SubprocessError):
+            continue
+        v = r.stdout.replace("(", "").replace('"', "").strip().split(",")[0].strip()
+        if v:
+            return v
+    return ""
+
+
 def detectar() -> str:
     """pt se o sistema falar português, en pro resto do mundo."""
     for var in ("LC_ALL", "LC_MESSAGES", "LANG", "LANGUAGE"):
@@ -25,6 +42,8 @@ def detectar() -> str:
         loc = locale.getlocale()[0] or ""
     except ValueError:
         loc = ""
+    if not loc:
+        loc = _idioma_mac()
     return "pt" if loc.lower().startswith(("pt", "portuguese")) else "en"
 
 

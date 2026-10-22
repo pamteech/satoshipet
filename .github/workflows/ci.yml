@@ -24,10 +24,10 @@ jobs:
           OFFLINE: "1"
         run: xvfb-run -a pytest -q
 
-  smoke-macos-windows:
+  smoke-windows:
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [windows-latest]   # macOS arm64 sem capacidade: build do Mac fica no test-build.yml
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4

@@ -30,3 +30,14 @@ def test_i18n_rotulos_cabem_na_tela():
 def test_ui_cores():
     assert ui._clarear("#808080") == "#acacac" and ui._escurecer("#808080") == "#535353"
     assert ui._clarear("#ffffff") == "#ffffff"
+
+
+def test_idioma_mac_sem_lang(monkeypatch):
+    import subprocess, sys
+    from tamagoshi_cripto import i18n
+    for v in ("LC_ALL", "LC_MESSAGES", "LANG", "LANGUAGE"):
+        monkeypatch.delenv(v, raising=False)
+    monkeypatch.setattr(i18n.locale, "getlocale", lambda: (None, None))
+    monkeypatch.setattr(sys, "platform", "darwin")
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(a, 0, '(\n    "pt-BR",\n    "en-US"\n)\n', ""))
+    assert i18n.detectar() == "pt"
