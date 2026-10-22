@@ -12,7 +12,7 @@
   // ---------- i18n ----------
   const EN = {
     nav_demo: "demo", nav_feat: "features", nav_price: "pricing", nav_rank: "leaderboard",
-    tag: "v1.3 · open source · MIT", h1: "A tiny pet that feels the market <em>harder than you</em>.",
+    tag: "v1.4 · open source · MIT", h1: "A tiny pet that feels the market <em>harder than you</em>.",
     sub: "Pixel art that floats on your desktop, eats every new Bitcoin block, gets hungry when fees spike and evolves from egg to <b>Whale</b>. It even has a hacker console.",
     dl_mac: "Download for macOS", dl_win: "Download for Windows", dl_src: "pipx / source",
     free_note: "Free forever. Pro is a one-time payment.", m_live: "live",
@@ -33,6 +33,9 @@
     q4: "Does it work offline?", a4: "Yes: without internet it shows “?” and stays alive (a bit needy).",
     q5: "macOS/Windows say the app is unsigned", a5: "Mac: right click → Open the first time. Windows: “More info” → “Run anyway”. Or install from source with <code>pipx</code>.",
     q6: "Is this financial advice?", a6: "It's a pixel pet. It cries when the price dips. Not financial advice.",
+    n14_t: "New in v1.4", n14_1: "turn-based battles · vs AI or a friend's code", n14_2: "DNA & breeding · rarity and mutations",
+    n14_3: "hardcore mode · the Graveyard of Honor",
+    n14_4: "Paper trading with fake money · ETH/SOL watch-only wallets · whale alerts · RSS headlines · animated GitHub profile card · VS Code extension · skin shop · OBS overlay with Twitch chat. No API keys.",
     novo_t: "New in v1.3", n1: "the egg hatches on first run · you name your pet", n2: "mini-game: catch the sats (P) → XP",
     n3: "particles, halloween/christmas hats, day/night palette",
     n4: "New chiptune sound design (optional background music) · high contrast and 6 sizes · new-version notice (never auto-installs) · ~1% CPU idle.",

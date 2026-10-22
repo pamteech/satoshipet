@@ -42,7 +42,7 @@ Em todos: cache de 24 h + **14 dias de graça offline**; reembolso derruba o Pro
 
 ## 3. Release (downloads)
 - [ ] Trocar `REPO = "OWNER/tamagoshi-cripto"` em `src/tamagoshi_cripto/updates.py` e `crashlog.py` (o aviso de versão nova e o "enviar relatório" usam isso; com OWNER o check fica desligado).
-- [ ] `git tag v1.3.0 && git push --tags` → Action **Release** gera `TamagoshiCripto.exe` e `TamagoshiCripto-macos.zip`.
+- [ ] `git tag v1.4.0 && git push --tags` → Action **Release** gera `TamagoshiCripto.exe` e `TamagoshiCripto-macos.zip`.
       Os links do site (`releases/latest/download/...`) passam a funcionar sozinhos.
 - [ ] (Opcional) assinar/notarizar no Mac e assinar o .exe para tirar o aviso de "app não assinado".
 
@@ -63,3 +63,16 @@ Em todos: cache de 24 h + **14 dias de graça offline**; reembolso derruba o Pro
 - [ ] Trocar `LINK_AFILIADO` em `src/tamagoshi_cripto/config.py` (confira as regras do programa e da sua jurisdição).
 - [ ] Abrir a primeira issue "🏆 Concurso de skins" e fixar (pinned). Definir prêmio e prazo.
 - [ ] Postar os GIFs de `docs/demo/` e o `docs/share_card.png`.
+
+## 7. v1.4 (tudo opcional, nada foi feito)
+- [ ] **Loja / collab com artista**: combinar por escrito o revenue share (o exemplo é 70/30), trocar o `neon_nights` de
+      exemplo pela arte real e créditos reais. Vender o código no provedor de sempre e gerar com
+      `TAMAGOSHI_LICENSE_SECRET=... python tools/keygen.py --pack <id> comprador@email` (ou `'*'` = promo pra todos).
+- [ ] **Pacote de marca**: só com contrato/autorização de uso da marca; preencher `patrocinador`, `autorizacao`,
+      `vigencia`; o selo PATROCINADO é obrigatório (o app recusa sem). Preços sugeridos em `docs/BRAND_SKINS.md`.
+      O `cafe_satoshi` é uma marca **fictícia** de exemplo: apague antes de vender o primeiro patrocínio.
+- [ ] **Extensão do VS Code**: `cd vscode && npx @vscode/vsce package` já funciona. Publicar exige criar um publisher
+      no Marketplace + token (`vsce publish`) e trocar `"publisher": "OWNER"` no `vscode/package.json`.
+- [ ] **Card de perfil**: trocar `OWNER` em `.github/workflows/profile-card.yml` e testar no seu repo de perfil.
+- [ ] **IA (`ask`)**: continua BYO. Se quiser oferecer IA "de fábrica", isso vira custo seu — não está implementado.
+- [ ] **Twitch**: nada a configurar (leitura anônima). Avisar no stream que os comandos são só visuais.

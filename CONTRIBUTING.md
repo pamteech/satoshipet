@@ -123,3 +123,20 @@ locally; CI runs the same checks and uploads a `skin-preview` artifact.
   network errors (triggers the grace period). Messages in pt-BR. Tests mock HTTP (`tests/test_v13.py`).
 - **Config**: bump `VERSAO_CONFIG` and add a step to `config.migrar()` when you rename/restructure keys.
 - **Performance**: run `xvfb-run -a python tools/medir_cpu.py 60` before/after anything that touches the draw loop.
+
+## v1.4 internals
+- **Mixins**: `engajamento.py` (DNA, breeding, battles, hardcore), `mercado.py` (paper trading, ETH/SOL, whales, RSS),
+  `lojinha.py` (shop, stream overlay, Twitch) are mixed into `Tamagoshi`. Network work stays in threads that only push
+  to `app.eventos`; `_evento_mercado` handles them on the Tk thread.
+- **DNA** (`genetica.py`): genes are recolors/overlays applied to the 48×48 frame **before** scaling, only with
+  Sweetie-16 colors (a test checks every coin × 25 seeds). New gene option = add it to `GENES` (weight, rarity points)
+  and to the tables; keep `importar()` strict (friend codes are untrusted input).
+- **Battles** (`batalha.py`): pure and deterministic given a seed. Balance changes need `tests/test_v14_engajamento.py`.
+- **Keys and seeds**: any new chain goes through a `validar()` that refuses private keys/seeds *before* anything is
+  stored or sent (see `multichain.py` and its parametrized tests).
+- **Keyless only**: new data sources must work without an API key. Anything needing a key is BYO and off by default
+  (`ai.py` is the model).
+- **Shop packs** (`loja.py`): folder + `pack.json` + 192×192 sheets. `patrocinado` packs require disclosure,
+  sponsor, authorization and dates — see [docs/BRAND_SKINS.md](docs/BRAND_SKINS.md). Generate examples with
+  `python tools/make_packs.py`.
+- **VS Code** (`vscode/`): plain JS, zero deps. `node vscode/test/smoke.js`, `cd vscode && npx @vscode/vsce package`.

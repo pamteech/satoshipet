@@ -20,6 +20,10 @@
 
 *v1.3: hatches on first run · catch-the-sats mini-game · seasonal hats, particles, chiptune*
 
+<img src="docs/demo/batalha.gif" width="160"> <img src="docs/demo/cruzamento.gif" width="160"> <img src="docs/demo/cemiterio.gif" width="160"> <img src="docs/profile_card.svg" width="240">
+
+*v1.4: turn-based battles · DNA & breeding · hardcore mode with a graveyard · GitHub profile card*
+
 [English](#english) · [Português](#português)
 
 </div>
@@ -82,6 +86,40 @@ tamagoshi [--tui] [--coin BTC|ETH|SOL|DOGE|PEPE] [--skin NAME|plugin:ID] [--scal
 - **Keyboard** (widget focused): `h j k l` move 10 px, `H J K L` 50 px, <kbd>`</kbd> console
 - Menu: coin, skin, watch-only wallet, console, show in sats, settings, price alerts, achievements, mute, CRT, start at login, hide to tray, activate Pro, quit
 
+### New in v1.4 🧬⚔️
+
+**Engagement**
+| | |
+|---|---|
+| 💀 **Hardcore mode** (opt-in, off) | life at zero for 30 min **and** no cuddle/game for 4 h → the pet dies, becomes a ghost, and its gravestone (epitaph, dates, level, blocks, crashes, DNA) goes to the **Cemitério de Honra**. *Renascer do ovo* restarts with new DNA. Menu → Genética e batalhas, or `hardcore on`, `rip` |
+| 🧬 **Genetics** | every pet has genes: palette (7), eyes (4), accessory (6), pattern (4) → rarity *comum/raro/épico/lendário*. `petcode` copies a `TAMA1-…` code (checksummed text, **no NFT, no blockchain**); `breed <n|code>` mixes two adults (yours, from the stable, or a friend's code) into an egg with ~8 % mutation; `stable`, `adopt <n>` |
+| ⚔️ **Battles** | turn-based: PUMP / HODL / FUD / special (LASER EYES with laser eyes, else TO THE MOON). Stats from level, stage, DNA and the coin's **24 h change**. vs AI (`battle`) or a friend's code (`battle TAMA1-…`), keys 1-4 or click, animated hits + result screen, +40 XP per win |
+
+**Crypto**
+| | |
+|---|---|
+| 📈 **Paper trading** | `$10.000` of **DINHEIRO FICTÍCIO** at live prices: menu → Mercado → Corretora de mentirinha, or `paper buy BTC 100`, `paper sell BTC all`, `paper hist`, `paper reset`. 0.1 % fake fee, PnL, history. The pet cheers at +5 % and cries at −5 %. The banner always says it's fake money |
+| 👀 **ETH & SOL watch-only** | `wallet eth 0x…`, `wallet sol …` (or menu). Keyless public RPCs (publicnode, Solana mainnet). Refuses 64-hex private keys, base58 secret keys, `keypair.json` arrays and seed phrases — same rules as BTC |
+| 🐋 **Whale alerts** | large BTC txs in the mempool (mempool.space, default ≥ 50 BTC): the pet panics, shakes, toast is clickable (opens the tx). Max 1 scare per 5 min. Toggle in menu → Mercado |
+| 📰 **News** | CoinDesk + Cointelegraph RSS (keyless) every 30 min; sometimes a headline shows in the speech bubble — **click to open**. `news` in the console |
+
+**Dev**
+| | |
+|---|---|
+| 🪪 **GitHub profile card** | animated SVG (4 embedded frames + CSS, no JS) → [docs/PROFILE_CARD.md](docs/PROFILE_CARD.md). `export` (public fields only), `card`, `tools/profile_card.py`, `GET /card.svg`, and a copy-paste Action `.github/workflows/profile-card.yml` |
+| 🧩 **VS Code extension** | `vscode/`: status bar pet + price, webview with the animated sprite. Reads the local API or CoinGecko. `npx @vscode/vsce package` → `.vsix` (not published) |
+| 🤖 **`ask <question>`** | BYO OpenAI-compatible URL/key (`ai set <url> [key] [model]`, works with Ollama/LM Studio on localhost), **off by default** → funny canned answers. Sends only the question + mood/price/level; the key is masked on screen |
+
+**Money**
+| | |
+|---|---|
+| 🛍️ **Skin shop** | menu → Loja de skins: seasonal packs (Noites de Bruxa, Natal — included in Pro), artist collabs (Neon Nights, 70/30 revenue share, unlocked by `SKIN-…` codes from `keygen.py --pack`), brand packs. `shop`, `redeem <code>` |
+| 📺 **Streamer overlay** | OBS browser source `http://127.0.0.1:8737/stream` + optional **anonymous** Twitch chat read (`!pet !moon !rekt !price !dna`) → [docs/STREAMER_OVERLAY.md](docs/STREAMER_OVERLAY.md) |
+| 🏷️ **Brand skins** | sponsored pack format with mandatory **PATROCINADO** disclosure, authorization and dates; rules + pricing in [docs/BRAND_SKINS.md](docs/BRAND_SKINS.md) |
+
+<img src="docs/screenshots/genes_bicho.png" width="150"> <img src="docs/screenshots/batalha_fim.png" width="150"> <img src="docs/screenshots/cemiterio.png" width="150"> <img src="docs/screenshots/paper_trading.png" width="150"> <img src="docs/screenshots/baleia.png" width="150"> <img src="docs/screenshots/loja.png" width="150">
+<img src="docs/screenshots/stream_overlay.png" width="300"> <img src="docs/screenshots/noticia.png" width="150"> <img src="docs/screenshots/skin_patrocinada.png" width="150">
+
 ### New in v1.3 ✨
 | | |
 |---|---|
@@ -99,7 +137,7 @@ tamagoshi [--tui] [--coin BTC|ETH|SOL|DOGE|PEPE] [--skin NAME|plugin:ID] [--scal
 <img src="docs/screenshots/onboarding_moeda.png" width="150"> <img src="docs/screenshots/onboarding_nome.png" width="150"> <img src="docs/screenshots/onboarding_dicas.png" width="150"> <img src="docs/screenshots/minigame_fim.png" width="150"> <img src="docs/screenshots/alto_contraste.png" width="150"> <img src="docs/screenshots/update.png" width="150">
 
 **Performance:** `xvfb-run -a python tools/medir_cpu.py 60` measures the idle widget (onboarding done, network threads on):
-**1.10 %** of one core on Linux/Xvfb (0.44 s CPU in 40 s). The 50 ms loop only runs while the mini-game is open.
+**1.25 %** of one core on Linux/Xvfb in v1.4 (0.50 s CPU in 40 s; v1.3: 1.10 %). The 50 ms loop only runs while the mini-game is open.
 
 ### What's inside
 | Feature | Source (keyless) | Offline? | Tier |
@@ -278,6 +316,8 @@ tamagoshi --tui      # no terminal
 
 **Free:** Satoshinho (BTC), animações, carinho, vida em corações, conquistas, sons 8-bit, Fear & Greed, contagem do halving (5 carinhos no Satoshinho), código konami (skin secreta), criaturas da comunidade, modo terminal e botão de afiliado.
 **Pro:** ETH, SOL, DOGE e PEPE na janela, skins premium, limites e preço de referência configuráveis, alertas de preço, mini gráfico e "abrir ao iniciar".
+
+**Novidades v1.4:** **modo hardcore** opcional (o bicho pode morrer de abandono, vira fantasma e vai pro **Cemitério de Honra** com epitáfio; renasce do ovo), **DNA** (paleta, olhos, acessório, padrão, raridade) com **cruzamento** via código de pet `TAMA1-...` (texto, sem NFT/blockchain), **batalhas por turnos** (vs IA ou código de amigo; força vem do nível, DNA e da variação 24h), **paper trading** com DINHEIRO FICTÍCIO, carteiras **ETH/SOL watch-only** (mesma recusa de chave/seed), **alerta de baleia** (mempool.space), **manchetes RSS** clicáveis no balão, **card de perfil do GitHub** em SVG animado, **extensão do VS Code** (`vscode/`), `ask` com IA **BYO** (desligada: responde piada), **loja de skins** (sazonais, collab com artista via código, pacotes de marca sempre com selo **PATROCINADO**) e **overlay de streamer** pro OBS com chat da Twitch anônimo. Tudo sem chave de API.
 
 **Novidades v1.3:** ovo chocando na primeira vez (escolhe moeda, dá nome, dicas, opt-ins — dá pra pular), mini-game **Pega os Sats** (tecla P), trilha chiptune nova (música de fundo opcional, desligada), tremidinha e partículas no moon/crash, paleta dia/noite, **chapéu de halloween** (outubro) e de Natal, alto contraste e 6 tamanhos, aviso de versão nova (nunca instala sozinho), log de crash com "enviar relatório" (só abre uma issue preenchida), licença via Gumroad, Lemon Squeezy, Hotmart ou offline, com 14 dias de graça sem internet. Uso de CPU parado: ~1%.
 
