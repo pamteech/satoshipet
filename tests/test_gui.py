@@ -58,6 +58,17 @@ def _gif(app, nome, n=16, ms=180, passo=None):
                    duration=ms, loop=0)
 
 
+def _resetar_extras(app):
+    """O _invocar_tudo clica em TUDO: abre jogo/intro, muda escala e opções. Volta pro normal."""
+    app.cena = None
+    from tamagoshi_cripto import config as _c
+    for k in ("alto_contraste", "dia_noite", "chapeus", "juice", "musica", "checar_updates"):
+        app.cfg[k] = _c.PADRAO[k]
+    app.som.musica(False)
+    if app.escala != 3:
+        app.mudar_escala(3)
+
+
 def _bombear(app, ms):
     fim = [False]
     app.root.after(ms, lambda: fim.__setitem__(0, True))
@@ -131,7 +142,39 @@ def executar():
     config.INTERVALO = 1
 
     falhas = []
-    app = main.Tamagoshi({"sem_tray": True, "mudo": True})
+    app = main.Tamagoshi({"sem_tray": True, "mudo": True, "sem_updates": True})
+
+    # ---------- onboarding (1ª vez): ovo choca, escolhe moeda, batiza, dicas, opt-ins ----------
+    from tamagoshi_cripto import cenas
+    assert isinstance(app.cena, cenas.Onboarding)
+    app.root.geometry("+24+24")
+    for _ in range(5):
+        app.root.update()
+    K = lambda k, ch="": type("E", (), {"keysym": k, "char": ch})()  # noqa: E731
+    _gif(app, "onboarding_ovo", n=40, ms=180)
+    _shot(app, "onboarding_ovo")
+    app._tecla(K("Return"))
+    assert app.cena.passo == "moeda"
+    app._tecla(K("Right")); app._tecla(K("Left"))
+    _bombear(app, 400)
+    _shot(app, "onboarding_moeda")
+    app._tecla(K("Return"))
+    for ch in "Satoshi Jr":
+        app._tecla(K("space" if ch == " " else ch, ch))
+    _bombear(app, 300)
+    _shot(app, "onboarding_nome")
+    app._tecla(K("Return"))
+    _shot(app, "onboarding_dicas")
+    app._tecla(K("Return"))
+    app._tecla(K("s"))  # liga o som (a CLI abriu mudo)
+    _shot(app, "onboarding_optins")
+    app._tecla(K("Return"))
+    assert app.cena is None and app.cfg["onboarding_ok"] and app.cfg["nome_pet"] == "Satoshi Jr"
+    assert app.cfg["mudo"] is False and app.nome_pet() == "Satoshi Jr"
+    app.cfg["mudo"] = False; app.som.mudo = True  # (os testes seguem mudos)
+    # pular também funciona
+    app.rever_intro(); app._tecla(K("Escape"))
+    assert app.cena is None and app.cfg["nome_pet"] == "Satoshi Jr"
     app.root.geometry("+24+24")
     _bombear(app, 2000)
     assert app.precos.get("BTC") == 100.0, app.precos
@@ -139,6 +182,7 @@ def executar():
 
     # FREE: itens Pro pedem licença e não mudam nada
     falhas += _invocar_tudo(app)
+    _resetar_extras(app)
     assert app.cfg["moeda"] == "BTC" and app.cfg["skin"] in ("padrao", "plugin:slime"), app.cfg["skin"]
     assert any(c[0] == "askyesno" for c in chamadas), "Free não pediu licença"
     assert any(c[0] == "showinfo" and c[1] == "Conquistas" for c in chamadas)
@@ -278,6 +322,59 @@ def executar():
     top = srv_rank.ranking.top()
     assert top[0]["nick"] == "gui_tester" and "device_id" not in top[0]
 
+    # ---------- mini-game: pega os sats ----------
+    xp0 = app.evo.xp
+    app._tecla(K("p"))
+    jogo = app.cena
+    assert isinstance(jogo, cenas.PegaSats)
+    jogo.rnd.seed(7)
+    def _piloto(i):  # um "jogador" que corre pro sat mais baixo
+        sats = [it for it in jogo.itens if it[3] == "sat"]
+        if sats:
+            alvo = max(sats, key=lambda it: it[1])[0]
+            if abs(alvo - jogo.x) > 10:
+                jogo.tecla(K("Right" if alvo > jogo.x else "Left"))
+    _gif(app, "minigame", n=60, ms=100, passo=_piloto)
+    for _ in range(400):
+        if jogo.fim is not None:
+            break
+        _piloto(0)
+        jogo.tempo -= 0.3
+        _bombear(app, 60)
+    assert jogo.fim is not None
+    _bombear(app, 200)
+    _shot(app, "minigame_fim")
+    jogo.tecla(K("Return"))
+    _bombear(app, 300)
+    assert app.cena is None and app.evo.xp >= xp0 and app.cfg["diversao"] == 100.0
+
+    # ---------- juice + aparência ----------
+    app.juice.emitir("moon", app.LARG // 2, app.Y_SPRITE + app.S // 2, app.escala)
+    _gif(app, "juice_moon", n=12, ms=120)
+    app.juice.emitir("rekt", app.LARG // 2, app.Y_SPRITE + app.S // 2, app.escala)
+    _gif(app, "juice_rekt", n=12, ms=120)
+    for chave in ("alto_contraste", "dia_noite", "chapeus", "juice", "musica"):
+        app.alternar_opcao(chave); _bombear(app, 60); app.alternar_opcao(chave)
+    app.cfg["alto_contraste"] = True
+    _bombear(app, 200)
+    _shot(app, "alto_contraste")
+    app.cfg["alto_contraste"] = False
+    app.mudar_escala(2); assert app.LARG >= 272 and app.cv.winfo_reqheight() == app.ALT
+    app.mudar_escala(3)
+    # update: toast clicável abre o Release (nunca instala)
+    app.eventos.append(("update", {"versao": "9.9.9", "url": "https://github.com/OWNER/tamagoshi-cripto/releases/tag/v9.9.9"}))
+    _bombear(app, 400)
+    assert app.toast and app.toast[2] == "NOVA VERSÃO!"
+    _shot(app, "update")
+    app.inicio_arraste(type("E", (), {"x": 50, "y": 20, "x_root": 0, "y_root": 0})())
+    assert abertos[-1].endswith("v9.9.9")
+    app.toast = None
+    # relatório de erro: só abre a issue preenchida
+    messagebox.askyesno = lambda *a, **k: True
+    app.enviar_relatorio()
+    assert abertos[-1].startswith("https://github.com/OWNER/tamagoshi-cripto/issues/new?")
+    messagebox.askyesno = lambda *a, **k: (chamadas.append(("askyesno", a[0])), False)[1]
+
     # ---------- vim keys ----------
     x_antes = app.root.winfo_x()
     app._tecla(type("E", (), {"keysym": "l", "char": "l"})())
@@ -308,6 +405,7 @@ def executar():
     assert app.pro and any(c[0] == "showerror" for c in chamadas)
     chamadas.clear()
     falhas += _invocar_tudo(app)
+    _resetar_extras(app)
     assert app.cfg["limite_alta"] == 3.0 and app.cfg["limite_queda"] == -4.0
     assert app.cfg["alertas"].get("BTC") == {"acima": 50.0}, app.cfg["alertas"]
     app._checar_alertas()

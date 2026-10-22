@@ -16,7 +16,7 @@ from tkinter import messagebox, simpledialog
 
 from PIL import Image
 
-from . import api, arts, config, conquistas, evolucao, license, logic, lore, onchain, plugins, ranking, recursos, share, sistema, sons
+from . import __version__, api, arts, cenas, config, conquistas, crashlog, juice, licencas, updates, evolucao, license, logic, lore, onchain, plugins, ranking, recursos, share, sistema, sons
 from .console import SPRITE, Console
 from .fonte import FontePixel
 from .sprites import FRAMES, LINHAS, SKINS_SECRETAS, nome_folha
@@ -35,13 +35,15 @@ def _png_para_tk(img):
     return tk.PhotoImage(data=base64.b64encode(buf.getvalue()).decode())
 
 
-def carregar_frames(caminho, escala, crt=False):
-    """Folha 192x192 -> {(linha, frame): PhotoImage} ampliado sem borrar (+ scanlines CRT)."""
+def carregar_frames(caminho, escala, crt=False, chapeu=None):
+    """Folha 192x192 -> {(linha, frame): PhotoImage} ampliado sem borrar (+ chapéu de época, + scanlines CRT)."""
     folha = Image.open(caminho).convert("RGBA")
     frames = {}
     for j, linha in enumerate(LINHAS):
         for f in range(FRAMES):
             fr = folha.crop((f * 48, j * 48, (f + 1) * 48, (j + 1) * 48))
+            if chapeu:
+                fr = juice.aplicar_chapeu(fr, chapeu)
             fr = fr.resize((48 * escala, 48 * escala), Image.NEAREST)
             if crt and escala >= 2:
                 px = fr.load()
@@ -61,7 +63,8 @@ class Tamagoshi:
         for k in ("moeda", "skin", "escala", "crt", "mudo"):  # flags da CLI vencem a config
             if op.get(k) is not None:
                 self.cfg[k] = op[k]
-        self.pro = license.validar(self.cfg.get("email"), self.cfg.get("licenca"))
+        crashlog.instalar()
+        self.pro = self._pro_inicial()
         self.plugins = plugins.descobrir(op.get("skins_dir"))
         self._aplicar_limites_free()
 
@@ -71,7 +74,11 @@ class Tamagoshi:
         self.alertados = set()
         self.historico = logic.Historico()
         self.conq = conquistas.Conquistas(self.cfg.get("progresso"))
-        self.som = sons.Som(mudo=self.cfg.get("mudo", False))
+        self.som = sons.Som(mudo=self.cfg.get("mudo", False), volume=float(self.cfg.get("volume", 0.35)))
+        self.juice = juice.Particulas()
+        self.cena = None           # onboarding / mini-game tomam o widget
+        self.update = None         # {"versao", "url"} se saiu versão nova
+        self.op = op
         self.reacao = 0            # frames restantes do pulo
         self.toast = None
         self.fng = None            # (valor, rótulo)
@@ -132,8 +139,16 @@ class Tamagoshi:
 
         x, y = self.cfg.get("posicao", [100, 100])
         self.root.geometry(f"+{x}+{y}")
+        if not self.cfg.get("onboarding_ok") and not op.get("sem_onboarding"):
+            self.cena = cenas.Onboarding(self)
         self._desenhar()
+        if self.cfg.get("musica"):
+            self.som.musica(True)
         threading.Thread(target=self.loop_api, daemon=True).start()
+        if self.cfg.get("checar_updates", True) and not op.get("sem_updates"):
+            threading.Thread(target=self.loop_update, daemon=True).start()
+        if self.pro and self.cfg.get("licenca_provedor", "hmac") != "hmac":
+            threading.Thread(target=self._revalidar_pro, daemon=True).start()
         threading.Thread(target=self.loop_lore, daemon=True).start()
         threading.Thread(target=self.loop_onchain, daemon=True).start()
         self.api = api.iniciar(self.status) if (self.cfg.get("api", True) and not op.get("sem_api")) else None
@@ -160,9 +175,119 @@ class Tamagoshi:
         self.SPRITE_BOX = (cx - S // 2, self.Y_SPRITE, cx + S // 2, self.Y_SPRITE + S)
 
     def _erro_tk(self, exc, val, tb):
-        import traceback
-        self.ultimo_erro = "".join(traceback.format_exception(exc, val, tb))
+        self.ultimo_erro = crashlog.registrar(exc, val, tb, "tk")
         print(self.ultimo_erro)
+
+    # ---------- licença (provedores em licencas.py) ----------
+    def _pro_inicial(self):
+        """Na abertura não bate na rede: hmac valida local; online usa o cache + período de graça."""
+        cfg = self.cfg
+        if (cfg.get("licenca_provedor") or "hmac") == "hmac":
+            return license.validar(cfg.get("email"), cfg.get("licenca"))
+        cache = cfg.get("licenca_cache") or {}
+        return bool(cfg.get("licenca") and cache.get("chave") == licencas._hash(cfg["licenca"])
+                    and time.time() - cache.get("validado_em", 0) < licencas.GRACA_DIAS * 86400)
+
+    def _revalidar_pro(self):
+        res = licencas.verificar(self.cfg, self.cfg.get("email"), self.cfg.get("licenca"))
+        with self.lock:
+            self.eventos.append(("licenca", res.ok, res.msg))
+
+    # ---------- atualizações (só avisa, nunca instala) ----------
+    def loop_update(self):
+        time.sleep(8)
+        info = updates.checar()
+        if info and info["versao"] != self.cfg.get("update_ignorado"):
+            with self.lock:
+                self.eventos.append(("update", info))
+
+    def checar_update_agora(self):
+        info = updates.checar()
+        if info:
+            self.update = info
+            self.toast = [f"v{info['versao']} - clique aqui", 60, "NOVA VERSÃO!"]
+            self.som.tocar("update")
+        else:
+            messagebox.showinfo("Atualizações", f"Você está na versão mais nova que achei (v{__version__}).\n"
+                                "(ou estou offline / o repo ainda não é público)", parent=self.root)
+
+    def abrir_update(self):
+        if self.update:
+            webbrowser.open(self.update["url"])  # só abre a página do Release. Instalar é com você.
+
+    # ---------- relatório de erro ----------
+    def enviar_relatorio(self):
+        if messagebox.askyesno("Enviar relatório",
+                               "Vou abrir uma issue PREENCHIDA no GitHub no seu navegador, com a versão, o sistema e o "
+                               "último erro (sem seu nome de usuário). Você revisa e decide se envia. Abrir?",
+                               parent=self.root):
+            webbrowser.open(crashlog.url_issue())
+
+    # ---------- acessibilidade e juice ----------
+    def mudar_escala(self, e):
+        self.escala = self.cfg["escala"] = max(1, min(6, int(e)))
+        self._medidas()
+        self.cv.config(width=self.LARG, height=self.ALT)
+        self.cache_sprites.clear()
+        config.salvar(self.cfg)
+        self._desenhar()
+
+    def alternar_opcao(self, chave, var=None):
+        self.cfg[chave] = bool(var.get()) if var is not None else not self.cfg.get(chave)
+        if chave == "musica":
+            self.som.musica(self.cfg["musica"])
+        if chave == "chapeus":
+            self.cache_sprites.clear()
+        config.salvar(self.cfg)
+        self._desenhar()
+
+    def rever_intro(self):
+        self.cena = cenas.Onboarding(self)
+        self._desenhar()
+
+    # ---------- mini-game ----------
+    def brincar(self):
+        if isinstance(self.cena, cenas.PegaSats):
+            return ["já tá jogando!"]
+        self.console_aberto = False
+        self.cena = cenas.PegaSats(self)
+        self.root.focus_force()
+        self.root.after(int(cenas.PegaSats.DT * 1000), self._loop_jogo)
+        return ["Pega os Sats! ← → por 20s. boa sorte, anon"]
+
+    def _loop_jogo(self):
+        cena = self.cena
+        if not isinstance(cena, cenas.PegaSats):
+            return
+        if not cena.tick():
+            self.cena = None
+            self._desenhar()
+            return
+        self.juice.tick()
+        cena.desenhar()
+        self.root.after(int(cenas.PegaSats.DT * 1000), self._loop_jogo)
+
+    def fim_minigame(self, pontos, pegos):
+        self.cfg["diversao"] = 100.0
+        xp = min(90, pontos * 3)
+        if xp:
+            self._ganhar_xp("jogo", xp)
+        if pegos >= 25:
+            self._comemorar(self.conq.especial("stacker"))
+        self.frase_atual = f"+{xp} XP! bora de novo? (P)" if xp else "nem um satzinho... HFSP"
+        recorde = self.cfg.get("recorde_jogo", 0)
+        if pegos > recorde:
+            self.cfg["recorde_jogo"] = pegos
+        self._salvar_progresso()
+
+    def _sprites_mini(self):
+        chave = ("mini", self.cfg["moeda"], self.cfg["skin"], self.estagio, self._chapeu())
+        if chave not in self.cache_sprites:
+            self.cache_sprites[chave] = carregar_frames(self._caminho_folha(), 2, chapeu=self._chapeu())
+        return self.cache_sprites[chave]
+
+    def _chapeu(self):
+        return juice.chapeu_do_dia() if self.cfg.get("chapeus", True) else None
 
     # ---------- Free vs Pro ----------
     def _skin_permitida(self, sk):
@@ -207,6 +332,26 @@ class Tamagoshi:
         m.add_command(label="Console hacker (`)", command=self.alternar_console)
         m.add_command(label="Compartilhar card (X)", command=self._menu_share)
         m.add_command(label="Ranking (opt-in)...", command=self.config_ranking)
+        m.add_command(label="Brincar: Pega os Sats (P)", command=self.brincar)
+        ma = tk.Menu(m, tearoff=0)  # aparência e acessibilidade
+        self.var_escala = tk.IntVar(value=self.escala)
+        for e in range(1, 7):
+            ma.add_radiobutton(label=f"Tamanho {e}x" + ("  (padrão)" if e == 3 else ""), variable=self.var_escala,
+                               value=e, command=lambda e=e: self.mudar_escala(e))
+        ma.add_separator()
+        self.vars_op = {}
+        for chave, rot in (("alto_contraste", "Alto contraste"), ("dia_noite", "Paleta dia/noite"),
+                           ("chapeus", "Chapéus de época"), ("juice", "Tremidinha e partículas"),
+                           ("musica", "Música de fundo (chiptune)"), ("checar_updates", "Avisar versão nova")):
+            v = self.vars_op[chave] = tk.BooleanVar(value=bool(self.cfg.get(chave)))
+            ma.add_checkbutton(label=rot, variable=v, command=lambda c=chave, v=v: self.alternar_opcao(c, v))
+        m.add_cascade(label="Aparência e acessibilidade", menu=ma)
+        mh = tk.Menu(m, tearoff=0)
+        mh.add_command(label="Rever introdução", command=self.rever_intro)
+        mh.add_command(label="Procurar atualização", command=self.checar_update_agora)
+        mh.add_command(label="Enviar relatório de erro...", command=self.enviar_relatorio)
+        mh.add_command(label=f"Tamagoshi Cripto v{__version__}", state="disabled")
+        m.add_cascade(label="Ajuda", menu=mh)
         self.var_sats = tk.BooleanVar(value=self.cfg.get("unidade") == "sats")
         m.add_checkbutton(label="Mostrar em sats", variable=self.var_sats,
                           command=lambda: self.alternar_sats(self.var_sats.get()))
@@ -327,13 +472,21 @@ class Tamagoshi:
         if not email:
             return
         chave = simpledialog.askstring("Ativar Pro", "Chave de licença:", parent=self.root)
-        if license.validar(email, chave or ""):
+        self.root.config(cursor="watch")
+        self.root.update_idletasks()
+        try:
+            res = licencas.verificar(self.cfg, email, chave or "", forcar=True)
+        finally:
+            self.root.config(cursor="")
+        if res.ok:
             self.pro = True
-            self.cfg["email"], self.cfg["licenca"] = email.strip().lower(), chave.strip().upper()
+            hmac_ = (self.cfg.get("licenca_provedor") or "hmac") == "hmac"
+            self.cfg["email"], self.cfg["licenca"] = email.strip().lower(), chave.strip().upper() if hmac_ else chave.strip()
             config.salvar(self.cfg)
-            messagebox.showinfo("Pro ativado!", "Bem-vindo ao clube das mãos de diamante!", parent=self.root)
+            self.cache_sprites.clear()
+            messagebox.showinfo("Pro ativado!", res.msg + "\nBem-vindo ao clube das mãos de diamante!", parent=self.root)
         else:
-            messagebox.showerror("Ops", "Chave inválida. Confere o e-mail e a chave, hein?", parent=self.root)
+            messagebox.showerror("Ops", res.msg, parent=self.root)
 
     # ---------- bandeja ----------
     def _iniciar_tray(self):
@@ -362,14 +515,29 @@ class Tamagoshi:
 
     # ---------- mouse e teclado ----------
     def inicio_arraste(self, e):
+        if self.cena:
+            self.cena.clique(e.x, e.y)
+            if getattr(self.cena, "acabou", False):
+                self.cena = None
+            self._desenhar()
+            self._press = None
+            return
+        if self.toast and len(self.toast) > 2 and self.update and e.y < 50:
+            self.abrir_update()
         self._x, self._y = e.x_root - self.root.winfo_x(), e.y_root - self.root.winfo_y()
         self._press = (e.x_root, e.y_root, e.x, e.y)
         self.root.focus_force()  # pra janela sem borda receber o código konami
 
     def arrastando(self, e):
+        if self.cena or getattr(self, "_press", 1) is None:
+            if isinstance(self.cena, cenas.PegaSats):
+                self.cena.mouse(e.x)
+            return
         self.root.geometry(f"+{e.x_root - self._x}+{e.y_root - self._y}")
 
     def fim_arraste(self, e):
+        if self.cena or getattr(self, "_press", 1) is None:
+            return
         px, py, cx, cy = getattr(self, "_press", (e.x_root, e.y_root, -99, -99))
         if abs(e.x_root - px) + abs(e.y_root - py) <= 4:  # clique, não arraste
             x0, y0, x1, y1 = self.SPRITE_BOX
@@ -382,6 +550,15 @@ class Tamagoshi:
         config.salvar(self.cfg)
 
     def _tecla(self, e):
+        if self.cena:
+            self.cena.tecla(e)
+            if getattr(self.cena, "acabou", False):
+                self.cena = None
+            if not isinstance(self.cena, cenas.PegaSats):
+                self._desenhar()
+            return
+        if e.keysym in ("p", "P"):
+            return self.brincar()
         if self.console_aberto:
             return self._tecla_console(e)
         if e.char == "`" or e.keysym in ("grave", "dead_grave"):
@@ -542,8 +719,7 @@ class Tamagoshi:
         preco = self.precos.get(moeda)
         var = self._variacao(moeda, preco) if preco else 0.0
         btc = self.precos.get("BTC")
-        nome = (self.plugins[self.cfg["skin"]]["nome"] if self.cfg["skin"].startswith("plugin:")
-                else arts.NOMES[moeda])
+        nome = self.nome_pet()
         return {
             "nome": nome, "moeda": moeda, "preco": preco, "preco_fmt": self._fmt_preco(moeda, preco),
             "variacao_pct": round(var, 4), "humor": self.estado,
@@ -563,6 +739,12 @@ class Tamagoshi:
             "carteira": {"endereco": self.cfg.get("carteira") or None,
                          "saldo_sats": self.saldo["total"] if self.saldo else None},
         }
+
+    def nome_pet(self):
+        if self.cfg.get("nome_pet"):
+            return self.cfg["nome_pet"][:12]
+        return (self.plugins[self.cfg["skin"]]["nome"] if self.cfg["skin"].startswith("plugin:")
+                else arts.NOMES[self.cfg["moeda"]])
 
     def _fmt_preco(self, moeda, preco):
         if not preco:
@@ -621,6 +803,17 @@ class Tamagoshi:
         with self.lock:
             evs, self.eventos = self.eventos, []
         for ev in evs:
+            if ev[0] == "update":
+                self.update = ev[1]
+                self.toast = [f"v{ev[1]['versao']} - clique aqui", 60, "NOVA VERSÃO!"]
+                self.som.tocar("update")
+                continue
+            if ev[0] == "licenca":
+                if not ev[1] and self.pro:
+                    self.pro = False
+                    self.cache_sprites.clear()
+                    self.toast = [ev[2][:60], 40, "LICENÇA"]
+                continue
             if ev[0] == "console":
                 self.console_linhas = (self.console_linhas + ev[1])[-60:]
                 continue
@@ -709,6 +902,11 @@ class Tamagoshi:
         if self.conq.d["crashes"] > crashes:
             self._ganhar_xp("crash")
         self._ganhar_xp("minuto", 10)
+        d = max(0.0, float(self.cfg.get("diversao", 100.0)) - 100 / (3 * 360))  # zera em ~3 h sem brincar
+        self.cfg["diversao"] = d
+        if d < 25 and random.random() < 0.15 and not self.toast:
+            self.frase_atual = random.choice(["tô entediado... bora jogar? (P)", "quero brincar! aperta P",
+                                              "pega uns sats comigo? (P)"])
         self._salvar_progresso()
         self.root.after(10000, self.tick_vida)
 
@@ -765,17 +963,20 @@ class Tamagoshi:
             refs.setdefault(moeda, preco)
         return logic.variacao_pct(preco, refs[moeda])
 
-    def _sprites(self):
+    def _caminho_folha(self):
         moeda, skin = self.cfg["moeda"], self.cfg["skin"]
-        chave = (moeda, skin, self.cfg.get("crt"), self.estagio)
+        if skin.startswith("plugin:"):
+            return self.plugins[skin]["_folha"]
+        caminho = recursos.ASSETS / "sprites" / nome_folha(moeda, skin, self.estagio)
+        if not caminho.exists():  # estágio sem folha? volta pro adulto, ninguém fica invisível
+            caminho = recursos.ASSETS / "sprites" / nome_folha(moeda, skin, "adulto")
+        return caminho
+
+    def _sprites(self):
+        chave = (self.cfg["moeda"], self.cfg["skin"], self.cfg.get("crt"), self.estagio, self._chapeu())
         if chave not in self.cache_sprites:
-            if skin.startswith("plugin:"):
-                caminho = self.plugins[skin]["_folha"]
-            else:
-                caminho = recursos.ASSETS / "sprites" / nome_folha(moeda, skin, self.estagio)
-                if not caminho.exists():  # estágio sem folha? volta pro adulto, ninguém fica invisível
-                    caminho = recursos.ASSETS / "sprites" / nome_folha(moeda, skin, "adulto")
-            self.cache_sprites[chave] = carregar_frames(caminho, self.escala, self.cfg.get("crt"))
+            self.cache_sprites[chave] = carregar_frames(self._caminho_folha(), self.escala, self.cfg.get("crt"),
+                                                        self._chapeu())
         return self.cache_sprites[chave]
 
     def _txt(self, x, y, texto, cor, anchor="center", escala=1, max_chars=None, sombra=None, tags=()):
@@ -824,8 +1025,21 @@ class Tamagoshi:
             c.create_rectangle(x, topo - 1, x + 2, base + 1, fill=cor, width=0)
             ant = y
 
+    def _paleta(self):
+        """(painel, painel2, sombra, destaque, ícone) conforme hora local / alto contraste."""
+        if self.cfg.get("alto_contraste"):
+            return juice.ALTO_CONTRASTE
+        if not self.cfg.get("dia_noite", True):
+            return juice.PERIODOS["noite"]
+        return juice.PERIODOS[juice.periodo()]
+
     def _desenhar(self):
+        if self.cena:
+            self.cena.desenhar()
+            return
         moeda = self.cfg["moeda"]
+        ac = bool(self.cfg.get("alto_contraste"))
+        pal = self._paleta()
         dormindo = self.estomago.dormindo() and moeda == "BTC" and not self.reacao
         with self.lock:
             preco = self.precos.get(moeda)
@@ -838,6 +1052,8 @@ class Tamagoshi:
                 self.estado = novo
                 self.som.tocar(novo)
                 self._nova_frase()
+                if novo in ("moon", "rekt") and self.cfg.get("juice", True):
+                    self.juice.emitir(novo, self.LARG // 2, self.Y_SPRITE + self.S // 2, self.escala)
             linha_preco, linha_var = self._fmt_preco(moeda, preco), f"{'+' if var >= 0 else ''}{var:.2f}%"
         else:
             linha_preco, linha_var = "carregando", "..."
@@ -849,13 +1065,13 @@ class Tamagoshi:
         if dormindo and not self.toast and not self.console_aberto:
             self.frase_atual = "esperando bloco... zzz"
         if self.toast:
-            fundo = "#ffcd75"
-            self._moldura(6, 2, L - 6, 48, fundo, luz="#fff4c0", sombra="#ef7d57")
-            self._txt(L // 2, 16, "CONQUISTA!", "#b13e53")
+            fundo = "#ffff00" if ac else ("#73eff7" if len(self.toast) > 2 and self.update else "#ffcd75")
+            self._moldura(6, 2, L - 6, 48, fundo, luz=None if ac else "#fff4c0", sombra=None if ac else "#ef7d57")
+            self._txt(L // 2, 16, self.toast[2] if len(self.toast) > 2 else "CONQUISTA!", C_TINTA if ac else "#b13e53")
             self._txt(L // 2, 32, self.toast[0], C_TINTA, max_chars=mc)
         else:
-            fundo = C_PAPEL
-            self._moldura(6, 2, L - 6, 48, fundo, luz="#ffffff", sombra="#94b0c2")
+            fundo = "#ffffff" if ac else C_PAPEL
+            self._moldura(6, 2, L - 6, 48, fundo, luz="#ffffff", sombra=None if ac else "#94b0c2")
             self._txt(L // 2, 25, self.frase_atual, C_TINTA, max_chars=mc)
         m = L // 2
         for i, w in enumerate((8, 5, 2)):
@@ -870,8 +1086,11 @@ class Tamagoshi:
         else:
             img = frames[(self.estado, self.frame)]
         tremor = random.randint(-3, 3) if self.panico_t else 0
+        sx, sy = self.juice.deslocamento() if self.cfg.get("juice", True) else (0, 0)
         cy = self.Y_SPRITE + self.S // 2
-        c.create_image(L // 2 + tremor, cy, image=img)
+        c.create_image(L // 2 + tremor + sx, cy + sy, image=img)
+        if self.cfg.get("juice", True):
+            self.juice.desenhar(c)
         E = self.escala
         if dormindo:  # Zzz subindo
             for i in range(3):
@@ -903,8 +1122,9 @@ class Tamagoshi:
             for dx, ph in ((-self.S // 2 - 6, 0), (self.S // 2 - 8, 2), (-self.S // 2 + 10, 4)):
                 self._coracao(L // 2 + dx, self.Y_SPRITE + self.S // 2 - (k + ph) * 6, "#b13e53", "#b13e53")
         # ----- nome e vida -----
-        nome = (self.plugins[self.cfg["skin"]]["nome"] if self.cfg["skin"].startswith("plugin:")
-                else arts.NOMES[moeda])
+        nome = self.nome_pet()
+        if ac:
+            cor = {"moon": "#00ff00", "rekt": "#ff5555", "garimpando": "#ffff00"}[self.estado]
         self._txt(L // 2, self.Y_NOME, f"{nome} - {arts.TITULOS[self.estado]}", cor,
                   max_chars=(L - 12) // 8, sombra=C_TINTA)
         self._txt(10, self.Y_VIDA + 2, "VIDA", "#f4f4f4", anchor="nw", sombra=C_TINTA)
@@ -927,9 +1147,13 @@ class Tamagoshi:
         self._txt(L - 10, y, evolucao.NOMES[self.estagio][:13], "#73eff7", anchor="ne", sombra=C_TINTA)
         # ----- painel -----
         y = self.Y_PAINEL
-        self._moldura(6, y, L - 6, y + 60, C_PAINEL, luz=C_PAINEL2, sombra="#1d1730")
+        self._moldura(6, y, L - 6, y + 60, pal[0], borda="#ffffff" if ac else C_TINTA, luz=pal[1], sombra=pal[2])
+        if not ac:
+            juice.desenhar_icone_ceu(c, L // 2 - 7, y + 8, pal[4], self.frame)
         self._txt(16, y + 10, ("PRO " if self.pro else "") + moeda, "#ffcd75" if self.pro else "#f4f4f4", anchor="nw")
         self._txt(L - 16, y + 10, linha_var, cor, anchor="ne")
+        if self.update and not self.toast:
+            self._txt(L // 2 + 12, y + 10, "UPD", "#73eff7", anchor="nw")
         self._txt(16, y + 26, self.erro or linha_preco, "#ef7d57" if self.erro else "#f4f4f4", anchor="nw")
         if self.pro:
             self._sparkline(moeda, L - 92, y + 22, L - 16, y + 38, cor)
@@ -1006,7 +1230,17 @@ class Tamagoshi:
         self.root.after(1000, self.atualizar_tela)
 
     def animar(self):
+        self.root.after(FRAME_MS, self.animar)
+        if isinstance(self.cena, cenas.PegaSats):
+            return  # o jogo tem o próprio loop de 50 ms
+        if self.cena:
+            if not self.cena.tick():
+                self.cena = None
+            self.juice.tick()
+            self._desenhar()
+            return
         self.frame = (self.frame + 1) % FRAMES
+        self.juice.tick()
         self.rodizio += 1
         self._processar_eventos()
         if self.comendo:
@@ -1020,7 +1254,6 @@ class Tamagoshi:
             if self.toast[1] <= 0:
                 self.toast = None
         self._desenhar()
-        self.root.after(FRAME_MS, self.animar)
 
     def trocar_frase(self):
         self._nova_frase()

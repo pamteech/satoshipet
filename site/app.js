@@ -12,7 +12,7 @@
   // ---------- i18n ----------
   const EN = {
     nav_demo: "demo", nav_feat: "features", nav_price: "pricing", nav_rank: "leaderboard",
-    tag: "v1.2 · open source · MIT", h1: "A tiny pet that feels the market <em>harder than you</em>.",
+    tag: "v1.3 · open source · MIT", h1: "A tiny pet that feels the market <em>harder than you</em>.",
     sub: "Pixel art that floats on your desktop, eats every new Bitcoin block, gets hungry when fees spike and evolves from egg to <b>Whale</b>. It even has a hacker console.",
     dl_mac: "Download for macOS", dl_win: "Download for Windows", dl_src: "pipx / source",
     free_note: "Free forever. Pro is a one-time payment.", m_live: "live",
@@ -33,6 +33,11 @@
     q4: "Does it work offline?", a4: "Yes: without internet it shows “?” and stays alive (a bit needy).",
     q5: "macOS/Windows say the app is unsigned", a5: "Mac: right click → Open the first time. Windows: “More info” → “Run anyway”. Or install from source with <code>pipx</code>.",
     q6: "Is this financial advice?", a6: "It's a pixel pet. It cries when the price dips. Not financial advice.",
+    novo_t: "New in v1.3", n1: "the egg hatches on first run · you name your pet", n2: "mini-game: catch the sats (P) → XP",
+    n3: "particles, halloween/christmas hats, day/night palette",
+    n4: "New chiptune sound design (optional background music) · high contrast and 6 sizes · new-version notice (never auto-installs) · ~1% CPU idle.",
+    f11: "Onboarding, mini-game, seasonal hats, chiptune soundtrack, high contrast",
+    q7: "Does it auto-update?", a7: "No. It only asks GitHub whether a new version is out and shows a notice with the link. Downloading and installing is always up to you (you can turn the notice off in the menu).",
     foot: "made with sats and coffee ☕", disc: "Not affiliated with Bitcoin, Ethereum, Solana, Dogecoin or PEPE. Prices: CoinGecko. Blocks: mempool.space.",
   };
   const PT = {};

@@ -100,7 +100,7 @@ class CtxTUI:
         p = e["precos"].get(e["moeda"])
         var = logic.variacao_pct(p, e["ref"].get(e["moeda"], p)) if p else 0.0
         xp = e["evo"].xp
-        return {"nome": arts.NOMES[e["moeda"]], "moeda": e["moeda"], "preco": p,
+        return {"nome": (config.carregar().get("nome_pet") or arts.NOMES[e["moeda"]])[:12], "moeda": e["moeda"], "preco": p,
                 "preco_fmt": logic.formatar_preco(p) if p else "carregando", "variacao_pct": var,
                 "humor": e["estado"], "nivel": evolucao.nivel(xp), "xp": xp,
                 "xp_pct": evolucao.progresso_nivel(xp), "estagio": evolucao.NOMES[e["estagio"]],

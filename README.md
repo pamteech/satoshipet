@@ -16,6 +16,10 @@
 
 *eats real Bitcoin blocks · evolves into a Whale · has a hacker console*
 
+<img src="docs/demo/onboarding_ovo.gif" width="160"> <img src="docs/demo/minigame.gif" width="160"> <img src="docs/demo/juice_moon.gif" width="160">
+
+*v1.3: hatches on first run · catch-the-sats mini-game · seasonal hats, particles, chiptune*
+
 [English](#english) · [Português](#português)
 
 </div>
@@ -77,6 +81,25 @@ tamagoshi [--tui] [--coin BTC|ETH|SOL|DOGE|PEPE] [--skin NAME|plugin:ID] [--scal
 - **Drag**: hold left click · **Pet**: click the creature (jump + hearts + sound) · **Menu**: right click (or ctrl-click on Mac)
 - **Keyboard** (widget focused): `h j k l` move 10 px, `H J K L` 50 px, <kbd>`</kbd> console
 - Menu: coin, skin, watch-only wallet, console, show in sats, settings, price alerts, achievements, mute, CRT, start at login, hide to tray, activate Pro, quit
+
+### New in v1.3 ✨
+| | |
+|---|---|
+| 🥚 **Onboarding** | first run: the egg wobbles, cracks and hatches → pick a coin → name your pet (shown in the UI and on the share card) → quick tips → opt-ins (sound, leaderboard). `PULAR`/Esc skips; menu → Ajuda → *Rever introdução* replays it. `--skip-intro` for scripts |
+| 🎮 **Mini-game "Pega os Sats"** | `P` (or console `play`, or menu): 20 s, ← → / h l / mouse to catch falling sats, dodge red FUD. 3 XP per sat (max 90). The pet gets bored after ~3 h without playing and asks for it |
+| 🎵 **Chiptune v2** | 2 pulse channels + noise, envelopes and arpeggios, a jingle per event (block, moon, rekt, evolve, achievement, hatch, game). Optional background loop, **off by default** |
+| 💥 **Juice** | screen shake + particles on moon/crash, day/night panel palette by local time, **seasonal hats** (halloween in October, Santa hat in December) |
+| 🔑 **Licensing providers** | `hmac` (offline), **Gumroad**, **Lemon Squeezy**, **Hotmart** (via webhook key server in `server/licencas.py`). 24 h cache + **14-day offline grace**. Clear pt-BR errors |
+| 🔔 **Update check** | asks GitHub Releases for the latest tag and shows a clickable "NOVA VERSÃO!" toast. **Never downloads or installs anything** |
+| 🧯 **Crash log** | `~/.tamagoshi_cripto/crash.log`; menu → Ajuda → *Enviar relatório* opens a **prefilled GitHub issue** in your browser (home path stripped). You review and submit |
+| ♿ **Accessibility** | 6 sizes (menu → Aparência), high-contrast mode, every effect can be turned off |
+| ⚙️ **Settings migration** | configs from v1.0–v1.2 are upgraded automatically (`versao_config`) — your pet keeps its XP |
+| 🪶 **Light** | ~**1.1 % of one CPU core idle** (measured, see below) |
+
+<img src="docs/screenshots/onboarding_moeda.png" width="150"> <img src="docs/screenshots/onboarding_nome.png" width="150"> <img src="docs/screenshots/onboarding_dicas.png" width="150"> <img src="docs/screenshots/minigame_fim.png" width="150"> <img src="docs/screenshots/alto_contraste.png" width="150"> <img src="docs/screenshots/update.png" width="150">
+
+**Performance:** `xvfb-run -a python tools/medir_cpu.py 60` measures the idle widget (onboarding done, network threads on):
+**1.10 %** of one core on Linux/Xvfb (0.44 s CPU in 40 s). The 50 ms loop only runs while the mini-game is open.
 
 ### What's inside
 | Feature | Source (keyless) | Offline? | Tier |
@@ -201,6 +224,12 @@ Open an issue with the **Concurso de skins** template and send a PR. Validate lo
 | `onchain` | `true` | block/fee/hashrate/gas polling |
 | `ranking` / `ranking_url` / `nick` | `false` / `""` / `""` | opt-in leaderboard |
 | `site` | `https://OWNER.github.io/tamagoshi-cripto` | link printed on the share card |
+| `nome_pet` | `""` | pet nickname (onboarding). Empty = coin default |
+| `licenca_provedor` | `"hmac"` | `hmac` · `gumroad` · `lemonsqueezy` · `servidor` (Hotmart) |
+| `licenca_produto` / `licenca_url` | `""` | product id (Gumroad/Lemon) / key server URL (Hotmart) |
+| `musica` / `volume` | `false` / `0.35` | background chiptune loop / volume |
+| `dia_noite` / `chapeus` / `juice` / `alto_contraste` | `true` / `true` / `true` / `false` | visuals & accessibility |
+| `checar_updates` | `true` | ask GitHub for a newer release (notice only) |
 | `progresso` / `evolucao` | — | life, achievements, XP (managed by the app) |
 
 ### Platform notes
@@ -249,6 +278,10 @@ tamagoshi --tui      # no terminal
 
 **Free:** Satoshinho (BTC), animações, carinho, vida em corações, conquistas, sons 8-bit, Fear & Greed, contagem do halving (5 carinhos no Satoshinho), código konami (skin secreta), criaturas da comunidade, modo terminal e botão de afiliado.
 **Pro:** ETH, SOL, DOGE e PEPE na janela, skins premium, limites e preço de referência configuráveis, alertas de preço, mini gráfico e "abrir ao iniciar".
+
+**Novidades v1.3:** ovo chocando na primeira vez (escolhe moeda, dá nome, dicas, opt-ins — dá pra pular), mini-game **Pega os Sats** (tecla P), trilha chiptune nova (música de fundo opcional, desligada), tremidinha e partículas no moon/crash, paleta dia/noite, **chapéu de halloween** (outubro) e de Natal, alto contraste e 6 tamanhos, aviso de versão nova (nunca instala sozinho), log de crash com "enviar relatório" (só abre uma issue preenchida), licença via Gumroad, Lemon Squeezy, Hotmart ou offline, com 14 dias de graça sem internet. Uso de CPU parado: ~1%.
+
+**Testar no Mac:** [docs/TESTE_MAC.md](docs/TESTE_MAC.md).
 
 **Pra colocar no ar:** veja o [docs/GO_LIVE.md](docs/GO_LIVE.md).
 

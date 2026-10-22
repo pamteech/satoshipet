@@ -62,7 +62,7 @@ def copiar():
     nomes += [f"BTC_padrao_{e}" for e in ("ovo", "bebe", "whale", "diamond")] + ["BTC_cyberpunk", "BTC_gato", "BTC_sapo"]
     for n in nomes:
         shutil.copy(s / f"{n}.png", SITE / "sprites" / f"{n}.png")
-    for g in ("btc", "eth", "sol", "doge", "pepe", "comendo", "console", "evoluindo"):
+    for g in ("btc", "eth", "sol", "doge", "pepe", "comendo", "console", "evoluindo", "onboarding_ovo", "minigame", "juice_moon"):
         shutil.copy(RAIZ / "docs" / "demo" / f"{g}.gif", SITE / "gif" / f"{g}.gif")
 
 

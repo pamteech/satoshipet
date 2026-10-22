@@ -1,7 +1,7 @@
 """evolucao.py - XP, níveis e estágios: ovo -> bebê -> adulto -> Whale ou Diamond Hands."""
 import math
 
-XP = {"bloco": 25, "minuto": 1, "crash": 50, "carinho": 2}
+XP = {"bloco": 25, "minuto": 1, "crash": 50, "carinho": 2, "jogo": 1}
 ESTAGIOS = [("ovo", 0), ("bebe", 100), ("adulto", 500), ("final", 2000)]
 NOMES = {"ovo": "OVO", "bebe": "BEBE", "adulto": "ADULTO", "whale": "WHALE", "diamond": "DIAMOND HANDS"}
 

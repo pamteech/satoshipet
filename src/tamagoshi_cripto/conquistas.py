@@ -24,6 +24,7 @@ LISTA = {
     "rm_rf": ("rm -rf / Survivor", "Tentou apagar a blockchain"),
     "lv21": ("21 Million", "Chegou ao nível 21"),
     "moscow": ("Moscow Time", "Passou a contar em sats"),
+    "stacker": ("Stacking Sats", "Pegou 25 sats no mini-game"),
 }
 
 # quanto a vida muda por minuto em cada humor

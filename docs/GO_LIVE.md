@@ -7,13 +7,42 @@ Nada foi publicado, deployado ou criado fora deste computador. Ordem sugerida:
 - [ ] Trocar **`OWNER`** pelo seu usuário em todos os arquivos: `grep -rl OWNER . --exclude-dir=.git | xargs sed -i 's/OWNER/seu-usuario/g'`
       (README badges, `site/config.js`, `site/index.html` meta OG, `share.py`/`config.py` `site`, issue template).
 
-## 2. Licenças Pro (Gumroad)
-- [ ] Gerar segredo forte e salvar como GitHub Secret `TAMAGOSHI_LICENSE_SECRET`.
-- [ ] Criar produto no Gumroad (US$ 5–10). Colar a URL em `site/config.js` → `gumroad`.
-- [ ] Gerar chaves com `TAMAGOSHI_LICENSE_SECRET=... python tools/keygen.py email` (ou integrar a API do Gumroad — ver `license.py`).
+## 2. Licenças Pro — escolha UM provedor
+O app lê `licenca_provedor` da config. Pra todo mundo usar o mesmo, mude o **padrão** em
+`src/tamagoshi_cripto/config.py` (`PADRAO["licenca_provedor"]` e `PADRAO["licenca_produto"]`/`licenca_url`) antes do build.
+Em todos: cache de 24 h + **14 dias de graça offline**; reembolso derruba o Pro na próxima validação online.
+
+| | Gumroad | Lemon Squeezy | Hotmart | Offline (hmac) |
+|---|---|---|---|---|
+| Bom pra | começar rápido, público gringo | gringo, imposto/VAT resolvido, limite de ativações | público BR, Pix/boleto | MVP/sem loja |
+| Precisa de servidor? | não | não | **sim** (`server/licencas.py`) | não |
+| Config | `gumroad` + `licenca_produto` = product_id | `lemonsqueezy` + `licenca_produto` = product_id | `servidor` + `licenca_url` | `hmac` |
+
+**Gumroad**
+- [ ] Criar o produto (US$ 5–10) → aba *Content* → ligar **"Generate a unique license key per sale"**.
+- [ ] Copiar o **product_id** (Edit product → Advanced / ou na resposta da API) → `licenca_produto`.
+- [ ] `licenca_provedor = "gumroad"`. URL do produto em `site/config.js` → `gumroad`.
+
+**Lemon Squeezy**
+- [ ] Criar loja + produto, em *License keys* ligar a geração e definir o **limite de ativações** (ex.: 3).
+- [ ] Copiar o **product_id** → `licenca_produto`; `licenca_provedor = "lemonsqueezy"`. Link de checkout no site.
+- [ ] O app usa `/v1/licenses/activate` (1ª vez, guarda `instance_id`) e depois `/validate`. Sem chave de API no app.
+
+**Hotmart** (não tem API pública de license key → webhook)
+- [ ] Subir `server/licencas.py` (Docker: `docker build -f server/Dockerfile.licencas -t tamagoshi-licencas server`)
+      com HTTPS e env `HOTMART_HOTTOK`, `TAMAGOSHI_LICENSE_SECRET`, `ADMIN_TOKEN` e (opcional) `SMTP_*` pra mandar a chave por e-mail.
+- [ ] Hotmart → Ferramentas → **Webhook (API e notificações)**: URL `https://SEU-HOST/hotmart/webhook`, eventos
+      *Compra aprovada/completa, reembolsada, chargeback, cancelada*. Copiar o **hottok** → `HOTMART_HOTTOK`.
+- [ ] `licenca_provedor = "servidor"`, `licenca_url = "https://SEU-HOST"`.
+- [ ] Sem SMTP? Veja as chaves em `curl -H "Authorization: Bearer $ADMIN_TOKEN" https://SEU-HOST/admin/chaves` e mande pela área de membros.
+
+**Offline (hmac)** — o que já existia
+- [ ] Segredo forte como GitHub Secret `TAMAGOSHI_LICENSE_SECRET`; chaves com `python tools/keygen.py email`.
+- [ ] Lembrete: quem descompilar o app acha o segredo. Use só pra começar.
 
 ## 3. Release (downloads)
-- [ ] `git tag v1.2.0 && git push --tags` → Action **Release** gera `TamagoshiCripto.exe` e `TamagoshiCripto-macos.zip`.
+- [ ] Trocar `REPO = "OWNER/tamagoshi-cripto"` em `src/tamagoshi_cripto/updates.py` e `crashlog.py` (o aviso de versão nova e o "enviar relatório" usam isso; com OWNER o check fica desligado).
+- [ ] `git tag v1.3.0 && git push --tags` → Action **Release** gera `TamagoshiCripto.exe` e `TamagoshiCripto-macos.zip`.
       Os links do site (`releases/latest/download/...`) passam a funcionar sozinhos.
 - [ ] (Opcional) assinar/notarizar no Mac e assinar o .exe para tirar o aviso de "app não assinado".
 

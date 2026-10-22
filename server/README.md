@@ -19,3 +19,14 @@ docker run -p 8740:8740 -v "$PWD/data:/data" tamagoshi-ranking
 ```
 Deploy anywhere that runs a container (Fly.io, Render, a $5 VPS) behind HTTPS, then set the URL in the
 app config (`"ranking_url"`) and in `site/config.js`.
+
+## Key server for Hotmart (`licencas.py`)
+Hotmart has no public license-key API, so a purchase webhook generates the key:
+`POST /hotmart/webhook` (checks `X-HOTMART-HOTTOK`) → approved = key `HMAC(email)` (same format as `tools/keygen.py`),
+optional e-mail via `SMTP_*`; refund/chargeback/cancel = revoked. The app validates with
+`GET /api/licenca/validar?email=&chave=`. Admin list: `GET /admin/chaves` with `Authorization: Bearer $ADMIN_TOKEN`.
+```bash
+HOTMART_HOTTOK=... TAMAGOSHI_LICENSE_SECRET=... ADMIN_TOKEN=... python server/licencas.py   # :8741
+docker build -f server/Dockerfile.licencas -t tamagoshi-licencas server
+```
+Stores only e-mail, key, status and transaction id (needed to deliver and revoke the license).

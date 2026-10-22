@@ -113,3 +113,13 @@ locally; CI runs the same checks and uploads a `skin-preview` artifact.
   `python tools/site_screenshots.py` (needs Chrome).
 - `share.py` draws the 1200×675 card on a 400×225 grid scaled 3× — keep it pixel-perfect (no smoothing).
 - `server/ranking.py` is stdlib-only on purpose. Any new field must be non-personal and added to the whitelist + tests.
+
+## v1.3 internals
+- **Scenes** (`cenas.py`): onboarding and the mini-game take over the canvas via `app.cena` (`desenhar/tecla/clique/tick`).
+  The mini-game has its own 50 ms loop that only runs while it's open — keep the idle path at the 180 ms animation tick.
+- **Sounds** (`sons.py`): add a jingle to `MUSICAS` using note names (`"C5 E5 G5:2"`), channels `p1`/`p2`/`ruido`.
+- **Hats** (`juice.py`): ASCII pixel art drawn on the 48×48 frame before scaling. Check renders of all 5 coins × moods.
+- **Licensing** (`licencas.py`): a provider is a function `(cfg, email, key, http) -> Resultado`; raise `SemRede` for
+  network errors (triggers the grace period). Messages in pt-BR. Tests mock HTTP (`tests/test_v13.py`).
+- **Config**: bump `VERSAO_CONFIG` and add a step to `config.migrar()` when you rename/restructure keys.
+- **Performance**: run `xvfb-run -a python tools/medir_cpu.py 60` before/after anything that touches the draw loop.

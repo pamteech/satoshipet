@@ -32,7 +32,7 @@ def shot(nome, w, h, escala=1, aparar=True):
     print(destino)
 
 
-shot("site_desktop", 1280, 4200)
+shot("site_desktop", 1280, 5400)
 shot("site_desktop_hero", 1280, 800, aparar=False)
-shot("site_mobile", 390, 6400)
+shot("site_mobile", 390, 8600)
 shot("site_mobile_hero", 390, 844, escala=2, aparar=False)

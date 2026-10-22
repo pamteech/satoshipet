@@ -29,6 +29,8 @@ AJUDA = [
     "  coin <x>        troca moeda",
     "  neofetch        info do sistema (do bicho)",
     "  share           card PNG + post pronto no X",
+    "  play            mini-game: pega os sats (20s)",
+    "  update          procura versão nova (só avisa)",
     "  rank [on <nick>|off]  leaderboard (opt-in)",
     "  clear / exit",
 ]
@@ -136,6 +138,17 @@ class Console:
             return ["skins: " + ", ".join(self.ctx.skins())]
         r = self.ctx.trocar_skin(a[0])
         return [r or f"skin: {a[0]} (se for Pro, destrave no menu)"]
+
+    def cmd_play(self, a):
+        f = getattr(self.ctx, "brincar", None)
+        return f() if f else ["mini-game só na janela (por enquanto)"]
+
+    def cmd_update(self, a):
+        from . import __version__, updates
+        info = updates.checar()
+        if not info:
+            return [f"v{__version__}: nada novo (ou offline / repo ainda placeholder)"]
+        return [f"nova versão v{info['versao']}!", info["url"], "(nada é instalado sozinho: baixe quando quiser)"]
 
     def cmd_share(self, a):
         return self.ctx.compartilhar()

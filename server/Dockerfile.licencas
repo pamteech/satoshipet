@@ -1,0 +1,10 @@
+# Servidor de chaves (Hotmart webhook → chave). Só stdlib.
+FROM python:3.12-alpine
+WORKDIR /app
+COPY licencas.py .
+RUN adduser -D pet && mkdir /data && chown pet /data
+USER pet
+ENV HOST=0.0.0.0 PORT=8741 DB=/data/licencas.db
+EXPOSE 8741
+VOLUME /data
+CMD ["python", "licencas.py"]
