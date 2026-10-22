@@ -32,6 +32,13 @@ AJUDA = [
     "  play            mini-game: pega os sats (20s)",
     "  update          procura versão nova (só avisa)",
     "  rank [on <nick>|off]  leaderboard (opt-in)",
+    "  genes           DNA do bicho e raridade",
+    "  petcode         seu código de pet (copia)",
+    "  breed <n|code>  cruza com pet do estábulo/amigo",
+    "  stable / adopt <n>  estábulo de pets",
+    "  battle [code]   batalha (vs IA ou amigo)",
+    "  hardcore on|off modo hardcore (pode morrer!)",
+    "  rip             Cemitério de Honra",
     "  clear / exit",
 ]
 
@@ -155,6 +162,50 @@ class Console:
 
     def cmd_rank(self, a):
         return self.ctx.ranking(a)
+
+    # ---- v1.4: genética, batalha, hardcore ----
+    def _so_janela(self, nome, *args):
+        f = getattr(self.ctx, nome, None)
+        return f(*args) if f else ["isso só funciona na janela (por enquanto)"]
+
+    def cmd_genes(self, a):
+        from . import genetica
+        st = self.ctx.status()
+        g = st.get("genes") or {}
+        if not g:
+            return ["sem DNA (?!)"]
+        return [f"{k:<10} {v}" for k, v in g.items()] + [f"raridade   {st.get('raridade', '?')}"]
+
+    def cmd_petcode(self, a):
+        r = self._so_janela("petcode")
+        return [r, "(copiado! manda pro amigo: breed/battle <código>)"] if isinstance(r, str) else r
+
+    def cmd_breed(self, a):
+        return self._so_janela("cruzar", " ".join(a)) if a else ["uso: breed <n do estábulo | TAMA1-...>"]
+
+    def cmd_stable(self, a):
+        return self._so_janela("estabulo")
+
+    def cmd_adopt(self, a):
+        return self._so_janela("adotar", a[0] if a else "")
+
+    def cmd_battle(self, a):
+        return self._so_janela("batalhar", " ".join(a) or None)
+
+    def cmd_hardcore(self, a):
+        if a[:1] not in (["on"], ["off"]):
+            return ["uso: hardcore on|off  (on = o bicho pode MORRER de abandono)"]
+        f = getattr(self.ctx, "cfg", None)
+        if f is None:
+            return ["só na janela"]
+        if bool(f.get("hardcore")) == (a[0] == "on"):
+            return ["já tá assim"]
+        return self.ctx.alternar_hardcore()
+
+    def cmd_rip(self, a):
+        return self._so_janela("ver_cemiterio")
+
+    cmd_cemiterio = cmd_rip
 
     def cmd_coin(self, a):
         if not a:

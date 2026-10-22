@@ -44,7 +44,7 @@ PADRAO = {
     "site": "https://OWNER.github.io/tamagoshi-cripto",
     "evolucao": {},
     # v1.3
-    "versao_config": 3,
+    "versao_config": 4,
     "nome_pet": "",          # apelido do bicho (onboarding); vazio = nome padrão da moeda
     "onboarding_ok": False,
     "licenca_provedor": "hmac",   # hmac | gumroad | lemonsqueezy | servidor (Hotmart)
@@ -58,11 +58,31 @@ PADRAO = {
     "dia_noite": True,
     "chapeus": True,         # chapéus de época (halloween/natal)
     "alto_contraste": False,
-    "juice": True,           # tremidinha e partículas         # xp (gerenciado pelo app)   # ícone na menu bar do Mac (experimental)
+    "juice": True,           # tremidinha e partículas
+    # v1.4
+    "hardcore": False,       # opt-in: o bicho pode MORRER de abandono (vai pro Cemitério de Honra)
+    "fantasma": False,
+    "cemiterio": [],
+    "ultima_interacao": 0,
+    "nasceu_em": 0,
+    "genes": {},             # DNA do bicho atual (genetica.py)
+    "estabulo": [],          # pets guardados / importados de amigos (código TAMA1-...)
+    "batalhas": {"vitorias": 0, "derrotas": 0},
+    "papel": {},             # paper trading: dinheiro FICTÍCIO
+    "carteira_eth": "",      # endereço PÚBLICO (watch-only)
+    "carteira_sol": "",      # endereço PÚBLICO (watch-only)
+    "baleias": True,         # alerta de baleia (mempool.space, sem chave)
+    "baleia_btc": 50,        # tx acima de X BTC = susto
+    "noticias": True,        # manchete RSS de vez em quando no balão
+    "ai_url": "",            # BYO: endpoint OpenAI-compatível (vazio = desligado, respostas enlatadas)
+    "ai_key": "",
+    "ai_modelo": "gpt-4o-mini",
+    "loja_codigos": [],      # códigos de pacotes de skin resgatados
+    "twitch_canal": "",      # overlay: lê o chat anônimo (vazio = desligado)
 }
 
 
-VERSAO_CONFIG = 3
+VERSAO_CONFIG = 4
 
 
 def migrar(cfg):
@@ -81,6 +101,13 @@ def migrar(cfg):
             cfg["escala"] = max(1, min(6, int(cfg.get("escala", 3))))
         except (TypeError, ValueError):
             cfg["escala"] = 3
+    if v < 4:  # v1.3 -> v1.4: todo bicho ganha DNA (quem já existe nasce "hoje" pro cemitério)
+        if not cfg.get("genes"):
+            from . import genetica
+            cfg["genes"] = genetica.aleatorio(moeda=cfg.get("moeda", "BTC"))
+        if not cfg.get("nasceu_em"):
+            import time
+            cfg["nasceu_em"] = int(time.time())
     cfg["versao_config"] = VERSAO_CONFIG
     return cfg
 

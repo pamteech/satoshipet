@@ -16,7 +16,7 @@ from tkinter import messagebox, simpledialog
 
 from PIL import Image
 
-from . import __version__, api, arts, cenas, config, conquistas, crashlog, juice, licencas, updates, evolucao, license, logic, lore, onchain, plugins, ranking, recursos, share, sistema, sons
+from . import __version__, api, engajamento, genetica, arts, cenas, config, conquistas, crashlog, juice, licencas, updates, evolucao, license, logic, lore, onchain, plugins, ranking, recursos, share, sistema, sons
 from .console import SPRITE, Console
 from .fonte import FontePixel
 from .sprites import FRAMES, LINHAS, SKINS_SECRETAS, nome_folha
@@ -35,15 +35,19 @@ def _png_para_tk(img):
     return tk.PhotoImage(data=base64.b64encode(buf.getvalue()).decode())
 
 
-def carregar_frames(caminho, escala, crt=False, chapeu=None):
+def carregar_frames(caminho, escala, crt=False, chapeu=None, genes=None, fantasma=False):
     """Folha 192x192 -> {(linha, frame): PhotoImage} ampliado sem borrar (+ chapéu de época, + scanlines CRT)."""
     folha = Image.open(caminho).convert("RGBA")
     frames = {}
     for j, linha in enumerate(LINHAS):
         for f in range(FRAMES):
             fr = folha.crop((f * 48, j * 48, (f + 1) * 48, (j + 1) * 48))
-            if chapeu:
-                fr = juice.aplicar_chapeu(fr, chapeu)
+            if fantasma:  # hardcore: virou assombração
+                fr = genetica.fantasma(fr)
+            else:
+                fr = genetica.aplicar(fr, genes)  # DNA do bicho (v1.4)
+                if chapeu:
+                    fr = juice.aplicar_chapeu(fr, chapeu)
             fr = fr.resize((48 * escala, 48 * escala), Image.NEAREST)
             if crt and escala >= 2:
                 px = fr.load()
@@ -56,7 +60,7 @@ def carregar_frames(caminho, escala, crt=False, chapeu=None):
     return frames
 
 
-class Tamagoshi:
+class Tamagoshi(engajamento.MixinEngajamento):
     def __init__(self, opcoes=None):
         op = opcoes or {}
         self.cfg = config.carregar()
@@ -268,6 +272,7 @@ class Tamagoshi:
         self.root.after(int(cenas.PegaSats.DT * 1000), self._loop_jogo)
 
     def fim_minigame(self, pontos, pegos):
+        self._tocar()
         self.cfg["diversao"] = 100.0
         xp = min(90, pontos * 3)
         if xp:
@@ -281,9 +286,10 @@ class Tamagoshi:
         self._salvar_progresso()
 
     def _sprites_mini(self):
-        chave = ("mini", self.cfg["moeda"], self.cfg["skin"], self.estagio, self._chapeu())
+        chave = ("mini", self.cfg["moeda"], self.cfg["skin"], self.estagio, self._chapeu(), self._chave_dna())
         if chave not in self.cache_sprites:
-            self.cache_sprites[chave] = carregar_frames(self._caminho_folha(), 2, chapeu=self._chapeu())
+            self.cache_sprites[chave] = carregar_frames(self._caminho_folha(), 2, chapeu=self._chapeu(),
+                                                        **self._dna())
         return self.cache_sprites[chave]
 
     def _chapeu(self):
@@ -333,6 +339,7 @@ class Tamagoshi:
         m.add_command(label="Compartilhar card (X)", command=self._menu_share)
         m.add_command(label="Ranking (opt-in)...", command=self.config_ranking)
         m.add_command(label="Brincar: Pega os Sats (P)", command=self.brincar)
+        self.menu_genetica(m)
         ma = tk.Menu(m, tearoff=0)  # aparência e acessibilidade
         self.var_escala = tk.IntVar(value=self.escala)
         for e in range(1, 7):
@@ -738,6 +745,10 @@ class Tamagoshi:
             "fng": {"valor": self.fng[0], "rotulo": self.fng[1]} if self.fng else None,
             "carteira": {"endereco": self.cfg.get("carteira") or None,
                          "saldo_sats": self.saldo["total"] if self.saldo else None},
+            "genes": {k: v for k, v in self.genes().items() if k in genetica.GENES},
+            "raridade": genetica.raridade(self.genes())[0],
+            "hardcore": bool(self.cfg.get("hardcore")), "fantasma": bool(self.cfg.get("fantasma")),
+            "batalhas": dict(self.cfg.get("batalhas") or {}),
         }
 
     def nome_pet(self):
@@ -879,6 +890,11 @@ class Tamagoshi:
 
     # ---------- carinho, vida, conquistas ----------
     def carinho(self):
+        self._tocar()
+        if self.cfg.get("fantasma"):
+            self.frase_atual = random.choice(["buuu... sua mão atravessou", "fantasma não sente carinho :(",
+                                              "renasce eu? (menu > Genética)"])
+            return self.frase_atual
         self.reacao = FRAMES * 2
         self.frase_atual = arts.reacao(self.estado)
         if self.cfg["moeda"] == "BTC":
@@ -896,6 +912,9 @@ class Tamagoshi:
         self._desenhar()
 
     def tick_vida(self):
+        if self.cfg.get("fantasma"):  # fantasma não envelhece, não ganha XP, só assombra
+            self.root.after(10000, self.tick_vida)
+            return
         bonus = lore.ajuste_vida_fng(self.fng[0] if self.fng else None)
         crashes = self.conq.d["crashes"]
         self._comemorar(self.conq.tick(self.estado, 10, bonus))
@@ -907,6 +926,8 @@ class Tamagoshi:
         if d < 25 and random.random() < 0.15 and not self.toast:
             self.frase_atual = random.choice(["tô entediado... bora jogar? (P)", "quero brincar! aperta P",
                                               "pega uns sats comigo? (P)"])
+        if self.checar_hardcore():
+            self.cena = cenas.Cemiterio(self)
         self._salvar_progresso()
         self.root.after(10000, self.tick_vida)
 
@@ -973,11 +994,21 @@ class Tamagoshi:
         return caminho
 
     def _sprites(self):
-        chave = (self.cfg["moeda"], self.cfg["skin"], self.cfg.get("crt"), self.estagio, self._chapeu())
+        chave = (self.cfg["moeda"], self.cfg["skin"], self.cfg.get("crt"), self.estagio, self._chapeu(),
+                 self._chave_dna())
         if chave not in self.cache_sprites:
             self.cache_sprites[chave] = carregar_frames(self._caminho_folha(), self.escala, self.cfg.get("crt"),
-                                                        self._chapeu())
+                                                        self._chapeu(), **self._dna())
         return self.cache_sprites[chave]
+
+    def _dna(self):
+        # skins de plugin/secretas mantêm as cores do artista; o DNA vale pras skins oficiais
+        g = self.genes() if not self.cfg["skin"].startswith("plugin:") else None
+        return {"genes": g, "fantasma": bool(self.cfg.get("fantasma"))}
+
+    def _chave_dna(self):
+        d = self._dna()
+        return (tuple(sorted((k, v) for k, v in (d["genes"] or {}).items() if k in genetica.GENES)), d["fantasma"])
 
     def _txt(self, x, y, texto, cor, anchor="center", escala=1, max_chars=None, sombra=None, tags=()):
         img = self.fonte.imagem(texto, cor, escala, max_chars, sombra)
@@ -1125,7 +1156,8 @@ class Tamagoshi:
         nome = self.nome_pet()
         if ac:
             cor = {"moon": "#00ff00", "rekt": "#ff5555", "garimpando": "#ffff00"}[self.estado]
-        self._txt(L // 2, self.Y_NOME, f"{nome} - {arts.TITULOS[self.estado]}", cor,
+        titulo = "FANTASMA" if self.cfg.get("fantasma") else arts.TITULOS[self.estado]
+        self._txt(L // 2, self.Y_NOME, f"{nome} - {titulo}", "#94b0c2" if self.cfg.get("fantasma") else cor,
                   max_chars=(L - 12) // 8, sombra=C_TINTA)
         self._txt(10, self.Y_VIDA + 2, "VIDA", "#f4f4f4", anchor="nw", sombra=C_TINTA)
         vida = self.conq.vida

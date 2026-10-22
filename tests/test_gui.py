@@ -412,6 +412,72 @@ def executar():
     assert "BTC" in app.alertados
     assert app.cfg["moeda"] == "PEPE", app.cfg["moeda"]
 
+    # ---------- v1.4 fase 1: genes, cruzamento, batalha, hardcore ----------
+    from tamagoshi_cripto import cenas as _cenas, genetica as _gen
+    for w in app.root.winfo_children():
+        if w.winfo_class() == "Toplevel":
+            w.destroy()
+    app.cfg["moeda"], app.cfg["skin"] = "BTC", "padrao"
+    app.cfg["chapeus"] = False
+    app.cfg["crt"] = False
+    app.cfg["genes"] = {"paleta": "gelo", "olhos": "laser", "acessorio": "coroinha", "padrao": "pintas",
+                        "moeda": "BTC", "geracao": 1, "id": "cafe0001"}
+    app.cache_sprites.clear()
+    app.evo.d["xp"] = 900
+    app.estagio = "adulto"
+    _bombear(app, 400)
+    _shot(app, "genes_bicho")
+    amigo = {"nome": "Bia", "genes": _gen.aleatorio(9, "BTC"), "nivel": 12, "xp": 1500, "estagio": "adulto"}
+    cod = _gen.exportar(amigo)
+    out = app.console.executar("breed " + cod)
+    assert "estábulo" in out[0] and isinstance(app.cena, _cenas.Cruzamento), out
+    _gif(app, "cruzamento", n=26)
+    _shot(app, "cruzamento")
+    app._tecla(type("E", (), {"keysym": "Return", "char": "\r"})())
+    assert app.cena is None and len(app.cfg["estabulo"]) == 1
+    assert "Filhote1" in "".join(app.console.executar("stable"))
+    assert app.console.executar("petcode")[0].startswith("TAMA1-")
+    assert _gen.importar(app.root.clipboard_get())[1] is None  # foi pra área de transferência
+    out = app.console.executar("battle " + cod)
+    assert isinstance(app.cena, _cenas.Batalha)
+    app.cena.auto = True
+    v0 = dict(app.cfg["batalhas"])
+    _gif(app, "batalha", n=60, passo=lambda i: None)
+    for _ in range(3000):  # acelera: tick direto em vez de esperar 180 ms
+        if app.cena is None or app.cena.fim:
+            break
+        app.cena.tick()
+    _bombear(app, 200)
+    _shot(app, "batalha_fim")
+    assert app.cena.fim and sum(app.cfg["batalhas"].values()) == sum(v0.values()) + 1
+    app._tecla(type("E", (), {"keysym": "Return", "char": "\r"})())
+    assert app.cena is None
+    app.console.executar("battle")  # vs IA: começa e sai com ESC
+    assert isinstance(app.cena, _cenas.Batalha)
+    app._tecla(type("E", (), {"keysym": "Escape", "char": ""})())
+    assert app.cena is None
+    # hardcore: morre de abandono, vira fantasma, cemitério, renasce do ovo
+    app.op["sem_confirmar"] = True
+    app.alternar_hardcore()
+    assert app.cfg["hardcore"]
+    app.conq.d["vida"] = 0
+    app.cfg["ultima_interacao"] = time.time() - 5 * 3600
+    app.cfg["zero_desde"] = time.time() - 31 * 60
+    assert app.checar_hardcore() and app.cfg["fantasma"]
+    _bombear(app, 400)
+    _shot(app, "fantasma")
+    frase = app.carinho()
+    assert any(k in frase for k in ("atravessou", "fantasma", "renasce")), frase
+    app.ver_cemiterio()
+    _gif(app, "cemiterio", n=12)
+    _shot(app, "cemiterio")
+    app.cena.acao("renascer")
+    assert not app.cfg["fantasma"] and app.estagio == "ovo" and app.cfg["cemiterio"]
+    app.cena = None
+    app.cfg["hardcore"] = False
+    app.cfg["chapeus"] = True
+    app.cache_sprites.clear()
+
     # foto Pro: ETH cyberpunk em TO THE MOON com sparkline
     for w in app.root.winfo_children():
         if w.winfo_class() == "Toplevel":

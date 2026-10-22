@@ -383,3 +383,336 @@ class PegaSats(_Cena):
 
     def juice_pulo(self):
         return bool(self.app.juice.p)
+
+
+# ======================= v1.4: GENES, CEMITÉRIO, CRUZAMENTO, BATALHA =======================
+def _frame_genes(moeda, estagio, linha, f, escala, genes=None, fantasma=False, espelhar=False):
+    from . import genetica
+    fr = _frame_png(moeda, estagio, linha, f, 1)
+    fr = genetica.fantasma(fr) if fantasma else genetica.aplicar(fr, genes)
+    if espelhar:
+        fr = fr.transpose(Image.FLIP_LEFT_RIGHT)
+    return fr.resize((48 * escala, 48 * escala), Image.NEAREST)
+
+
+def _lapide_png(escala=2):
+    """Lápide 24x28 em pixel art (pedra cinza, RIP, gramadinho)."""
+    arte = ["......11111111......",
+            "....112222222211....",
+            "...12222222222221...",
+            "..1223333333333221..",
+            "..1222222222222221..",
+            ".122444242444222221.",
+            ".122424242424222221.",
+            ".122442242444222221.",
+            ".122424242422222221.",
+            ".122424242422222221.",
+            ".122222222222222221.",
+            ".122222225522222221.",
+            ".122222555555222221.",
+            ".122222225522222221.",
+            ".122222225522222221.",
+            ".122222225522222221.",
+            ".122222222222222221.",
+            ".122222222222222221.",
+            "1111111111111111111.",
+            "6676767766767767767.",
+            ]
+    cores = {"1": (26, 28, 44), "2": (148, 176, 194), "3": (244, 244, 244), "4": (51, 60, 87),
+             "5": (86, 108, 134), "6": (56, 183, 100), "7": (167, 240, 112)}
+    im = Image.new("RGBA", (20, 20), (0, 0, 0, 0))
+    for y, l in enumerate(arte):
+        for x, ch in enumerate(l):
+            if ch in cores:
+                im.putpixel((x, y), cores[ch] + (255,))
+    return im.resize((20 * escala, 20 * escala), Image.NEAREST)
+
+
+class Cemiterio(_Cena):
+    """Cemitério de Honra: uma lápide por página, com epitáfio e stats. < > navega, ESC sai."""
+
+    def __init__(self, app):
+        super().__init__(app)
+        self.i = max(0, len(app.cfg.get("cemiterio", [])) - 1)
+        self.acabou = False
+        self.alvos = []
+
+    def tecla(self, e):
+        n = len(self.app.cfg.get("cemiterio", []))
+        if e.keysym in ("Left", "h"):
+            self.i = max(0, self.i - 1)
+        elif e.keysym in ("Right", "l"):
+            self.i = min(max(0, n - 1), self.i + 1)
+        elif e.keysym in ("Escape", "Return", "q"):
+            self.acabou = True
+
+    def acao(self, tag):
+        if tag == "sair":
+            self.acabou = True
+        elif tag == "ant":
+            self.i = max(0, self.i - 1)
+        elif tag == "prox":
+            self.i = min(len(self.app.cfg.get("cemiterio", [])) - 1, self.i + 1)
+        elif tag == "renascer":
+            self.app.renascer()
+            self.acabou = True
+
+    def tick(self):
+        self.t += 1
+        return not self.acabou
+
+    def desenhar(self):
+        import time as _t
+        a, c, L, H = self.app, self.app.cv, self.app.LARG, self.app.ALT
+        self.alvos = []
+        c.delete("all")
+        a._moldura(2, 2, L - 2, H - 2, "#1d1730", borda=TINTA, luz="#333c57", sombra="#0d0f1a")
+        # lua e névoa
+        for k, (dx, w) in enumerate(((4, 6), (2, 10), (0, 14), (0, 14), (0, 14), (2, 10), (4, 6))):  # lua minguante
+            y = 38 + k * 3
+            c.create_rectangle(L - 34 + dx, y, L - 34 + dx + w, y + 3, fill="#f4f4f4", width=0)
+            c.create_rectangle(L - 28 + dx, y, L - 28 + dx + w, y + 3, fill="#1d1730", width=0)
+        a._txt(L // 2, 18, "CEMITÉRIO DE HONRA", "#94b0c2", sombra=TINTA)
+        lista = a.cfg.get("cemiterio", [])
+        if not lista:
+            a._txt(L // 2, H // 2 - 20, "ninguém morreu (ainda)", "#f4f4f4", sombra=TINTA)
+            a._txt(L // 2, H // 2 + 4, "modo hardcore: " + ("LIGADO" if a.cfg.get("hardcore") else "desligado"),
+                   "#b13e53" if a.cfg.get("hardcore") else "#566c86")
+        else:
+            r = lista[self.i]
+            lap = self.img(("lap", 3), lambda: _lapide_png(3))
+            c.create_image(L // 2, 72, image=lap)
+            fant = self.img(("fant", r.get("moeda"), self.t // 4 % 4), lambda: _frame_genes(
+                r.get("moeda", "BTC"), "adulto", "garimpando", self.t // 4 % 4, 1, fantasma=True))
+            c.create_image(L // 2 + 56, 52 - (self.t // 3) % 3 * 2, image=fant)
+            a._txt(L // 2, 116, r["nome"], "#ffcd75", escala=2, sombra=TINTA)
+            data = lambda ts: _t.strftime("%d/%m/%y", _t.localtime(ts))
+            a._txt(L // 2, 136, f"{data(r['nasceu'])} - {data(r['morreu'])}", "#94b0c2")
+            a._txt(L // 2, 158, '"' + r["epitafio"] + '"', "#f4f4f4", max_chars=(L - 24) // 8, sombra=TINTA)
+            y = 186
+            for k, v in (("estágio", f"{r['estagio']} LV{r['nivel']}"),
+                         ("blocos/crashes", f"{r['blocos']}/{r['crashes']}"), ("viveu", f"{r['dias']} dias"),
+                         ("DNA", (r.get("genes") or {}).get("paleta", "?"))):
+                a._txt(30, y, k, "#566c86", anchor="w")
+                a._txt(L - 30, y, str(v), "#f4f4f4", anchor="e")
+                y += 13
+            a._txt(L // 2, 30, f"{self.i + 1}/{len(lista)}", "#566c86")
+            if self.i > 0:
+                self.botao(10, 60, 38, 84, "<", fundo="#94b0c2", tag="ant")
+            if self.i < len(lista) - 1:
+                self.botao(L - 38, 60, L - 10, 84, ">", fundo="#94b0c2", tag="prox")
+        if a.cfg.get("fantasma"):
+            self.botao(20, H - 70, L - 20, H - 44, "RENASCER DO OVO", fundo="#ffcd75", tag="renascer")
+        self.botao(L // 2 - 40, H - 38, L // 2 + 40, H - 12, "SAIR", fundo="#94b0c2", tag="sair")
+
+
+class Cruzamento(_Cena):
+    """Mostra pai + mãe -> ovo chocando -> filhote com genes (e mutações destacadas)."""
+
+    def __init__(self, app, pai, mae, filho, mutou):
+        super().__init__(app)
+        self.pai, self.mae, self.filho, self.mutou = pai, mae, filho, mutou
+        self.acabou = False
+        self.alvos = []
+
+    def tecla(self, e):
+        if e.keysym in ("Escape", "Return", "space"):
+            self.acabou = True
+
+    def acao(self, tag):
+        if tag == "ok":
+            self.acabou = True
+
+    def tick(self):
+        self.t += 1
+        if self.t == 14:
+            self.app.som.tocar("eclodir")
+            self.app.juice.emitir("moon", self.app.LARG // 2, 230, 2)
+        return not self.acabou
+
+    def desenhar(self):
+        from . import genetica
+        a, c, L, H = self.app, self.app.cv, self.app.LARG, self.app.ALT
+        self.alvos = []
+        c.delete("all")
+        a._moldura(2, 2, L - 2, H - 2, "#1d1730", borda=TINTA, luz="#3e3466", sombra="#0d0f1a")
+        a._txt(L // 2, 18, "LABORATÓRIO DE DNA", "#a7f070", sombra=TINTA)
+        for i, p in enumerate((self.pai, self.mae)):
+            g = p["genes"]
+            x = L // 4 + i * L // 2
+            im = self.img(("p", i, self.t // 3 % 4), lambda g=g, i=i: _frame_genes(
+                g.get("moeda", "BTC"), p.get("estagio", "adulto") if p.get("estagio") != "ovo" else "adulto",
+                "garimpando", self.t // 3 % 4, 1, g, espelhar=i == 1))
+            c.create_image(x, 54, image=im)
+            a._txt(x, 86, p.get("nome", "?")[:10], "#f4f4f4", sombra=TINTA)
+        a._txt(L // 2, 54, "+", "#b13e53", escala=2, sombra=TINTA)
+        g = self.filho
+        if self.t < 14:  # ovo balançando
+            off = (-3, 0, 3, 0)[self.t % 4]
+            ovo = self.img(("ovo", self.t % 4), lambda: _frame_genes(g["moeda"], "ovo", "garimpando", 0, 2, g))
+            c.create_image(L // 2 + off, 146, image=ovo)
+            a._txt(L // 2, 206, "chocando" + "." * (self.t // 3 % 4), "#ffcd75")
+        else:
+            bebe = self.img(("bebe", self.t // 3 % 4), lambda: _frame_genes(
+                g["moeda"], "bebe", "pulo" if self.t < 26 else "garimpando", self.t // 3 % 4, 2, g))
+            c.create_image(L // 2, 144, image=bebe)
+            nome, pts = genetica.raridade(g)
+            a._txt(L // 2, 200, nome.upper() + f" - geração {g.get('geracao', 1)}", genetica.COR_RARIDADE[nome],
+                   sombra=TINTA)
+            y = 218
+            for k in genetica.GENES:
+                mut = k in self.mutou
+                a._txt(30, y, k, "#566c86", anchor="w")
+                a._txt(L - 30, y, g[k] + (" *MUTOU*" if mut else ""), "#ffcd75" if mut else "#f4f4f4", anchor="e")
+                y += 13
+            self.botao(L // 2 - 50, H - 36, L // 2 + 50, H - 10, "LINDO!", tag="ok")
+        a.juice.desenhar(c)
+
+
+class Batalha(_Cena):
+    """Batalha por turnos animada. Você escolhe o golpe (1-4 ou clique); o rival é IA."""
+    BOTOES = ("PUMP", "HODL", "FUD", "ESPECIAL")
+
+    def __init__(self, app, eu, rival, var_eu=0.0, var_rival=0.0, semente=None, auto=False):
+        from . import batalha
+        super().__init__(app)
+        import random as _r
+        self.B, self.rnd = batalha, _r.Random(semente)
+        self.eu_pet, self.rival_pet = eu, rival
+        self.a, self.b = batalha.Lutador(eu, var_eu), batalha.Lutador(rival, var_rival)
+        self.vez = "a" if self.a.s["spd"] >= self.b.s["spd"] else "b"
+        self.log = [f"{self.a.nome} VS {self.b.nome}!"]
+        self.anim = 0        # frames de animação do golpe atual
+        self.atacante = None
+        self.dano_txt = None
+        self.fim = None
+        self.auto = auto     # demo/teste: IA joga pelos dois
+        self.acabou = False
+        self.alvos = []
+        self.espera = 6
+
+    def jogar(self, golpe):
+        if self.fim or self.vez != "a" or self.anim:
+            return
+        if golpe == "ESPECIAL":
+            golpe = self.a.s["especial"]
+        self._executar(self.a, self.b, golpe)
+
+    def _executar(self, at, df, golpe):
+        at.defendendo = False
+        hp = df.hp
+        dano, txt = self.B._golpe(at, df, golpe, self.rnd)
+        if at.fud and golpe != "FUD":
+            at.fud = max(0, at.fud - 1)
+        self.log = (self.log + [txt])[-3:]
+        self.atacante, self.anim = at, 6
+        self.dano_txt = f"-{hp - df.hp}" if hp > df.hp else None
+        self.app.som.tocar("errou" if dano and at is self.b else "pegou" if dano else "clique")
+        if dano:
+            self.app.juice.tremor = 3 if df is self.a else 2
+        self.vez = "b" if at is self.a else "a"
+        if not df.vivo:
+            self.fim = "a" if df is self.b else "b"
+            self.app.fim_batalha(self.fim == "a", self.rival_pet)
+
+    def tecla(self, e):
+        if self.fim:
+            if e.keysym in ("Return", "space", "Escape"):
+                self.acabou = True
+            return
+        if e.keysym == "Escape":
+            self.acabou = True
+        elif e.char in "1234" and e.char:
+            self.jogar(self.BOTOES[int(e.char) - 1])
+
+    def acao(self, tag):
+        if tag == "ok":
+            self.acabou = True
+        elif tag and tag.startswith("g:"):
+            self.jogar(tag[2:])
+
+    def tick(self):
+        self.t += 1
+        if self.anim:
+            self.anim -= 1
+        elif not self.fim:
+            if self.espera:
+                self.espera -= 1
+            elif self.vez == "b":
+                self._executar(self.b, self.a, self.B.escolher_ia(self.b, self.a, self.rnd))
+                self.espera = 3
+            elif self.auto:
+                self._executar(self.a, self.b, self.B.escolher_ia(self.a, self.b, self.rnd))
+                self.espera = 3
+        return not self.acabou
+
+    def _barra(self, x0, y, w, lut, cor):
+        c = self.app.cv
+        c.create_rectangle(x0, y, x0 + w, y + 10, fill=TINTA, width=0)
+        c.create_rectangle(x0 + 2, y + 2, x0 + w - 2, y + 8, fill="#333c57", width=0)
+        f = lut.hp / lut.s["max_hp"]
+        cor = "#38b764" if f > .5 else "#ffcd75" if f > .2 else "#b13e53"
+        if lut.hp:
+            c.create_rectangle(x0 + 2, y + 2, x0 + 2 + int((w - 4) * f), y + 8, fill=cor, width=0)
+
+    def desenhar(self):
+        a, c, L, H = self.app, self.app.cv, self.app.LARG, self.app.ALT
+        self.alvos = []
+        c.delete("all")
+        a._moldura(2, 2, L - 2, H - 2, "#29366f", borda=TINTA, luz="#3b5dc9", sombra="#1a1c2c")
+        yl = H - 108           # topo da caixa de log
+        chao = yl - 10
+        # arena: chão quadriculado + plataformas
+        for i, x in enumerate(range(6, L - 6, 16)):
+            c.create_rectangle(x, chao - 8, x + 16, chao + 4, fill="#38b764" if i % 2 else "#257179", width=0)
+        c.create_rectangle(6, chao + 4, L - 6, chao + 7, fill=TINTA, width=0)
+        c.create_rectangle(L - 130, 112, L - 14, 118, fill="#257179", width=0)
+        c.create_rectangle(L - 130, 118, L - 14, 121, fill=TINTA, width=0)
+        # HP: rival em cima à esquerda, eu embaixo à direita (clássico)
+        for lut, x, y in ((self.b, 10, 10), (self.a, L - 132, chao - 52)):
+            a._txt(x, y, f"{lut.nome[:9]} LV{lut.pet.get('nivel', 1)}", "#f4f4f4", anchor="nw", sombra=TINTA)
+            self._barra(x, y + 13, 122, lut, None)
+            a._txt(x + 122, y + 26, f"{lut.hp}/{lut.s['max_hp']}", "#94b0c2", anchor="ne")
+        for lut, x, y, esp in ((self.b, L - 72, 116 - 36, True), (self.a, 66, chao - 40, False)):
+            dx = 0
+            if self.anim and self.atacante is lut and self.anim > 3:
+                dx = 12 if lut is self.a else -12
+            apanhou = self.anim and self.atacante is not None and self.atacante is not lut and self.dano_txt
+            morto = not lut.vivo
+            if not (apanhou and self.anim % 2):  # pisca quando apanha
+                g = lut.pet.get("genes") or {}
+                est = lut.pet.get("estagio", "adulto")
+                est = "adulto" if est == "ovo" else est
+                linha = "rekt" if morto or lut.hp < lut.s["max_hp"] * .25 else \
+                    "moon" if (self.fim and lut.vivo) else "garimpando"
+                f = self.t // 3 % 4
+                im = self.img((id(lut), linha, f, morto), lambda: _frame_genes(
+                    g.get("moeda", "BTC"), est, linha, f, 2 if lut is self.a else 1, g, fantasma=morto,
+                    espelhar=esp))
+                c.create_image(x + dx, y - (self.t // 3 % 2 * 2 if morto else 0), image=im, anchor="center")
+            if apanhou:
+                a._txt(x + 30, y - (40 if lut is self.a else 20) - (6 - self.anim) * 3, self.dano_txt, "#b13e53", escala=2, sombra=PAPEL)
+        # caixa de log
+        a._moldura(6, yl, L - 6, yl + 50, PAPEL, luz="#ffffff", sombra="#94b0c2")
+        for i, l in enumerate(self.log[-3:]):
+            a._txt(12, yl + 7 + i * 13, l, TINTA, anchor="nw", max_chars=(L - 24) // 8)
+        if self.fim:
+            ganhou = self.fim == "a"
+            a._moldura(30, 40, L - 30, 150, "#ffcd75" if ganhou else "#94b0c2", luz="#fff4c0",
+                       sombra="#ef7d57" if ganhou else "#566c86")
+            a._txt(L // 2, 60, "VITÓRIA!" if ganhou else "DERROTA...", "#b13e53" if ganhou else TINTA, escala=2)
+            a._txt(L // 2, 86, f"+{40 if ganhou else 10} XP", "#257179")
+            v = a.cfg.get("batalhas", {})
+            a._txt(L // 2, 102, f"recorde: {v.get('vitorias', 0)}V {v.get('derrotas', 0)}D", TINTA)
+            self.botao(L // 2 - 36, 116, L // 2 + 36, 140, "OK", tag="ok")
+        esp = "LASER" if self.a.s["especial"] == "LASER EYES" else "MOON"
+        for i, gname in enumerate(self.BOTOES):
+            w = (L - 20) // 2
+            x0 = 10 + (i % 2) * w
+            y0 = H - 54 + (i // 2) * 24
+            rot = f"{i + 1} {esp if gname == 'ESPECIAL' else gname}"
+            ativo = not self.fim and self.vez == "a" and not self.anim and \
+                not (gname == "ESPECIAL" and self.a.recarga)
+            self.botao(x0, y0, x0 + w - 4, y0 + 22, rot, fundo="#ef7d57" if gname == "ESPECIAL" else "#38b764",
+                       ativo=ativo, tag="g:" + gname)
+        a.juice.desenhar(c)
