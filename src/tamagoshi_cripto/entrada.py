@@ -50,14 +50,17 @@ class MixinEntrada:
 
     def _tecla(self, e):
         if self.cena:
-            self.cena.tecla(e)
+            if not self.cena.nav(e):
+                self.cena.tecla(e)
             if getattr(self.cena, "acabou", False):
                 self.cena = None
             if not isinstance(self.cena, cenas.PegaSats):
                 self._desenhar()
             return
-        if e.keysym in ("p", "P"):
+        if e.keysym in ("p", "P") and not self.console_aberto:
             return self.brincar()
+        if e.keysym in ("s", "S") and not self.console_aberto:
+            return self.abrir_ajustes()
         if self.console_aberto:
             return self._tecla_console(e)
         if e.char == "`" or e.keysym in ("grave", "dead_grave"):
@@ -85,10 +88,17 @@ class MixinEntrada:
             self.console_input = ""
         elif e.keysym == "BackSpace":
             self.console_input = self.console_input[:-1]
+        elif e.char == "\x16" or (e.keysym.lower() == "v" and getattr(e, "state", 0) & 0x4):  # Ctrl+V cola
+            try:
+                colado = self.root.clipboard_get()
+            except Exception:
+                colado = ""
+            colado = "".join(ch for ch in colado.strip().splitlines()[0] if ch.isprintable()) if colado.strip() else ""
+            self.console_input = (self.console_input + colado)[:2000]
         elif e.keysym == "Up" and self.console.historico:
             self.console_hist_i = max(0, (self.console_hist_i or len(self.console.historico)) - 1)
             self.console_input = self.console.historico[self.console_hist_i]
-        elif e.char and e.char.isprintable() and len(self.console_input) < 60:
+        elif e.char and e.char.isprintable() and len(self.console_input) < 2000:
             self.console_input += e.char
         self._desenhar()
 

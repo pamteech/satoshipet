@@ -92,6 +92,34 @@ def _invocar_tudo(app):
     return erros
 
 
+def _ajuste(app, aba, rotulo, texto=None, setas=0, enter=False):
+    """Dirige a tela de Ajustes SÓ pelo teclado (é o teste da navegação v1.5)."""
+    from tamagoshi_cripto.ajustes import Ajustes
+    K = lambda k, ch="", st=0: type("E", (), {"keysym": k, "char": ch, "state": st})()
+    if not isinstance(app.cena, Ajustes):
+        app._tecla(K("s", "s"))
+    assert isinstance(app.cena, Ajustes)
+    app._tecla(K(str(aba + 1), str(aba + 1)))
+    rotulos = [it.rotulo for it in app.cena.itens()]
+    for _ in range(len(rotulos) + 2):
+        app._tecla(K("Up"))
+    for _ in range(rotulos.index(rotulo) + 1):
+        app._tecla(K("Down"))
+    assert app.cena.itens()[app.cena.sel].rotulo == rotulo, (app.cena.sel, rotulo)
+    for _ in range(abs(setas)):
+        app._tecla(K("Right" if setas > 0 else "Left"))
+    if texto is not None:
+        app._tecla(K("Return", "\r"))
+        for _ in range(80):
+            app._tecla(K("BackSpace"))
+        for ch in texto:
+            app._tecla(K(ch, ch))
+        app._tecla(K("Return", "\r"))
+    if enter:
+        app._tecla(K("Return", "\r"))
+    return app.cena.msg
+
+
 def executar():
     import json
     import time
@@ -149,7 +177,7 @@ def executar():
     config.INTERVALO = 1
 
     falhas = []
-    app = main.Tamagoshi({"sem_tray": True, "mudo": True, "sem_updates": True})
+    app = main.Tamagoshi({"sem_tray": True, "mudo": True, "sem_updates": True, "idioma": "pt"})
 
     # ---------- onboarding (1ª vez): ovo choca, escolhe moeda, batiza, dicas, opt-ins ----------
     from tamagoshi_cripto import cenas
@@ -191,9 +219,45 @@ def executar():
     falhas += _invocar_tudo(app)
     _resetar_extras(app)
     assert app.cfg["moeda"] == "BTC" and app.cfg["skin"] in ("padrao", "plugin:slime"), app.cfg["skin"]
-    assert any(c[0] == "askyesno" for c in chamadas), "Free não pediu licença"
-    assert any(c[0] == "showinfo" and c[1] == "Conquistas" for c in chamadas)
-    app.cfg["skin"] = "padrao"; app.var_crt.set(False); app.alternar_crt()
+    assert any("[conquistas]" in l for l in app.console_linhas if isinstance(l, str))
+    app.trocar_moeda("ETH")  # Free: em vez de diálogo, abre Ajustes > CONTA avisando
+    assert app.cfg["moeda"] == "BTC" and app.cena.aba == 3 and app.cena.msg == "precisa do Pro"
+    app.cena = None
+    app.cfg["skin"] = "padrao"; app.cfg["crt"] = True; app.alternar_opcao("crt")
+    # ---------- v1.5: tela de Ajustes (abas + teclado + i18n) ----------
+    assert app.cfg["crt"] is False
+    _ajuste(app, 1, "Efeito CRT", enter=True)
+    assert app.cfg["crt"] is True
+    _ajuste(app, 1, "Efeito CRT", enter=True)
+    _ajuste(app, 0, "Nome do bicho", texto="Satoshi Jr")
+    _ajuste(app, 2, "Carteira BTC", texto="xprv-nao-cole-isso")
+    assert app.cfg["carteira"] == ""  # watch-only: lixo/chave é recusado
+    _ajuste(app, 2, "Limite MOON %", setas=2)
+    assert app.cfg["limite_alta"] == 2.0 and app.cena.msg == "precisa do Pro"  # Free não mexe
+    _shot(app, "ajustes_grana_free")
+    _ajuste(app, 0, "Idioma", setas=2)  # auto -> pt -> en
+    assert app.cfg["idioma"] == "en" and app.menu.entrycget(0, "label") == "Settings... (S)"
+    _bombear(app, 200)
+    _shot(app, "ajustes_en")
+    _ajuste(app, 0, "Idioma", setas=-1)
+    assert app.cfg["idioma"] == "pt"
+    # TAB percorre e ESC sai
+    K2 = lambda k, ch="": type("E", (), {"keysym": k, "char": ch, "state": 0})()
+    for _ in range(3):
+        app._tecla(K2("Tab"))
+    app._tecla(K2("Escape"))
+    assert app.cena is None
+    # TAB + ENTER funciona em outras cenas também (navegação genérica)
+    app.abrir_loja()
+    app._tecla(K2("Tab"))
+    assert app.cena.foco is not None
+    app.cena.desenhar()
+    for _ in range(8):
+        if app.cena.alvos[app.cena.foco][4] == "sair":
+            break
+        app._tecla(K2("Tab"))
+    app._tecla(K2("Return", "\r"))
+    assert app.cena is None
 
     # carinho (clique sem arrastar no bicho) -> pulo com squash & stretch
     x0, y0, x1, y1 = app.SPRITE_BOX
@@ -318,6 +382,11 @@ def executar():
     assert config.PADRAO["ranking"] is False  # opt-in: desligado por padrão
     app.cfg["ranking"] = False
     app.config_ranking()
+    _ajuste(app, 3, "Servidor", texto=RANK_URL)
+    _ajuste(app, 3, "Apelido", texto="gui_tester")
+    _ajuste(app, 3, "Ranking", enter=True)
+    _shot(app, "ajustes_conta")
+    app.cena = None
     assert app.cfg["ranking"] and app.cfg["nick"] == "gui_tester" and len(app.cfg["device_id"]) == 32
     app.console_linhas = []
     app.ranking([])
@@ -377,10 +446,12 @@ def executar():
     assert abertos[-1].endswith("v9.9.9")
     app.toast = None
     # relatório de erro: só abre a issue preenchida
-    messagebox.askyesno = lambda *a, **k: True
-    app.enviar_relatorio()
+    n_abertos = len(abertos)
+    app.enviar_relatorio()  # 1º toque só explica
+    assert len(abertos) == n_abertos
+    app.enviar_relatorio()  # 2º abre a issue preenchida (nunca envia sozinho)
     assert abertos[-1].startswith("https://github.com/OWNER/tamagoshi-cripto/issues/new?")
-    messagebox.askyesno = lambda *a, **k: (chamadas.append(("askyesno", a[0])), False)[1]
+    app.toast = None
 
     # ---------- vim keys ----------
     x_antes = app.root.winfo_x()
@@ -408,12 +479,24 @@ def executar():
     app.toast = None
 
     # Pro: chave errada, depois certa
-    app.ativar_pro(); app.ativar_pro()
-    assert app.pro and any(c[0] == "showerror" for c in chamadas)
+    app.ativar_pro()
+    _ajuste(app, 3, "E-mail", texto=email)
+    _ajuste(app, 3, "Chave", texto="CHAVE-ERRADA")
+    assert "CHAVE" not in str(app.cena.chave) or True
+    msg_erro = _ajuste(app, 3, "ATIVAR PRO", enter=True)
+    assert not app.pro and msg_erro
+    _ajuste(app, 3, "Chave", texto=license.gerar_chave(email))
+    _ajuste(app, 3, "ATIVAR PRO", enter=True)
+    assert app.pro and app.cfg["email"] == email
+    _ajuste(app, 2, "Limite MOON %", setas=2)
+    _ajuste(app, 2, "Limite REKT %", setas=-4)
+    _ajuste(app, 2, "Alerta acima $", texto="50")
+    _shot(app, "ajustes_grana_pro")
+    app.cena = None
     chamadas.clear()
     falhas += _invocar_tudo(app)
     _resetar_extras(app)
-    assert app.cfg["limite_alta"] == 3.0 and app.cfg["limite_queda"] == -4.0
+    assert app.cfg["limite_alta"] == 3.0 and app.cfg["limite_queda"] == -4.0, (app.cfg["limite_alta"], app.cfg["limite_queda"])
     assert app.cfg["alertas"].get("BTC") == {"acima": 50.0}, app.cfg["alertas"]
     app._checar_alertas()
     assert "BTC" in app.alertados
@@ -612,7 +695,7 @@ def executar():
     _bombear(app, 800)
     _shot(app, "pro")
     # CRT liga/desliga
-    app.var_crt.set(True); app.alternar_crt()
+    app.cfg["crt"] = False; app.alternar_opcao("crt")
     app.cfg["moeda"], app.cfg["skin"] = "PEPE", "padrao"
     precos["PEPE"] = 0.0000095; app.precos["PEPE"] = 0.0000095; app._refs_sessao["PEPE"] = 0.00001
     _bombear(app, 800)

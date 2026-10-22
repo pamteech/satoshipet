@@ -140,18 +140,8 @@ class MixinMercado:
         return [f"carteira {rede.upper()} watch-only salva. só leitura, via RPC público sem chave."]
 
     def config_carteiras_multi(self):
-        from tkinter import messagebox, simpledialog
-        for rede, ex in (("eth", "0x..."), ("sol", "base58")):
-            end = simpledialog.askstring(
-                f"Carteira {rede.upper()} watch-only",
-                f"Endereço {rede.upper()} PÚBLICO ({ex}).\nNUNCA cole seed, chave privada ou keypair.json.\n"
-                "(vazio = manter, '-' = remover)", initialvalue=self.cfg.get("carteira_" + rede, ""),
-                parent=self.root)
-            if not end or end.strip() == self.cfg.get("carteira_" + rede):
-                continue
-            res = self.carteira_multi(rede, end)
-            (messagebox.showinfo if "salva" in res[0] or "removida" in res[0] else messagebox.showerror)(
-                "Carteira " + rede.upper(), "\n".join(res), parent=self.root)
+        self.abrir_ajustes("grana")
+        self.cena.sel = next(i for i, it in enumerate(self.cena.itens()) if it.rotulo == "Carteira ETH")
 
     # ---------- paper trading ----------
     def corretora(self):

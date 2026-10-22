@@ -17,6 +17,7 @@ from . import (
     crashlog,
     engajamento,
     evolucao,
+    i18n,
     juice,
     logic,
     lojinha,
@@ -126,6 +127,7 @@ class Tamagoshi(MixinVida, MixinDesenho, MixinEntrada, MixinMenus, MixinRede,
 
         self.cv.tag_bind("botao", "<Enter>", lambda e: self.cv.config(cursor="hand2"))
         self.cv.tag_bind("botao", "<Leave>", lambda e: self.cv.config(cursor=""))
+        i18n.definir(self.op.get("idioma") or self.cfg.get("idioma", "auto"))
         self._montar_menu()
         self.cv.bind("<ButtonPress-1>", self.inicio_arraste)
         self.cv.bind("<B1-Motion>", self.arrastando)

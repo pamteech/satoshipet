@@ -8,7 +8,7 @@ import re
 
 from PIL import Image
 
-from . import arts, config, recursos
+from . import arts, config, recursos, ui
 from .sprites import nome_folha
 
 MOEDAS = ["BTC", "ETH", "SOL", "DOGE", "PEPE"]
@@ -32,11 +32,34 @@ class _Cena:
             self.imgs[chave] = _png_para_tk(fabrica())
         return self.imgs[chave]
 
+    # ---- v1.5: navegação por teclado igual em TODA cena (TAB foca botão, ENTER/espaço aperta) ----
+    foco = None          # índice em self.alvos (None = ninguém focado, a cena usa as teclas dela)
+    NAV_PROPRIA = False  # cenas com navegação própria (Ajustes) dispensam a genérica
+
+    def nav(self, e):
+        """Devolve True se a tecla foi de navegação genérica (aí a cena não precisa tratar)."""
+        if self.NAV_PROPRIA:
+            return False
+        alvos = [i for i, a in enumerate(getattr(self, "alvos", [])) if a[4]]
+        k = e.keysym
+        if k in ("Tab", "ISO_Left_Tab") and alvos:
+            volta = k == "ISO_Left_Tab" or bool(getattr(e, "state", 0) & 1)
+            pos = alvos.index(self.foco) if self.foco in alvos else (0 if volta else -1)
+            self.foco = alvos[(pos + (-1 if volta else 1)) % len(alvos)]
+            return True
+        if k in ("Return", "space", "KP_Enter") and self.foco is not None and self.foco < len(self.alvos):
+            tag = self.alvos[self.foco][4]
+            self.foco = None if tag == "sair" else self.foco
+            self.acao(tag)
+            return True
+        if k == "Escape" and self.foco is not None:
+            self.foco = None
+            return True
+        return False
+
     def botao(self, x0, y0, x1, y1, texto, fundo="#38b764", ativo=True, tag=None):
-        a = self.app
-        a._moldura(x0, y0, x1, y1, fundo if ativo else "#566c86", luz="#a7f070" if ativo else None,
-                   sombra="#257179" if ativo else None, tags=(tag,) if tag else ())
-        a._txt((x0 + x1) // 2, (y0 + y1) // 2 + 1, texto, TINTA if ativo else "#333c57", tags=(tag,) if tag else ())
+        tags = (tag,) if tag else ()
+        ui.botao(self.app, x0, y0, x1, y1, texto, fundo, ativo, foco=self.foco == len(self.alvos), tags=tags)
         self.alvos.append((x0, y0, x1, y1, tag))
 
     def clique(self, x, y):

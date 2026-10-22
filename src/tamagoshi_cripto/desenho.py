@@ -9,6 +9,7 @@ from . import (
     arts,
     evolucao,
     genetica,
+    i18n,
     juice,
     logic,
     onchain,
@@ -41,7 +42,7 @@ class MixinDesenho:
         self.SPRITE_BOX = (cx - S // 2, self.Y_SPRITE, cx + S // 2, self.Y_SPRITE + S)
 
     def _txt(self, x, y, texto, cor, anchor="center", escala=1, max_chars=None, sombra=None, tags=()):
-        img = self.fonte.imagem(texto, cor, escala, max_chars, sombra)
+        img = self.fonte.imagem(i18n.t(texto), cor, escala, max_chars, sombra)
         self.cv.create_image(x, y, image=img, anchor=anchor, tags=tags)
 
     def _moldura(self, x0, y0, x1, y1, fundo, borda=C_TINTA, luz=None, sombra=None, tags=()):

@@ -59,6 +59,7 @@ def rodar(horas=6, semente=1, verbose=False):
         multichain,
         noticias,
         onchain,
+        sistema,
     )
     # rede: tudo falso e controlado (às vezes cai)
     estado = {"online": True}
@@ -89,7 +90,7 @@ def rodar(horas=6, semente=1, verbose=False):
     sd.askfloat = lambda *a, **k: None
     webbrowser.open = lambda *a, **k: True
 
-    app = main.Tamagoshi({"sem_tray": 1, "sem_onboarding": 1, "sem_updates": 1, "mudo": True,
+    app = main.Tamagoshi({"sem_tray": 1, "idioma": "pt", "sem_onboarding": 1, "sem_updates": 1, "mudo": True,
                           "sem_confirmar": 1, "sem_twitch": 1})
     app.root.after = lambda *a, **k: None          # o soak dirige o relógio, não o Tk
     app.pro = True
@@ -169,6 +170,23 @@ def rodar(horas=6, semente=1, verbose=False):
                 app.cena.acao(k)
                 app.cena.desenhar()
             app.cena = None
+        if rnd.random() < 0.003 and not app.cena:  # v1.5: fuzz de teclado na tela de Ajustes (abas GERAL/VISUAL)
+            esc0, mudo0 = app.escala, app.cfg.get("mudo")
+            sistema.definir_autostart = lambda ligar: True  # nunca mexe no autostart de verdade
+            app.abrir_ajustes(rnd.choice(["geral", "visual"]))
+            teclas = ["Tab", "ISO_Left_Tab", "Up", "Down", "Left", "Right", "Return", "space", "BackSpace", "x", "1", "2"]
+            for _ in range(rnd.randint(5, 40)):
+                k = rnd.choice(teclas)
+                app.cena.tecla(type("E", (), {"keysym": k, "char": k if len(k) == 1 else "", "state": 0})())
+                if app.cena.aba > 1:
+                    app.cena._trocar_aba(0)
+                app.cena.desenhar()
+            app.cena = None
+            app.definir_idioma("pt")
+            if app.escala != esc0:
+                app.mudar_escala(esc0)
+            app.som.mudo = app.cfg["mudo"] = mudo0
+            stats["ajustes"] = stats.get("ajustes", 0) + 1
         if rnd.random() < 0.002:
             app.trocar_skin(rnd.choice(["padrao"] + ["loja:" + p for p in app.catalogo]))
         if rnd.random() < 0.002:

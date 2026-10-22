@@ -3,7 +3,6 @@
 Mixin do Tamagoshi (main.py). Roda na thread da GUI, exceto os loop_* (threads daemon)."""
 import time
 import webbrowser
-from tkinter import messagebox
 
 from . import (
     __version__,
@@ -51,8 +50,8 @@ class MixinRede:
             self.toast = [f"v{info['versao']} - clique aqui", 60, "NOVA VERSÃO!"]
             self.som.tocar("update")
         else:
-            messagebox.showinfo("Atualizações", f"Você está na versão mais nova que achei (v{__version__}).\n"
-                                "(ou estou offline / o repo ainda não é público)", parent=self.root)
+            self.avisar([f"v{__version__}: você já está na mais nova", "(ou offline / repo ainda não é público)"],
+                        "ATUALIZAÇÕES")
 
     def abrir_update(self):
         if self.update:
@@ -60,11 +59,17 @@ class MixinRede:
 
     # ---------- relatório de erro ----------
     def enviar_relatorio(self):
-        if messagebox.askyesno("Enviar relatório",
-                               "Vou abrir uma issue PREENCHIDA no GitHub no seu navegador, com a versão, o sistema e o "
-                               "último erro (sem seu nome de usuário). Você revisa e decide se envia. Abrir?",
-                               parent=self.root):
-            webbrowser.open(crashlog.url_issue())
+        """2 passos, sem diálogo: o 1º explica o que vai acontecer; o 2º (em 8 s) abre a issue no navegador."""
+        agora = time.time()
+        if agora - getattr(self, "_rel_pedido", 0) > 8:
+            self._rel_pedido = agora
+            msg = ["abre uma issue PREENCHIDA no navegador (versão, sistema, último erro; sem seu usuário).",
+                   "você revisa e decide se envia. repita em 8 s pra abrir"]
+            self.avisar(msg, "RELATÓRIO")
+            return msg
+        self._rel_pedido = 0
+        webbrowser.open(crashlog.url_issue())
+        return ["abri no navegador. nada foi enviado sozinho"]
 
     # ---------- on-chain ----------
     def loop_onchain(self):

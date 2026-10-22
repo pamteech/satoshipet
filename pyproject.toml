@@ -71,13 +71,15 @@ skip_empty = true
 python_version = "3.10"
 ignore_missing_imports = true
 check_untyped_defs = true
+follow_imports = "silent"
 warn_unused_ignores = true
 files = [
     "src/tamagoshi_cripto/genetica.py", "src/tamagoshi_cripto/batalha.py", "src/tamagoshi_cripto/hardcore.py",
     "src/tamagoshi_cripto/papel.py", "src/tamagoshi_cripto/loja.py", "src/tamagoshi_cripto/multichain.py",
     "src/tamagoshi_cripto/config.py", "src/tamagoshi_cripto/logic.py", "src/tamagoshi_cripto/evolucao.py",
     "src/tamagoshi_cripto/conquistas.py", "src/tamagoshi_cripto/license.py", "src/tamagoshi_cripto/baleias.py",
-    "src/tamagoshi_cripto/noticias.py", "src/tamagoshi_cripto/pixel.py",
+    "src/tamagoshi_cripto/noticias.py", "src/tamagoshi_cripto/pixel.py", "src/tamagoshi_cripto/i18n.py",
+    "src/tamagoshi_cripto/ui.py", "src/tamagoshi_cripto/ajustes.py",
 ]
 
 # núcleo de regras do jogo: tudo tipado, sem desculpa 🧐

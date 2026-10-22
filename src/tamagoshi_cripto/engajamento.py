@@ -5,7 +5,6 @@ o "código do pet" é só texto que você cola no zap do amigo.
 """
 import random
 import time
-from tkinter import messagebox, simpledialog
 
 from . import batalha, cenas, config, evolucao, genetica, hardcore
 
@@ -130,15 +129,17 @@ class MixinEngajamento:
     def _tocar(self):
         hardcore.tocar(self.cfg)
 
-    def alternar_hardcore(self, var=None):
+    def alternar_hardcore(self, var=None, confirmado=False):
+        """Ligar pede confirmação em DOIS passos (sem diálogo): o 1º toque só avisa, o 2º (em 8 s) liga."""
         ligar = bool(var.get()) if var is not None else not self.cfg.get("hardcore")
-        if ligar and not self.op.get("sem_confirmar") and not messagebox.askyesno(
-                "Modo hardcore", "No modo hardcore o bicho pode MORRER:\n"
-                f"vida zerada por {hardcore.MORTE_MIN} min + {hardcore.ABANDONO_H} h sem carinho.\n"
-                "Ele vira fantasma e vai pro Cemitério de Honra. Ligar?", parent=self.root):
+        agora = time.time()
+        if ligar and not (confirmado or self.op.get("sem_confirmar")) and agora - getattr(self, "_hc_pedido", 0) > 8:
+            self._hc_pedido = agora
             if var is not None:
                 var.set(False)
-            return ["ufa. covarde, mas vivo"]
+            return [f"CERTEZA? o bicho pode MORRER ({hardcore.MORTE_MIN} min sem vida + {hardcore.ABANDONO_H} h "
+                    "sem carinho). repita em 8 s pra ligar"]
+        self._hc_pedido = 0
         self.cfg["hardcore"] = ligar
         self._tocar()
         config.salvar(self.cfg)
@@ -231,30 +232,29 @@ class MixinEngajamento:
     # ---------- menu ----------
     def menu_genetica(self, m):
         import tkinter as tk
+
+        from .i18n import t
         mg = tk.Menu(m, tearoff=0)
-        mg.add_command(label="Copiar meu código de pet", command=self._menu_petcode)
-        mg.add_command(label="Cruzar com código de amigo...", command=lambda: self._menu_codigo("cruzar"))
-        mg.add_command(label="Batalhar contra IA", command=self.batalhar)
-        mg.add_command(label="Batalhar contra código de amigo...", command=lambda: self._menu_codigo("batalhar"))
-        mg.add_command(label="Estábulo (console: stable)", command=lambda: self._menu_info(self.estabulo()))
+        mg.add_command(label=t("Copiar meu código de pet"), command=self._menu_petcode)
+        mg.add_command(label=t("Cruzar com código de amigo..."), command=lambda: self._menu_codigo("cruzar"))
+        mg.add_command(label=t("Batalhar contra IA"), command=self.batalhar)
+        mg.add_command(label=t("Batalhar contra código de amigo..."), command=lambda: self._menu_codigo("batalhar"))
+        mg.add_command(label=t("Estábulo (console: stable)"), command=lambda: self._menu_info(self.estabulo()))
         mg.add_separator()
-        mg.add_command(label="Cemitério de Honra", command=self.ver_cemiterio)
-        self.var_hardcore = tk.BooleanVar(value=bool(self.cfg.get("hardcore")))
-        mg.add_checkbutton(label="Modo hardcore (pode morrer!)", variable=self.var_hardcore,
-                           command=lambda: self.alternar_hardcore(self.var_hardcore))
-        m.add_cascade(label="Genética e batalhas", menu=mg)
+        mg.add_command(label=t("Cemitério de Honra"), command=self.ver_cemiterio)
+        m.add_cascade(label=t("Genética e batalhas"), menu=mg)
 
     def _menu_petcode(self):
         cod = self.petcode()
-        messagebox.showinfo("Código do pet", "Copiado pra área de transferência:\n\n" + cod +
-                            "\n\nManda pro amigo: ele cola em 'Cruzar' ou 'Batalhar'.", parent=self.root)
+        self.avisar(["código copiado! manda pro amigo", cod], "CÓDIGO DO PET")
 
     def _menu_codigo(self, acao):
-        cod = simpledialog.askstring("Código do pet", "Cole o código (TAMA1-...):", parent=self.root)
-        if cod:
-            linhas = getattr(self, acao)(cod)
-            if not isinstance(self.cena, (cenas.Cruzamento, cenas.Batalha)):
-                messagebox.showinfo("Hmm", "\n".join(linhas), parent=self.root)
+        """Abre o console já com o comando digitado: é só colar (Ctrl+V) o código e dar ENTER."""
+        self.console_aberto = True
+        self.console_input = ("breed " if acao == "cruzar" else "battle ")
+        self.console_linhas = (self.console_linhas + ["cole o código do amigo (Ctrl+V) e ENTER"])[-60:]
+        self.root.focus_force()
+        self._desenhar()
 
     def _menu_info(self, linhas):
-        messagebox.showinfo("Tamagoshi", "\n".join(linhas), parent=self.root)
+        self.avisar(linhas, "TAMAGOSHI")

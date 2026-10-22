@@ -60,6 +60,7 @@ PADRAO = {
     "chapeus": True,         # chapéus de época (halloween/natal)
     "alto_contraste": False,
     "juice": True,           # tremidinha e partículas
+    "idioma": "auto",        # v1.5: auto (segue o sistema) | pt | en
     # v1.4
     "hardcore": False,       # opt-in: o bicho pode MORRER de abandono (vai pro Cemitério de Honra)
     "fantasma": False,

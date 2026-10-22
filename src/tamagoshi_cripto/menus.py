@@ -1,14 +1,14 @@
-"""menus.py - menu do botão direito e os diálogos antigos (Tk) que ainda sobraram.
+"""menus.py - menu do botão direito (enxuto: o resto mora na tela de Ajustes) e os helpers aplicar_*.
 
 Mixin do Tamagoshi (main.py). Roda na thread da GUI, exceto os loop_* (threads daemon)."""
 import tkinter as tk
-from tkinter import messagebox, simpledialog
 
 from . import (
     __version__,
     arts,
     cenas,
     config,
+    i18n,
     licencas,
     ranking,
     sistema,
@@ -22,6 +22,8 @@ from .graficos import (
 class MixinMenus:
     # ---------- menu ----------
     def _montar_menu(self):
+        """Menu enxuto: atalhos de ação. Opções/ligações moram em Ajustes (S). Rótulos passam pelo i18n."""
+        t = i18n.t
         m = tk.Menu(self.root, tearoff=0)
         self.menu_moedas = tk.Menu(m, tearoff=0)
         for s in config.MOEDAS:
@@ -29,65 +31,34 @@ class MixinMenus:
                                          command=lambda s=s: self.trocar_moeda(s))
         self.menu_skins = tk.Menu(m, tearoff=0)
         self._preencher_skins()
-        m.add_cascade(label="Trocar moeda", menu=self.menu_moedas)
-        m.add_cascade(label="Trocar skin", menu=self.menu_skins)
-        m.add_command(label="Configurações", command=self.configuracoes)
-        m.add_command(label="Alertas de preço", command=self.config_alertas)
-        m.add_command(label="Conquistas", command=self.ver_conquistas)
-        m.add_command(label="Carteira watch-only...", command=self.config_carteira)
-        m.add_command(label="Console hacker (`)", command=self.alternar_console)
-        m.add_command(label="Compartilhar card (X)", command=self._menu_share)
-        m.add_command(label="Ranking (opt-in)...", command=self.config_ranking)
-        m.add_command(label="Brincar: Pega os Sats (P)", command=self.brincar)
+        m.add_command(label=t("Ajustes... (S)"), command=self.abrir_ajustes)
+        m.add_separator()
+        m.add_cascade(label=t("Trocar moeda"), menu=self.menu_moedas)
+        m.add_cascade(label=t("Trocar skin"), menu=self.menu_skins)
+        m.add_command(label=t("Conquistas"), command=self.ver_conquistas)
+        m.add_command(label=t("Console hacker (`)"), command=self.alternar_console)
+        m.add_command(label=t("Compartilhar card (X)"), command=self._menu_share)
+        m.add_command(label=t("Brincar: Pega os Sats (P)"), command=self.brincar)
         self.menu_genetica(m)
         mm = tk.Menu(m, tearoff=0)
-        mm.add_command(label="Corretora de mentirinha (paper trading)", command=self.abrir_corretora)
-        mm.add_command(label="Carteiras ETH/SOL watch-only...", command=self.config_carteiras_multi)
-        for chave, rot in (("baleias", "Alerta de baleia (mempool.space)"), ("noticias", "Manchetes RSS no balão")):
-            v = self.vars_op_m = getattr(self, "vars_op_m", {})
-            v[chave] = tk.BooleanVar(value=bool(self.cfg.get(chave, True)))
-            mm.add_checkbutton(label=rot, variable=v[chave], command=lambda c=chave: self.alternar_opcao(c, self.vars_op_m[c]))
-        m.add_cascade(label="Mercado", menu=mm)
+        mm.add_command(label=t("Corretora de mentirinha (paper trading)"), command=self.abrir_corretora)
+        m.add_cascade(label=t("Mercado"), menu=mm)
         ml = tk.Menu(m, tearoff=0)
-        ml.add_command(label="Abrir loja de skins", command=self.abrir_loja)
-        ml.add_command(label="Resgatar código...", command=self._menu_resgatar)
-        ml.add_command(label="Overlay de streamer (OBS + Twitch)...", command=self.config_twitch)
-        m.add_cascade(label="Loja de skins", menu=ml)
-        ma = tk.Menu(m, tearoff=0)  # aparência e acessibilidade
-        self.var_escala = tk.IntVar(value=self.escala)
-        for e in range(1, 7):
-            ma.add_radiobutton(label=f"Tamanho {e}x" + ("  (padrão)" if e == 3 else ""), variable=self.var_escala,
-                               value=e, command=lambda e=e: self.mudar_escala(e))
-        ma.add_separator()
-        self.vars_op = {}
-        for chave, rot in (("alto_contraste", "Alto contraste"), ("dia_noite", "Paleta dia/noite"),
-                           ("chapeus", "Chapéus de época"), ("juice", "Tremidinha e partículas"),
-                           ("musica", "Música de fundo (chiptune)"), ("checar_updates", "Avisar versão nova")):
-            v = self.vars_op[chave] = tk.BooleanVar(value=bool(self.cfg.get(chave)))
-            ma.add_checkbutton(label=rot, variable=v, command=lambda c=chave, v=v: self.alternar_opcao(c, v))
-        m.add_cascade(label="Aparência e acessibilidade", menu=ma)
+        ml.add_command(label=t("Abrir loja de skins"), command=self.abrir_loja)
+        ml.add_command(label=t("Resgatar código..."), command=self._menu_resgatar)
+        ml.add_command(label=t("Overlay de streamer (OBS + Twitch)..."), command=self.config_twitch)
+        m.add_cascade(label=t("Loja de skins"), menu=ml)
         mh = tk.Menu(m, tearoff=0)
-        mh.add_command(label="Rever introdução", command=self.rever_intro)
-        mh.add_command(label="Procurar atualização", command=self.checar_update_agora)
-        mh.add_command(label="Enviar relatório de erro...", command=self.enviar_relatorio)
+        mh.add_command(label=t("Rever introdução"), command=self.rever_intro)
+        mh.add_command(label=t("Procurar atualização"), command=self.checar_update_agora)
+        mh.add_command(label=t("Enviar relatório de erro..."), command=self.enviar_relatorio)
         mh.add_command(label=f"Tamagoshi Cripto v{__version__}", state="disabled")
-        m.add_cascade(label="Ajuda", menu=mh)
-        self.var_sats = tk.BooleanVar(value=self.cfg.get("unidade") == "sats")
-        m.add_checkbutton(label="Mostrar em sats", variable=self.var_sats,
-                          command=lambda: self.alternar_sats(self.var_sats.get()))
-        self.var_mudo = tk.BooleanVar(value=self.cfg.get("mudo", False))
-        m.add_checkbutton(label="Mudo", variable=self.var_mudo, command=self.alternar_mudo)
-        self.var_crt = tk.BooleanVar(value=self.cfg.get("crt", False))
-        m.add_checkbutton(label="Efeito CRT", variable=self.var_crt, command=self.alternar_crt)
-        self.var_auto = tk.BooleanVar(value=sistema.autostart_ativo())
-        m.add_checkbutton(label=sistema.nome_autostart(), variable=self.var_auto,
-                          command=self.alternar_autostart,
-                          state="normal" if sistema.autostart_suportado() else "disabled")
-        m.add_command(label="Esconder (bandeja)", command=self.esconder,
+        m.add_cascade(label=t("Ajuda"), menu=mh)
+        m.add_command(label=t("Esconder (bandeja)"), command=self.esconder,
                       state="normal" if sistema.tray_disponivel(self.cfg.get("menubar_mac")) else "disabled")
         m.add_separator()
-        m.add_command(label="Ativar Pro", command=self.ativar_pro)
-        m.add_command(label="Sair", command=self.sair)
+        m.add_command(label=t("Ativar Pro"), command=self.ativar_pro)
+        m.add_command(label=t("Sair"), command=self.sair)
         self.menu = m
 
     def _preencher_skins(self):
@@ -112,139 +83,145 @@ class MixinMenus:
                                command=lambda pid=pid: self.trocar_skin(pid))
 
     def abrir_menu(self, e):
-        self.menu.entryconfig(self.menu.index("end") - 1, label="Pro ativo" if self.pro else "Ativar Pro")
+        self.menu.entryconfig(self.menu.index("end") - 1, label=i18n.t("Pro ativo" if self.pro else "Ativar Pro"))
         try:
             self.menu.tk_popup(e.x_root, e.y_root)
         finally:
             self.menu.grab_release()
 
+    # ---------- v1.5: tudo que era diálogo agora mora na tela de Ajustes ----------
+    def abrir_ajustes(self, aba="geral", msg=""):
+        from .ajustes import Ajustes
+        self.console_aberto = False
+        self.cena = Ajustes(self, aba)
+        if msg:
+            self.cena._dizer(msg)
+        self._desenhar()
+
     def configuracoes(self):
-        if not self._exige_pro():
+        self.abrir_ajustes("grana")
+
+    def config_alertas(self):
+        self.abrir_ajustes("grana")
+
+    def config_carteira(self):
+        self.abrir_ajustes("grana")
+
+    def config_ranking(self):
+        self.abrir_ajustes("conta")
+
+    def ativar_pro(self):
+        self.abrir_ajustes("conta", "Pro ativo" if self.pro else "")
+
+    def definir_idioma(self, escolha):
+        self.cfg["idioma"] = escolha
+        i18n.definir(escolha)
+        config.salvar(self.cfg)
+        self._montar_menu()  # menu do Tk não passa pelo _txt: remonta traduzido
+
+    def autostart_ligado(self):
+        return sistema.autostart_ativo()
+
+    def autostart_suportado(self):
+        return sistema.autostart_suportado()
+
+    def avisar(self, linhas, titulo="INFO", ticks=40):
+        """Substitui o messagebox.showinfo: vira toast no estilo do app (e cai no console pra reler)."""
+        linhas = [linhas] if isinstance(linhas, str) else [str(x) for x in linhas if x]
+        if not linhas:
             return
-        ask = simpledialog.askfloat
-        alta = ask("Configurações", "Limite TO THE MOON (%):", initialvalue=self.cfg["limite_alta"], parent=self.root)
-        queda = ask("Configurações", "Limite REKT (%, negativo):", initialvalue=self.cfg["limite_queda"], parent=self.root)
-        moeda = self.cfg["moeda"]
-        atual = self.cfg["preco_referencia"].get(moeda) or self.precos.get(moeda) or 0
-        ref = ask("Configurações", f"Preço de referência do {moeda} (USD, 0 = preço atual):",
-                  initialvalue=atual, parent=self.root)
+        self.toast = [linhas[0][:60], ticks, titulo]
+        self.console_linhas = (self.console_linhas + [f"[{titulo.lower()}] " + x for x in linhas])[-60:]
+
+    def aplicar_limites(self, alta=None, queda=None, ref=None):
+        if not self.pro:
+            return False
         if alta is not None:
-            self.cfg["limite_alta"] = abs(alta)
+            self.cfg["limite_alta"] = round(max(0.5, min(50.0, abs(float(alta)))), 2)
         if queda is not None:
-            self.cfg["limite_queda"] = -abs(queda)
+            self.cfg["limite_queda"] = round(-max(0.5, min(50.0, abs(float(queda)))), 2)
         if ref is not None:
+            moeda = self.cfg["moeda"]
             if ref > 0:
-                self.cfg["preco_referencia"][moeda] = ref
+                self.cfg["preco_referencia"][moeda] = float(ref)
             else:
                 self.cfg["preco_referencia"].pop(moeda, None)
         config.salvar(self.cfg)
-        self._desenhar()
+        return True
 
-    def config_alertas(self):
-        if not self._exige_pro():
-            return
+    def aplicar_alertas(self, acima=None, abaixo=None):
+        if not self.pro:
+            return False
         moeda = self.cfg["moeda"]
-        alvo = self.cfg["alertas"].get(moeda, {})
-        acima = simpledialog.askfloat("Alertas", f"Avisar quando {moeda} passar de (USD, 0 = off):",
-                                      initialvalue=alvo.get("acima", 0), parent=self.root)
-        abaixo = simpledialog.askfloat("Alertas", f"Avisar quando {moeda} cair abaixo de (USD, 0 = off):",
-                                       initialvalue=alvo.get("abaixo", 0), parent=self.root)
-        self.cfg["alertas"][moeda] = {k: v for k, v in (("acima", acima), ("abaixo", abaixo)) if v}
+        self.cfg["alertas"][moeda] = {k: float(v) for k, v in (("acima", acima), ("abaixo", abaixo))
+                                      if v and float(v) > 0}
         self.alertados.discard(moeda)
         config.salvar(self.cfg)
+        return True
+
+    def aplicar_carteira(self, endereco):
+        """BTC watch-only. Vazio = remover. Devolve linhas de resposta (mesmas do console)."""
+        if not (endereco or "").strip():
+            self.cfg["carteira"] = ""
+            self.saldo = None
+            config.salvar(self.cfg)
+            return ["carteira removida"]
+        return self.carteira(endereco.strip())
+
+    def aplicar_licenca(self, email, chave):
+        email, chave = (email or "").strip(), (chave or "").strip()
+        if not email or not chave:
+            return licencas.Resultado(False, "preencha e-mail e chave")
+        self.root.config(cursor="watch")
+        self.root.update_idletasks()
+        try:
+            res = licencas.verificar(self.cfg, email, chave, forcar=True)
+        finally:
+            self.root.config(cursor="")
+        if res.ok:
+            self.pro = True
+            hmac_ = (self.cfg.get("licenca_provedor") or "hmac") == "hmac"
+            self.cfg["email"], self.cfg["licenca"] = email.lower(), chave.upper() if hmac_ else chave
+            config.salvar(self.cfg)
+            self.cache_sprites.clear()
+            self.som.tocar("conquista")
+        return res
+
+    def ligar_ranking(self, url, nick):
+        self.cfg["ranking_url"] = (url or "").strip()
+        return ranking.comando(self.cfg, self.status(), ["on", (nick or "").strip()], config.salvar)
+
+    def _exige_pro(self):
+        if self.pro:
+            return True
+        from .ajustes import Ajustes
+        if isinstance(self.cena, Ajustes):
+            self.cena._dizer("precisa do Pro")
+        else:
+            self.abrir_ajustes("conta", "precisa do Pro")
+        return False
 
     def ver_conquistas(self):
-        messagebox.showinfo("Conquistas", self.conq.resumo(), parent=self.root)
+        self.avisar(self.conq.resumo().split("\n"), "CONQUISTAS", 50)
 
     def alternar_mudo(self):
         self.som.mudo = self.cfg["mudo"] = bool(self.var_mudo.get())
         config.salvar(self.cfg)
 
     def alternar_crt(self):
-        self.cfg["crt"] = bool(self.var_crt.get())
+        self.cfg["crt"] = bool(self.var_crt.get()) if hasattr(self, "var_crt") else not self.cfg.get("crt")
         self.cache_sprites.clear()
         config.salvar(self.cfg)
         self._desenhar()
 
     def alternar_autostart(self):
         if not self._exige_pro():
-            self.var_auto.set(sistema.autostart_ativo())
             return
-        if not sistema.definir_autostart(bool(self.var_auto.get())):
-            messagebox.showerror("Ops", "Não consegui configurar a inicialização automática.", parent=self.root)
-        self.var_auto.set(sistema.autostart_ativo())
-
-    def ativar_pro(self):
-        if self.pro:
-            messagebox.showinfo("Pro", "Você já é Pro, sua baleia!", parent=self.root)
-            return
-        email = simpledialog.askstring("Ativar Pro", "E-mail da compra:", parent=self.root)
-        if not email:
-            return
-        chave = simpledialog.askstring("Ativar Pro", "Chave de licença:", parent=self.root)
-        self.root.config(cursor="watch")
-        self.root.update_idletasks()
-        try:
-            res = licencas.verificar(self.cfg, email, chave or "", forcar=True)
-        finally:
-            self.root.config(cursor="")
-        if res.ok:
-            self.pro = True
-            hmac_ = (self.cfg.get("licenca_provedor") or "hmac") == "hmac"
-            self.cfg["email"], self.cfg["licenca"] = email.strip().lower(), chave.strip().upper() if hmac_ else chave.strip()
-            config.salvar(self.cfg)
-            self.cache_sprites.clear()
-            messagebox.showinfo("Pro ativado!", res.msg + "\nBem-vindo ao clube das mãos de diamante!", parent=self.root)
-        else:
-            messagebox.showerror("Ops", res.msg, parent=self.root)
-
-    def _exige_pro(self):
-        if self.pro:
-            return True
-        if messagebox.askyesno("Recurso Pro", "Isso é coisa da versão Pro!\nQuer ativar sua licença agora?",
-                               parent=self.root):
-            self.ativar_pro()
-        return self.pro
-
-    def config_ranking(self):
-        if self.cfg.get("ranking"):
-            if messagebox.askyesno("Ranking", f"Ranking ligado como {self.cfg.get('nick')}. Desligar?", parent=self.root):
-                ranking.comando(self.cfg, self.status(), ["off"], config.salvar)
-            return
-        url = simpledialog.askstring("Ranking (opt-in)", "URL do servidor de ranking:", parent=self.root,
-                                     initialvalue=self.cfg.get("ranking_url") or "http://127.0.0.1:8740")
-        if not url:
-            return
-        nick = simpledialog.askstring("Ranking (opt-in)",
-                                      "Apelido público (3-16 letras/números/_/-).\n"
-                                      "Enviado: apelido, XP, nível, estágio, blocos, nº de conquistas.\n"
-                                      "NUNCA carteira, e-mail ou nome real.", parent=self.root)
-        if not nick:
-            return
-        self.cfg["ranking_url"] = url.strip()
-        linhas = ranking.comando(self.cfg, self.status(), ["on", nick.strip()], config.salvar)
-        messagebox.showinfo("Ranking", "\n".join(linhas[:6]), parent=self.root)
-
-    def config_carteira(self):
-        end = simpledialog.askstring(
-            "Carteira watch-only",
-            "Cole um endereço BTC PÚBLICO (bc1..., 1..., 3...).\n"
-            "NUNCA cole seed, chave privada ou xprv. O app só lê o saldo.\n(vazio = remover)",
-            initialvalue=self.cfg.get("carteira", ""), parent=self.root)
-        if end is None:
-            return
-        if not end.strip():
-            self.cfg["carteira"] = ""
-            self.saldo = None
-            config.salvar(self.cfg)
-            return
-        res = self.carteira(end)
-        (messagebox.showinfo if res[0].startswith("carteira") else messagebox.showerror)(
-            "Carteira", "\n".join(res), parent=self.root)
+        if not sistema.definir_autostart(not sistema.autostart_ativo()):
+            self.avisar("Não consegui configurar a inicialização automática.", "OPS")
 
     def _menu_share(self):
-        linhas = self.compartilhar()
-        messagebox.showinfo("Compartilhar", "\n".join(linhas), parent=self.root)
+        self.avisar(self.compartilhar(), "SHARE")
 
     def _popup(self, texto):
         if not self.som.tocar("alerta"):
@@ -270,7 +247,10 @@ class MixinMenus:
         self._desenhar()
 
     def alternar_opcao(self, chave, var=None):
-        self.cfg[chave] = bool(var.get()) if var is not None else not self.cfg.get(chave)
+        padrao = config.PADRAO.get(chave, False)
+        self.cfg[chave] = bool(var.get()) if var is not None else not self.cfg.get(chave, padrao)
+        if chave == "crt":
+            self.cache_sprites.clear()
         if chave == "musica":
             self.som.musica(self.cfg["musica"])
         if chave == "chapeus":

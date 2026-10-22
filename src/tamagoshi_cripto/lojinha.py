@@ -65,10 +65,8 @@ class MixinLoja:
         return ["loja de skins aberta"]
 
     def _menu_resgatar(self):
-        from tkinter import messagebox, simpledialog
-        c = simpledialog.askstring("Resgatar código", "Código do pacote (SKIN-...):", parent=self.root)
-        if c:
-            messagebox.showinfo("Loja", "\n".join(self.resgatar(c)), parent=self.root)
+        self.abrir_ajustes("conta")
+        self.cena.sel = next(i for i, it in enumerate(self.cena.itens()) if it.rotulo == "Código da loja")
 
     # ---------- overlay de streamer ----------
     def folha_png(self):
@@ -111,28 +109,25 @@ class MixinLoja:
         return self.twitch
 
     def config_twitch(self):
-        from tkinter import messagebox, simpledialog
+        self.abrir_ajustes("conta")
+        self.cena.sel = next(i for i, it in enumerate(self.cena.itens()) if it.rotulo == "Canal Twitch")
 
+    def aplicar_twitch(self, canal):
+        """Liga/desliga o leitor anônimo do chat. Vazio = desligar. Devolve linhas de resposta."""
         from . import twitch
-        c = simpledialog.askstring("Overlay de streamer", "Canal da Twitch pra ler o chat (anônimo, só leitura).\n"
-                                   "Comandos: !pet !moon !rekt !price !dna !dance\n(vazio = desligar)",
-                                   initialvalue=self.cfg.get("twitch_canal", ""), parent=self.root)
-        if c is None:
-            return
-        c = c.strip().lower().lstrip("#")
+        c = (canal or "").strip().lower().lstrip("#")
         if c and not twitch.canal_valido(c):
-            messagebox.showerror("Twitch", "Canal inválido (a-z, 0-9, _).", parent=self.root)
-            return
+            return ["canal inválido (a-z, 0-9, _)"]
         self.cfg["twitch_canal"] = c
         config.salvar(self.cfg)
         if getattr(self, "twitch", None):
             self.twitch.parar = True
             self.twitch = None
-        if c:
-            self.iniciar_twitch()
+        if not c:
+            return ["chat da Twitch desligado"]
+        self.iniciar_twitch()
         porta = getattr(self.api, "server_address", (0, 8737))[1]
-        messagebox.showinfo("Overlay", f"OBS > Browser Source > http://127.0.0.1:{porta}/stream\n"
-                            "(largura 600, altura 400). Veja docs/STREAMER_OVERLAY.md", parent=self.root)
+        return [f"OBS > Browser Source > http://127.0.0.1:{porta}/stream", "(600x400) docs/STREAMER_OVERLAY.md"]
 
     # ---------- Twitch (thread -> fila -> GUI) ----------
     def evento_twitch(self, usuario, cmd, agora=None):
