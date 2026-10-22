@@ -1,6 +1,7 @@
 """graficos.py - constantes de cor/tempo e o carregador de sprites (PIL -> PhotoImage sem borrar)."""
 import base64
 import io
+import sys
 import tkinter as tk
 
 from PIL import Image
@@ -20,9 +21,34 @@ C_TINTA, C_PAPEL, C_PAINEL, C_PAINEL2 = "#1a1c2c", "#f4f4f4", "#29213f", "#3e346
 
 
 def _png_para_tk(img):
+    if sys.platform == "darwin":
+        return _rgba_para_tk_opaco(img)
     buf = io.BytesIO()
     img.save(buf, "PNG")
     return tk.PhotoImage(data=base64.b64encode(buf.getvalue()).decode())
+
+
+def _rgba_para_tk_opaco(img):
+    """macOS: numa janela -transparent (fundo systemTransparent) o Tk Aqua NÃO desenha PhotoImage
+    vinda de PNG com canal alfa -> o bicho some (texto aparecia porque a fonte usa put()).
+    Aqui pintamos só os pixels visíveis com put() (alfa 0/1, como a fonte). Pixel art não tem
+    meio-alfa mesmo; o que for >=128 vira opaco, o resto fica "não pintado" = transparente."""
+    img = img.convert("RGBA")
+    w, h = img.size
+    foto = tk.PhotoImage(width=w, height=h)
+    px = img.load()
+    for y in range(h):
+        x = 0
+        while x < w:
+            r, g, b, a = px[x, y]
+            if a < 128:
+                x += 1
+                continue
+            ini = x
+            while x < w and px[x, y][:3] == (r, g, b) and px[x, y][3] >= 128:
+                x += 1
+            foto.put(f"#{r:02x}{g:02x}{b:02x}", to=(ini, y, x, y + 1))
+    return foto
 
 
 def carregar_frames(caminho, escala, crt=False, chapeu=None, genes=None, fantasma=False):

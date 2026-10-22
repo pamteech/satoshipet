@@ -63,3 +63,26 @@ def test_janela_sem_borda_mac_e_outros(monkeypatch):
     monkeypatch.setattr(sistema, "MAC", False)
     r = R()
     assert sistema.janela_sem_borda(r) == "override" and r.chamadas == [("override", True)]
+
+
+def test_sprite_mac_tem_pixels_opacos(monkeypatch):
+    """Caminho do macOS (put, sem PNG alfa): o frame tem pixel pintado e o fundo fica transparente."""
+    import sys
+    import tkinter as tk
+
+    from tamagoshi_cripto import graficos, recursos
+    root = tk.Tk()
+    try:
+        monkeypatch.setattr(sys, "platform", "darwin")
+        folha = next((recursos.ASSETS / "sprites").glob("*.png"))
+        frames = graficos.carregar_frames(folha, 3)
+        img = frames[next(iter(frames))]
+        w, h = img.width(), img.height()
+        opacos = sum(not img.transparency_get(x, y) for x in range(0, w, 3) for y in range(0, h, 3))
+        assert w == 144 and 50 < opacos < (w // 3) * (h // 3)
+        assert img.transparency_get(0, 0)
+        cv = tk.Canvas(root, width=w, height=h, bg="#010101")
+        cv.create_image(w // 2, h // 2, image=img)
+        assert cv.find_all()
+    finally:
+        root.destroy()
