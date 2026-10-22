@@ -14,10 +14,10 @@ from PIL import Image
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "server"))
 sys.path.insert(0, str(RAIZ / "tools"))
-import ranking as srv_mod  # noqa: E402  (servidor)
-import validate_skin  # noqa: E402
+import ranking as srv_mod
 
-from tamagoshi_cripto import console, ranking, share  # noqa: E402
+import validate_skin
+from tamagoshi_cripto import console, ranking, share
 
 DEV = "0123456789abcdef0123456789abcdef"
 

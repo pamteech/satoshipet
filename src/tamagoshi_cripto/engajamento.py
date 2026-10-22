@@ -195,6 +195,7 @@ class MixinEngajamento:
 
     def perguntar_ia(self, pergunta):
         import threading
+
         from . import ai
         ctx = {k: v for k, v in self.status().items() if k in ("moeda", "humor", "variacao_pct", "nivel")}
 
@@ -211,6 +212,7 @@ class MixinEngajamento:
 
     def exportar_stats(self):
         import json
+
         from . import __version__, cartao
         s = cartao.exportar_stats(self.status(), __version__)
         arq = self._pasta_saida() / "tamagoshi-stats.json"

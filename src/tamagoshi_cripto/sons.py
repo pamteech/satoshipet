@@ -1,9 +1,7 @@
 # sons.py - chiptune raiz v2: 2 canais de pulso + ruído, envelopes e arpejos. Tudo gerado em código,
 # zero arquivos de áudio no repo. Toca sem travar a janela.
-import math
 import random
 import shutil
-import struct
 import subprocess
 import sys
 import tempfile
@@ -103,7 +101,9 @@ def gerar_wav(musica, caminho, volume=0.35):
         musica = {"p1": musica}
     amostras = bytes(int(128 + v * 120) for v in renderizar(musica, volume))
     with wave.open(str(caminho), "wb") as w:
-        w.setnchannels(1); w.setsampwidth(1); w.setframerate(TAXA)
+        w.setnchannels(1)
+        w.setsampwidth(1)
+        w.setframerate(TAXA)
         w.writeframes(amostras)
     return caminho
 

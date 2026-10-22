@@ -50,7 +50,7 @@ def test_codigo_do_pet_ida_e_volta_e_rejeita_lixo():
 
 
 def test_cruzar_herda_dos_pais_e_muta():
-    a = {k: list(v)[0] for k, v in genetica.GENES.items()}
+    a = {k: next(iter(v)) for k, v in genetica.GENES.items()}
     b = {k: list(v)[-1] for k, v in genetica.GENES.items()}
     filho, mutou = genetica.cruzar(dict(a, geracao=1), dict(b, geracao=3), semente=1, taxa_mutacao=0)
     assert not mutou and filho["geracao"] == 4

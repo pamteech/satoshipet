@@ -130,8 +130,8 @@ class Sprite:
         X0, Y0 = self.T(x0, y0)
         X1, Y1 = self.T(x1, y1)
         w, h = max(1.0, X1 - X0), max(1.0, Y1 - Y0)
-        for y in range(int(round(Y0)), int(round(Y1))):
-            for x in range(int(round(X0)), int(round(X1))):
+        for y in range(round(Y0), round(Y1)):
+            for x in range(round(X0), round(X1)):
                 # cantos arredondados
                 cx = min(x - X0 + 0.5, X1 - x - 0.5)
                 cy = min(y - Y0 + 0.5, Y1 - y - 0.5)
@@ -159,7 +159,7 @@ class Sprite:
                     xs.append(xa + (yc - ya) * (xb - xa) / (yb - ya))
             xs.sort()
             for a, b in zip(xs[::2], xs[1::2]):
-                for x in range(int(round(a)), int(round(b))):
+                for x in range(round(a), round(b)):
                     t = (yc - y_min) / max(1, y_max - y_min)
                     self._pintar(x, y, luz - grad * t, rampa)
 
@@ -177,14 +177,14 @@ class Sprite:
     def ret(self, x, y, w, h, cor, mat="escuro"):
         """Retângulo de pixels exatos (olhos, detalhes) - só a origem é transformada."""
         X, Y = self.T(x, y)
-        X, Y = int(round(X)), int(round(Y))
+        X, Y = round(X), round(Y)
         for j in range(h):
             for i in range(w):
                 self.set(X + i, Y + j, cor, mat)
 
     def texto(self, x, y, s, cor, mat="escuro"):
         X, Y = self.T(x, y)
-        X, Y = int(round(X)), int(round(Y))
+        X, Y = round(X), round(Y)
         for ch in s:
             g = FONTE35.get(ch)
             if g:

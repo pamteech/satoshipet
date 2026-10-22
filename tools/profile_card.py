@@ -14,7 +14,7 @@ import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from tamagoshi_cripto import cartao  # noqa: E402
+from tamagoshi_cripto import cartao
 
 
 def main(argv=None):

@@ -46,8 +46,20 @@ def rodar(horas=6, semente=1, verbose=False):
     import tkinter.messagebox as mb
     import tkinter.simpledialog as sd
     import webbrowser
-    from tamagoshi_cripto import (baleias, batalha, cenas, conquistas, genetica, logic, lore, loja, main,
-                                  multichain, noticias, onchain)
+
+    from tamagoshi_cripto import (
+        baleias,
+        cenas,
+        conquistas,
+        genetica,
+        logic,
+        loja,
+        lore,
+        main,
+        multichain,
+        noticias,
+        onchain,
+    )
     # rede: tudo falso e controlado (às vezes cai)
     estado = {"online": True}
 
@@ -109,10 +121,10 @@ def rodar(horas=6, semente=1, verbose=False):
             app.eventos.append(("tip", altura, RELOGIO[0]))
         if rnd.random() < 0.004:
             app.ultima_baleia = 0
-            app.eventos.append(("baleia", {"txid": "%064x" % i, "btc": 500.0, "url": "https://mempool.space/tx/x"}))
+            app.eventos.append(("baleia", {"txid": f"{i:064x}", "btc": 500.0, "url": "https://mempool.space/tx/x"}))
             stats["baleias"] += 1
         if rnd.random() < 0.003:
-            app.eventos.append(("noticias", [{"titulo": "Manchete %d" % i, "link": "https://x.y/%d" % i, "fonte": "T"}]))
+            app.eventos.append(("noticias", [{"titulo": f"Manchete {i}", "link": f"https://x.y/{i}", "fonte": "T"}]))
         if rnd.random() < 0.01 and i < hardcore_desde:  # !pet do chat conta como carinho (é interação)
             app._ultimo_cmd_twitch = 0
             app.eventos.append(("twitch", "viewer", rnd.choice(sorted(main.lojinha.COMANDOS_TWITCH))))
@@ -185,7 +197,7 @@ def rodar(horas=6, semente=1, verbose=False):
             app.cfg["ultima_interacao"] = RELOGIO[0]
         elif isinstance(app.cena, cenas.Cemiterio):
             app.cena.acao("renascer")  # vivo: botão não existe, e a ação não pode resetar o bicho
-            assert not app.cfg.get("fantasma") and app.evo.xp == xp_antes or True
+            assert (not app.cfg.get("fantasma") and app.evo.xp == xp_antes) or True
             app.cena = None
         for _ in range(2):
             app.animar()

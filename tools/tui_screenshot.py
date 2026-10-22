@@ -4,9 +4,9 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "src"))
-from PIL import Image, ImageDraw, ImageFont  # noqa: E402
+from PIL import Image, ImageDraw, ImageFont
 
-from tamagoshi_cripto import tui  # noqa: E402
+from tamagoshi_cripto import tui
 
 CEL_W, CEL_H = 8, 16
 sprites = tui.carregar("PEPE", "padrao")

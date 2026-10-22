@@ -77,7 +77,7 @@ class Console:
                 self.ctx.sudo_moon()
                 return ["[sudo] senha para satoshi: ********", "permissão concedida. ativando modo lua...",
                         "isso não muda o preço real. infelizmente."]
-            return [f"satoshi não está no arquivo sudoers. este incidente será reportado ao Fed."]
+            return ["satoshi não está no arquivo sudoers. este incidente será reportado ao Fed."]
         if cmd == "git" and args[:1] == ["blame"]:
             return [f"^1f3d2a ({random.choice(FED)} 2008-10-31) inflação += 'transitória'",
                     f"^b10c4d ({random.choice(FED)} 2020-03-15) money_printer.go(brrrr=True)",
@@ -186,7 +186,6 @@ class Console:
         return f(*args) if f else ["isso só funciona na janela (por enquanto)"]
 
     def cmd_genes(self, a):
-        from . import genetica
         st = self.ctx.status()
         g = st.get("genes") or {}
         if not g:
@@ -292,7 +291,7 @@ class Console:
         txs = baleias.recentes()
         grandes = sorted(txs, key=lambda t: -t.get("value", 0))[:3]
         return [f"{t['value'] / 1e8:,.2f} BTC  {t['txid'][:16]}..." for t in grandes] + \
-            ["(alerta dispara acima de %s BTC)" % (getattr(self.ctx, "cfg", {}) or {}).get("baleia_btc", 50)]
+            ["(alerta dispara acima de {} BTC)".format((getattr(self.ctx, "cfg", {}) or {}).get("baleia_btc", 50))]
 
     def cmd_coin(self, a):
         if not a:
@@ -314,12 +313,12 @@ class Console:
                 f"Host: {s['moeda']} mainnet",
                 f"Kernel: proof-of-{'stake' if s['moeda'] == 'ETH' else 'work'}",
                 f"Uptime: {s['uptime_min']} min",
-                f"Shell: tamash 0.21M",
+                "Shell: tamash 0.21M",
                 f"Estágio: {s['estagio']} LV{s['nivel']}",
                 f"Humor: {s['humor']}",
                 f"Bloco: {s['btc'].get('bloco') or '?'}",
                 f"Fee: {s['btc'].get('fee_sat_vb') or '?'} sat/vB",
-                f"Vida: {'<3' * int(round(s['vida'] / 2))}"]
+                f"Vida: {'<3' * round(s['vida'] / 2)}"]
 
     def cmd_whoami(self, a):
         return ["satoshi (provavelmente não)"]

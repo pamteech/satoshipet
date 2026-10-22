@@ -65,7 +65,7 @@ def _sortear(rnd, gene):
 def aleatorio(semente=None, moeda="BTC"):
     rnd = random.Random(semente)
     g = {k: _sortear(rnd, k) for k in GENES}
-    g.update({"moeda": moeda, "geracao": 1, "id": "%08x" % rnd.getrandbits(32)})
+    g.update({"moeda": moeda, "geracao": 1, "id": f"{rnd.getrandbits(32):08x}"})
     return g
 
 
@@ -90,7 +90,7 @@ def cruzar(a, b, semente=None, taxa_mutacao=0.08):
             filho[k] = (a if rnd.random() < .5 else b).get(k, "original")
     filho.update({"moeda": rnd.choice([a.get("moeda", "BTC"), b.get("moeda", "BTC")]),
                   "geracao": max(a.get("geracao", 1), b.get("geracao", 1)) + 1,
-                  "id": "%08x" % rnd.getrandbits(32), "pais": [a.get("id"), b.get("id")]})
+                  "id": f"{rnd.getrandbits(32):08x}", "pais": [a.get("id"), b.get("id")]})
     return filho, mutou
 
 
@@ -188,9 +188,8 @@ def aplicar(fr, g):
                 if all(v[3] for v in viz) and sum(v[:3] != _HEX["preto"] for v in viz) >= 3:
                     px[x, y] = _HEX[COR_OLHOS[g["olhos"]]] + (255,)
                     continue
-            if c == corpo and g.get("padrao") in ("pintas", "listras"):
-                if (g["padrao"] == "pintas" and (x * 7 + y * 13) % 11 == 0) or \
-                        (g["padrao"] == "listras" and y % 4 == 0):
+            if c == corpo and ((g.get("padrao") == "pintas" and (x * 7 + y * 13) % 11 == 0) or
+                               (g.get("padrao") == "listras" and y % 4 == 0)):
                     px[x, y] = _escurecer(troca.get(c, c)) + (255,)
                     continue
             if c in troca:

@@ -6,8 +6,6 @@ então fica no mesmo pixel do bicho - nada de pixel torto).
 import datetime as dt
 import random
 
-from PIL import Image
-
 from .pixel import rgb
 
 
@@ -160,7 +158,10 @@ class Particulas:
     def tick(self):
         vivos = []
         for q in self.p:
-            q[0] += q[2]; q[1] += q[3]; q[3] += q[7]; q[5] -= 1
+            q[0] += q[2]
+            q[1] += q[3]
+            q[3] += q[7]
+            q[5] -= 1
             if q[5] > 0:
                 vivos.append(q)
         self.p = vivos

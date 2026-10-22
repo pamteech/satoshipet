@@ -3,7 +3,6 @@ import datetime as dt
 import json
 import sys
 import threading
-import time
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -13,9 +12,9 @@ from PIL import Image
 
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "server"))
-import licencas as srv_lic  # noqa: E402
+import licencas as srv_lic
 
-from tamagoshi_cripto import config, crashlog, juice, license, licencas, recursos, sons, updates  # noqa: E402
+from tamagoshi_cripto import config, crashlog, juice, licencas, license, recursos, sons, updates
 
 
 class Resp:

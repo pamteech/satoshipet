@@ -10,8 +10,8 @@ from PIL import Image, ImageDraw
 
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "src"))
-from tamagoshi_cripto import recursos, share  # noqa: E402
-from tamagoshi_cripto.pixel import rgb  # noqa: E402
+from tamagoshi_cripto import recursos, share
+from tamagoshi_cripto.pixel import rgb
 
 SITE = RAIZ / "site" / "assets"
 
@@ -40,7 +40,7 @@ def og():
         sh = Image.open(recursos.ASSETS / "sprites" / f"{m}_padrao.png").convert("RGBA")
         pet = sh.crop((48, ln * 48, 96, ln * 48 + 48)).resize((96, 96), Image.NEAREST) if m == "BTC" else \
             sh.crop((48, ln * 48, 96, ln * 48 + 48)).resize((72, 72), Image.NEAREST)
-        x = [8, 84, 152, 240, 318][i] + (0 if m == "BTC" else 0)
+        x = [8, 84, 152, 240, 318][i]
         y = 178 - pet.height + 4
         img.alpha_composite(pet, (x if m != "BTC" else 160, y) if False else (x, y))
     rod = "gratis - macos - windows - linux - terminal"

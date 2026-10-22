@@ -8,8 +8,8 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "src"))
 
-from tamagoshi_cripto import sprites as S  # noqa: E402
-from tamagoshi_cripto.pixel import W  # noqa: E402
+from tamagoshi_cripto import sprites as S
+from tamagoshi_cripto.pixel import W
 
 
 def slime(s, e, f, k):

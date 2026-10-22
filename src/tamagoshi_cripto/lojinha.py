@@ -74,7 +74,9 @@ class MixinLoja:
     def folha_png(self):
         """PNG da folha atual com DNA/fantasma aplicados (chamado pela thread da API: só PIL, nada de Tk)."""
         import io
+
         from PIL import Image
+
         from . import genetica
         chave = (str(self._caminho_folha()), self._chave_dna())
         cache = self.__dict__.setdefault("_cache_folha", {})
@@ -110,6 +112,7 @@ class MixinLoja:
 
     def config_twitch(self):
         from tkinter import messagebox, simpledialog
+
         from . import twitch
         c = simpledialog.askstring("Overlay de streamer", "Canal da Twitch pra ler o chat (anônimo, só leitura).\n"
                                    "Comandos: !pet !moon !rekt !price !dna !dance\n(vazio = desligar)",

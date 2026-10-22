@@ -9,7 +9,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from .pixel import W, Sprite, rgb
+from .pixel import Sprite, W, rgb
 
 ESTADOS = ("garimpando", "moon", "rekt")
 LINHAS = ESTADOS + ("pulo",)
@@ -382,8 +382,8 @@ def sapo_degen(s, e, f, k):
             y = 34 + math.sin(i / 12 * math.pi) * 5
             s.set(x, y, "amarelo" if (i + f) % 4 else "branco", "ouro")
         s.esfera(24, 39.5, 2.2, 2.2, "ouro")
-        s.texto(23, 38, "$", "vinho") if False else s.ret(24, 38, 1, 3, "laranja", "ouro")
-        for i, (x, y) in enumerate(((5, 10), (42, 6), (44, 22), (3, 26))):  # moedinhas caindo
+        s.ret(24, 38, 1, 3, "laranja", "ouro")
+        for x, y in ((5, 10), (42, 6), (44, 22), (3, 26)):  # moedinhas caindo
             yy = (y + f * 3) % 30
             s.efeito(x, yy, "amarelo"); s.efeito(x + 1, yy, "laranja"); s.efeito(x, yy + 1, "laranja")
     elif e == "rekt":
@@ -538,7 +538,7 @@ def baleia(s, e, f, k):
             s.set(x, 44, "amarelo", "pele"); s.set(x, 45, "laranja", "pele"); s.set(x, 46, "preto")
         rampa = "pedra"
     else:
-        for x in range(0, 48):  # ondas animadas
+        for x in range(48):  # ondas animadas
             y = 42 + round(math.sin((x + f * 3) / 3.0))
             s.set(x, y, "celeste", "azul"); s.set(x, y + 1, "azul", "azul")
             for yy in range(y + 2, 47):
@@ -576,7 +576,7 @@ def baleia(s, e, f, k):
 
 
 def coroa(s, cor="ouro"):
-    cx, t, w = s.ancora
+    cx, t, _w = s.ancora
     t = max(t, 7)
     s.poly([(cx - 6, t), (cx - 6, t - 5), (cx - 3, t - 2), (cx, t - 6), (cx + 3, t - 2), (cx + 6, t - 5),
             (cx + 6, t)], cor, 0.8)
@@ -662,7 +662,7 @@ def gif_demo(moeda, skin, destino, escala=4):
     sh = sheet(moeda, skin)
     frames = []
     for j, linha in enumerate(LINHAS):
-        for rep in range(3 if linha != "pulo" else 2):
+        for _rep in range(3 if linha != "pulo" else 2):
             for f in range(FRAMES):
                 fr = Image.new("RGBA", (W, W), (34, 32, 52, 255))
                 fr.alpha_composite(sh.crop((f * W, j * W, (f + 1) * W, (j + 1) * W)))
@@ -675,7 +675,7 @@ def gif_evolucao(moeda, destino, escala=4):
     frames = []
     for est in ESTAGIOS:
         sh = sheet(moeda, "padrao", est)
-        for rep in range(3):
+        for _rep in range(3):
             for f in range(FRAMES):
                 fr = Image.new("RGBA", (W, W), (34, 32, 52, 255))
                 fr.alpha_composite(sh.crop((f * W, 0, (f + 1) * W, W)))

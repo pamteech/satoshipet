@@ -44,3 +44,25 @@ tamagoshi_cripto = ["assets/**/*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py39"
+src = ["src", "tests", "tools"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "I", "UP", "SIM", "PIE", "RUF"]
+ignore = ["E741", "RUF001", "RUF002", "RUF003", "SIM108", "B008", "UP035", "UP006", "UP007", "UP045", "RUF005", "SIM105", "B905", "RUF012"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E402", "B011", "SIM", "B023", "E702", "E501", "B017", "RUF059", "E731"]
+"tools/*" = ["E402"]
+"src/tamagoshi_cripto/api.py" = ["E501"]  # HTML/JS embutido
+"src/tamagoshi_cripto/sprites.py" = ["E702"]  # DSL de pixel art: 1 traço por linha, de propósito
+
+[tool.coverage.run]
+source = ["tamagoshi_cripto"]
+branch = true
+
+[tool.coverage.report]
+skip_empty = true

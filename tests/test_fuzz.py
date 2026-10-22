@@ -45,7 +45,7 @@ def test_fuzz_petcode_lixo(semente):
         _checar_pet(genetica.importar(genetica.PREFIXO + "".join(rnd.choice(ALFABETO) for _ in range(80))))
 
 
-g_ok = {k: list(v)[0] for k, v in genetica.GENES.items()} | {"moeda": "BTC"}
+g_ok = {k: next(iter(v)) for k, v in genetica.GENES.items()} | {"moeda": "BTC"}
 FORJADOS = [
     [], "texto", 42, None, {"g": []}, {"g": "x"}, {"g": g_ok, "lv": "abc"}, {"g": g_ok, "lv": 1e300},
     {"g": g_ok, "lv": -5, "xp": -1}, {"g": g_ok, "n": 123}, {"g": g_ok, "n": ["a"]}, {"g": g_ok, "xp": "1e9"},

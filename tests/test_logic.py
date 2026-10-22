@@ -2,15 +2,14 @@
 import json
 import os
 import sys
-import tempfile
 import wave
 from pathlib import Path
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from tamagoshi_cripto import arts, cli, config, conquistas, license, logic, lore, plugins, recursos, sistema, sons  # noqa: E402
-from tamagoshi_cripto import sprites as S  # noqa: E402
+from tamagoshi_cripto import arts, cli, config, conquistas, license, logic, lore, plugins, recursos, sistema, sons
+from tamagoshi_cripto import sprites as S
 
 OFFLINE = bool(os.environ.get("OFFLINE"))
 
@@ -56,6 +55,7 @@ def test_folhas_de_sprite(moeda):
 def test_paleta_padrao_limitada():
     """Skin padrão usa só a paleta Sweetie 16 (efeitos inclusos)."""
     from PIL import Image
+
     from tamagoshi_cripto.pixel import P, rgb
     pal = {rgb(c) for c in P.values()}
     for m in config.MOEDAS:

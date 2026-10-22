@@ -9,10 +9,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from PIL import Image  # noqa: E402
+from PIL import Image
 
-from tamagoshi_cripto import genetica, juice, recursos  # noqa: E402
-from tamagoshi_cripto.pixel import P, rgb  # noqa: E402
+from tamagoshi_cripto import genetica, juice, recursos
+from tamagoshi_cripto.pixel import P, rgb
 
 MOEDAS = ("BTC", "ETH", "SOL", "DOGE", "PEPE")
 RECEITAS = {

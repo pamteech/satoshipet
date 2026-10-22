@@ -48,13 +48,13 @@ def _post(http, url, dados, timeout=10):
     try:
         r = http.post(url, data=dados, timeout=timeout, headers={"Accept": "application/json"})
     except Exception as e:  # requests.ConnectionError, Timeout...
-        raise SemRede(str(e))
+        raise SemRede(str(e)) from e
     if r.status_code >= 500:
         raise SemRede(f"HTTP {r.status_code}")
     try:
         return r.status_code, r.json()
     except ValueError:
-        raise SemRede("resposta não é JSON")
+        raise SemRede("resposta não é JSON") from None
 
 
 # ---------------- provedores ----------------
@@ -62,7 +62,7 @@ def _gumroad(cfg, email, chave, http):
     produto = cfg.get("licenca_produto")
     if not produto:
         return Resultado(False, "Configuração incompleta: falta o product_id do Gumroad (licenca_produto).")
-    cod, d = _post(http, GUMROAD_URL, {"product_id": produto, "license_key": chave.strip(),
+    _cod, d = _post(http, GUMROAD_URL, {"product_id": produto, "license_key": chave.strip(),
                                        "increment_uses_count": "false"})
     if not d.get("success"):
         return Resultado(False, "Chave não encontrada no Gumroad. Confere se copiou inteira (com os traços).")
@@ -80,10 +80,10 @@ def _lemon(cfg, email, chave, http):
     cache = cfg.get("licenca_cache") or {}
     inst = cache.get("instance_id") if cache.get("chave") == _hash(chave) else None
     if inst:
-        cod, d = _post(http, f"{LEMON_URL}/validate", {"license_key": chave.strip(), "instance_id": inst})
+        _cod, d = _post(http, f"{LEMON_URL}/validate", {"license_key": chave.strip(), "instance_id": inst})
         ok = d.get("valid")
     else:
-        cod, d = _post(http, f"{LEMON_URL}/activate", {"license_key": chave.strip(),
+        _cod, d = _post(http, f"{LEMON_URL}/activate", {"license_key": chave.strip(),
                                                        "instance_name": cfg.get("nome_pet") or "tamagoshi"})
         ok = d.get("activated")
         inst = (d.get("instance") or {}).get("id")
@@ -114,7 +114,7 @@ def _servidor(cfg, email, chave, http):
     try:
         r = http.get(f"{url}/api/licenca/validar", params={"email": email or "", "chave": chave.strip()}, timeout=10)
     except Exception as e:
-        raise SemRede(str(e))
+        raise SemRede(str(e)) from e
     if r.status_code >= 500:
         raise SemRede(f"HTTP {r.status_code}")
     d = r.json() if r.content else {}

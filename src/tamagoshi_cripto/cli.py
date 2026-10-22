@@ -40,6 +40,7 @@ def main(argv=None):
               "sem_api": a.no_api}
     if a.status:
         import urllib.request
+
         from . import api
         try:
             print(urllib.request.urlopen(f"http://127.0.0.1:{api.PORTA}/status", timeout=3).read().decode())

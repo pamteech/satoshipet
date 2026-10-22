@@ -19,7 +19,7 @@ sys.path.insert(0, str(RAIZ / "src"))
 os.environ["TAMAGOSHI_CONFIG"] = str(Path(tempfile.mkdtemp()) / "cfg.json")
 os.environ.setdefault("TAMAGOSHI_API_PORT", "18737")
 
-import pytest  # noqa: E402
+import pytest
 
 SHOTS = RAIZ / "docs" / "screenshots"
 
@@ -93,11 +93,10 @@ def _invocar_tudo(app):
 
 
 def executar():
-    from tkinter import messagebox, simpledialog
-
     import json
     import time
     import urllib.request
+    from tkinter import messagebox, simpledialog
 
     os.environ["HOME"] = tempfile.mkdtemp()  # card de share cai aqui, não no ~ de verdade
     (Path(os.environ["HOME"]) / "Pictures").mkdir()
@@ -107,7 +106,7 @@ def executar():
     threading.Thread(target=srv_rank.serve_forever, daemon=True).start()
     global RANK_URL
     RANK_URL = f"http://127.0.0.1:{srv_rank.server_address[1]}"
-    from tamagoshi_cripto import config, evolucao, license, logic, lore, main, onchain
+    from tamagoshi_cripto import config, license, logic, lore, main, onchain
 
     chamadas = []
     messagebox.askyesno = lambda *a, **k: (chamadas.append(("askyesno", a[0])), False)[1]
@@ -133,7 +132,9 @@ def executar():
     logic.buscar_precos = lambda simbolos, timeout=10: {s: precos[s] for s in simbolos}
     lore.fear_greed = lambda timeout=10: (72, "GANANCIA")
     lore.altura_bloco = lambda timeout=10: 921_337
-    from tamagoshi_cripto import baleias as _bal, multichain as _mc, noticias as _news
+    from tamagoshi_cripto import baleias as _bal
+    from tamagoshi_cripto import multichain as _mc
+    from tamagoshi_cripto import noticias as _news
     _bal.recentes = lambda timeout=10: []
     _news.buscar = lambda timeout=10: [{"titulo": "Bitcoin volta aos US$ 100 mil e o bicho comemora", "link":
                                         "https://example.com/noticia", "fonte": "Teste"}]
@@ -156,7 +157,7 @@ def executar():
     app.root.geometry("+24+24")
     for _ in range(5):
         app.root.update()
-    K = lambda k, ch="": type("E", (), {"keysym": k, "char": ch})()  # noqa: E731
+    K = lambda k, ch="": type("E", (), {"keysym": k, "char": ch})()
     _gif(app, "onboarding_ovo", n=40, ms=180)
     _shot(app, "onboarding_ovo")
     app._tecla(K("Return"))
@@ -419,7 +420,8 @@ def executar():
     assert app.cfg["moeda"] == "PEPE", app.cfg["moeda"]
 
     # ---------- v1.4 fase 1: genes, cruzamento, batalha, hardcore ----------
-    from tamagoshi_cripto import cenas as _cenas, genetica as _gen
+    from tamagoshi_cripto import cenas as _cenas
+    from tamagoshi_cripto import genetica as _gen
     for w in app.root.winfo_children():
         if w.winfo_class() == "Toplevel":
             w.destroy()

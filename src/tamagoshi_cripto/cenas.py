@@ -183,7 +183,7 @@ class Onboarding(_Cena):
             img = self.img(("ovo", p % 4), lambda: _frame_png("BTC", "ovo", "garimpando", p % 4, E))
             a.cv.create_image(L // 2 + dx, cy, image=img)
             trincas = [(0, -8, 3, -4), (3, -4, -1, 0), (-1, 0, 4, 4), (-6, -2, -2, 2), (-2, 2, -5, 6)]
-            for k, (x0, y0, x1, y1) in enumerate(trincas[:max(0, (p - 8) // 4)]):
+            for x0, y0, x1, y1 in trincas[:max(0, (p - 8) // 4)]:
                 a.cv.create_line(L // 2 + dx + x0 * E, cy + y0 * E, L // 2 + dx + x1 * E, cy + y1 * E,
                                  fill=TINTA, width=E)
             self._titulo(a.Y_SPRITE + a.S + 26, "...?" if p < 15 else "TEM ALGUÉM AÍ DENTRO!")
@@ -486,7 +486,8 @@ class Cemiterio(_Cena):
                 r.get("moeda", "BTC"), "adulto", "garimpando", self.t // 4 % 4, 1, fantasma=True))
             c.create_image(L // 2 + 56, 52 - (self.t // 3) % 3 * 2, image=fant)
             a._txt(L // 2, 116, r["nome"], "#ffcd75", escala=2, sombra=TINTA)
-            data = lambda ts: _t.strftime("%d/%m/%y", _t.localtime(ts))
+            def data(ts):
+                return _t.strftime("%d/%m/%y", _t.localtime(ts))
             a._txt(L // 2, 136, f"{data(r['nasceu'])} - {data(r['morreu'])}", "#94b0c2")
             a._txt(L // 2, 158, '"' + r["epitafio"] + '"', "#f4f4f4", max_chars=(L - 24) // 8, sombra=TINTA)
             y = 186
@@ -540,7 +541,7 @@ class Cruzamento(_Cena):
         for i, p in enumerate((self.pai, self.mae)):
             g = p["genes"]
             x = L // 4 + i * L // 2
-            im = self.img(("p", i, self.t // 3 % 4), lambda g=g, i=i: _frame_genes(
+            im = self.img(("p", i, self.t // 3 % 4), lambda g=g, i=i, p=p: _frame_genes(
                 g.get("moeda", "BTC"), p.get("estagio", "adulto") if p.get("estagio") != "ovo" else "adulto",
                 "garimpando", self.t // 3 % 4, 1, g, espelhar=i == 1))
             c.create_image(x, 54, image=im)
@@ -556,7 +557,7 @@ class Cruzamento(_Cena):
             bebe = self.img(("bebe", self.t // 3 % 4), lambda: _frame_genes(
                 g["moeda"], "bebe", "pulo" if self.t < 26 else "garimpando", self.t // 3 % 4, 2, g))
             c.create_image(L // 2, 144, image=bebe)
-            nome, pts = genetica.raridade(g)
+            nome, _pts = genetica.raridade(g)
             a._txt(L // 2, 200, nome.upper() + f" - geração {g.get('geracao', 1)}", genetica.COR_RARIDADE[nome],
                    sombra=TINTA)
             y = 218
@@ -695,12 +696,14 @@ class Batalha(_Cena):
                 linha = "rekt" if morto or lut.hp < lut.s["max_hp"] * .25 else \
                     "moon" if (self.fim and lut.vivo) else "garimpando"
                 f = self.t // 3 % 4
-                im = self.img((id(lut), linha, f, morto), lambda: _frame_genes(
+                im = self.img((id(lut), linha, f, morto), lambda g=g, est=est, linha=linha, f=f, lut=lut,
+                              morto=morto, esp=esp: _frame_genes(
                     g.get("moeda", "BTC"), est, linha, f, 2 if lut is self.a else 1, g, fantasma=morto,
                     espelhar=esp))
                 c.create_image(x + dx, y - (self.t // 3 % 2 * 2 if morto else 0), image=im, anchor="center")
             if apanhou:
-                a._txt(x + 30, y - (40 if lut is self.a else 20) - (6 - self.anim) * 3, self.dano_txt, "#b13e53", escala=2, sombra=PAPEL)
+                a._txt(x + 30, y - (40 if lut is self.a else 20) - (6 - self.anim) * 3, self.dano_txt, "#b13e53",
+                       escala=2, sombra=PAPEL)
         # caixa de log
         a._moldura(6, yl, L - 6, yl + 50, PAPEL, luz="#ffffff", sombra="#94b0c2")
         for i, l in enumerate(self.log[-3:]):
@@ -896,6 +899,6 @@ class Loja(_Cena):
             self.botao(L // 2 + 2, H - 66, L - 20, H - 42, "CÓDIGO", fundo="#73eff7", tag="codigo")
         else:
             preco = m.get("preco_sugerido_brl")
-            self.botao(20, H - 66, L - 20, H - 42, f"CÓDIGO" + (f" (R${preco:.2f})".replace(".", ",") if preco
+            self.botao(20, H - 66, L - 20, H - 42, "CÓDIGO" + (f" (R${preco:.2f})".replace(".", ",") if preco
                                                                  else ""), fundo="#73eff7", tag="codigo")
         self.botao(L // 2 - 40, H - 38, L // 2 + 40, H - 12, "SAIR", fundo="#94b0c2", tag="sair")
