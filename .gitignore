@@ -11,3 +11,4 @@ src/tamagoshi_cripto/_segredo.py
 previews/
 *.db
 server/data/
+vscode/*.vsix

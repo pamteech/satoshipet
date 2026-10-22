@@ -43,6 +43,10 @@ AJUDA = [
     "  wallet eth|sol <addr>  watch-only ETH/SOL",
     "  news            últimas manchetes (RSS)",
     "  whale           última baleia na mempool",
+    "  ask <pergunta>  pergunta pro bicho (IA BYO, off)",
+    "  ai set <url> [chave] [modelo] / ai off",
+    "  export          stats públicos (card do GitHub)",
+    "  card            gera card SVG animado",
     "  clear / exit",
 ]
 
@@ -215,6 +219,49 @@ class Console:
         return self._so_janela("ver_cemiterio")
 
     cmd_cemiterio = cmd_rip
+
+    # ---- v1.4 fase 3: dev ----
+    def cmd_ask(self, a):
+        from . import ai
+        pergunta = " ".join(a)
+        cfg = getattr(self.ctx, "cfg", {}) or {}
+        if not ai.ligado(cfg) or not pergunta:
+            return [ai.perguntar(pergunta, cfg)]
+        f = getattr(self.ctx, "perguntar_ia", None)  # janela: roda em thread, resposta chega depois
+        if f:
+            f(pergunta)
+            return ["pensando... (IA BYO: " + cfg["ai_url"][:30] + ")"]
+        return [ai.perguntar(pergunta, cfg, self.ctx.status())]
+
+    def cmd_ai(self, a):
+        cfg = getattr(self.ctx, "cfg", None)
+        if cfg is None:
+            return ["só na janela"]
+        if a[:1] == ["off"]:
+            cfg["ai_url"] = cfg["ai_key"] = ""
+            self.ctx.salvar_cfg()
+            return ["IA desligada. voltei pras respostas enlatadas (grátis)"]
+        if a[:1] == ["set"] and len(a) >= 2:
+            if not a[1].startswith(("https://", "http://127.0.0.1", "http://localhost")):
+                return ["URL precisa ser https:// (ou http://localhost pra Ollama/LM Studio)"]
+            cfg["ai_url"] = a[1]
+            cfg["ai_key"] = a[2] if len(a) >= 3 else ""
+            if len(a) >= 4:
+                cfg["ai_modelo"] = a[3]
+            self.ctx.salvar_cfg()
+            return ["IA ligada (BYO). só a pergunta + humor/preço/nível são enviados.",
+                    "a chave fica no seu config local. 'ai off' desliga."]
+        from . import ai
+        return [f"IA: {'LIGADA ' + cfg['ai_url'] if ai.ligado(cfg) else 'desligada (respostas enlatadas)'}",
+                "uso: ai set <url> [chave] [modelo]  |  ai off"]
+
+    def cmd_export(self, a):
+        f = getattr(self.ctx, "exportar_stats", None)
+        return f() if f else ["export só na janela"]
+
+    def cmd_card(self, a):
+        f = getattr(self.ctx, "gerar_card", None)
+        return f() if f else ["card só na janela"]
 
     # ---- v1.4 fase 2: mercado ----
     def cmd_paper(self, a):

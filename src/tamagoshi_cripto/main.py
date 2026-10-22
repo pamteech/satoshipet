@@ -613,7 +613,11 @@ class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado):
         self._desenhar()
 
     def executar_console(self, linha):
-        self.console_linhas.append("> " + linha)
+        eco = linha
+        if linha.strip().startswith("ai set "):  # não deixa a chave BYO aparecer na tela (nem em screenshot)
+            p = linha.split()
+            eco = " ".join(p[:3] + ["****"] * (len(p) > 3) + p[4:])
+        self.console_linhas.append("> " + eco)
         if linha.strip() in ("clear", "cls"):
             self.console_linhas = []
         elif linha.strip() in ("exit", "quit", "q"):

@@ -532,6 +532,31 @@ def executar():
     app.cfg["carteira_eth"] = app.cfg["carteira_sol"] = ""
     app.saldos_multi.clear()
 
+    # ---------- v1.4 fase 3: export, card, ask (IA off), máscara da chave ----------
+    out = app.console.executar("export")
+    arq = Path(out[0].split(": ", 1)[1])
+    assert "carteira" not in json.loads(arq.read_text())
+    assert app.console.executar("card")[0].startswith("card:")
+    svg = urllib.request.urlopen(f"http://127.0.0.1:{os.environ['TAMAGOSHI_API_PORT']}/card.svg", timeout=3).read()
+    assert svg.startswith(b"<svg")
+    from tamagoshi_cripto import ai as _ai
+    assert app.console.executar("ask vai subir?")[0]
+    app.executar_console("ai set https://api.exemplo.com/v1 sk-SEGREDO modelo-x")
+    assert not any("sk-SEGREDO" in l for l in app.console_linhas) and app.cfg["ai_key"] == "sk-SEGREDO"
+    _ai_orig = _ai.perguntar
+    _ai.perguntar = lambda p, cfg, ctx=None, timeout=25: "HODL, fren (IA de mentira)"
+    app.executar_console("ask e agora?")
+    for _ in range(50):
+        _bombear(app, 20)
+        app._processar_eventos()
+        if any("IA de mentira" in l for l in app.console_linhas):
+            break
+    _ai.perguntar = _ai_orig
+    assert any("IA de mentira" in l for l in app.console_linhas)
+    app.executar_console("ai off")
+    assert not app.cfg["ai_url"] and not app.cfg["ai_key"]
+    app.console_aberto = False
+
     # foto Pro: ETH cyberpunk em TO THE MOON com sparkline
     for w in app.root.winfo_children():
         if w.winfo_class() == "Toplevel":

@@ -1,0 +1,32 @@
+{
+  "name": "tamagoshi-cripto",
+  "displayName": "Tamagoshi Cripto",
+  "description": "O bichinho que sente o mercado, agora na barra de status do VS Code (preço + humor + sprite).",
+  "version": "1.4.0",
+  "publisher": "OWNER",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "repository": {"type": "git", "url": "https://github.com/OWNER/tamagoshi-cripto"},
+  "engines": {"vscode": "^1.80.0"},
+  "categories": ["Other"],
+  "keywords": ["bitcoin", "crypto", "tamagotchi", "pixel art", "status bar"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {"command": "tamagoshi.abrir", "title": "Tamagoshi: abrir o bicho"},
+      {"command": "tamagoshi.carinho", "title": "Tamagoshi: fazer carinho"}
+    ],
+    "configuration": {
+      "title": "Tamagoshi Cripto",
+      "properties": {
+        "tamagoshi.moeda": {"type": "string", "default": "BTC", "enum": ["BTC", "ETH", "SOL", "DOGE", "PEPE"],
+                            "description": "Moeda (usada quando o app desktop não está rodando)"},
+        "tamagoshi.apiLocal": {"type": "string", "default": "http://127.0.0.1:8737",
+                               "description": "API local do app desktop (só 127.0.0.1)"},
+        "tamagoshi.intervaloSeg": {"type": "number", "default": 60, "minimum": 20,
+                                   "description": "De quanto em quanto tempo atualiza"}
+      }
+    }
+  }
+}

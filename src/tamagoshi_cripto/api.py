@@ -3,6 +3,8 @@
 GET /status       -> JSON completo
 GET /status.txt   -> uma linha (barra de status)
 GET /overlay      -> página HTML transparente pro OBS (Browser Source)
+GET /card.svg     -> card de perfil animado (README do GitHub) - v1.4
+GET /stream       -> overlay de streamer (sprite + preço + chat da Twitch) - v1.4
 Porta padrão 8737 (T-A-M-A no teclado do celular, mais ou menos). Mude com $TAMAGOSHI_API_PORT.
 """
 import json
@@ -42,6 +44,9 @@ def iniciar(obter_status, porta=PORTA):
                              f"LV{s['nivel']}\n", "text/plain; charset=utf-8")
             elif self.path.startswith("/status"):
                 self._enviar(json.dumps(obter_status(), ensure_ascii=False), "application/json")
+            elif self.path.startswith("/card.svg"):
+                from . import cartao
+                self._enviar(cartao.svg(cartao.exportar_stats(obter_status())), "image/svg+xml")
             elif self.path.startswith("/overlay"):
                 self._enviar(OVERLAY, "text/html; charset=utf-8")
             else:

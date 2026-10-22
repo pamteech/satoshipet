@@ -187,6 +187,43 @@ class MixinEngajamento:
         self._desenhar()
         return [f"{len(self.cfg.get('cemiterio', []))} lápide(s) no Cemitério de Honra"]
 
+    # ---------- v1.4 fase 3: IA BYO, export, card ----------
+    def salvar_cfg(self):
+        config.salvar(self.cfg)
+
+    def perguntar_ia(self, pergunta):
+        import threading
+        from . import ai
+        ctx = {k: v for k, v in self.status().items() if k in ("moeda", "humor", "variacao_pct", "nivel")}
+
+        def tarefa():
+            resp = ai.perguntar(pergunta, self.cfg, ctx)
+            with self.lock:
+                self.eventos.append(("console", ["bicho: " + resp]))
+        threading.Thread(target=tarefa, daemon=True).start()
+
+    def _pasta_saida(self):
+        from pathlib import Path
+        p = Path.home() / "Pictures"
+        return p if p.exists() else Path.home()
+
+    def exportar_stats(self):
+        import json
+        from . import __version__, cartao
+        s = cartao.exportar_stats(self.status(), __version__)
+        arq = self._pasta_saida() / "tamagoshi-stats.json"
+        arq.write_text(json.dumps(s, ensure_ascii=False, indent=1), encoding="utf-8")
+        return [f"stats salvos: {arq}", "só campos públicos (sem carteira/e-mail/licença).",
+                "suba no seu repo de perfil + .github/workflows/profile-card.yml (docs/PROFILE_CARD.md)"]
+
+    def gerar_card(self):
+        from . import cartao
+        s = cartao.exportar_stats(self.status())
+        arq = self._pasta_saida() / "tamagoshi-card.svg"
+        arq.write_text(cartao.svg(s), encoding="utf-8")
+        cartao.png(s).save(arq.with_suffix(".png"))
+        return [f"card: {arq} (+ .png)", "API local também serve: http://127.0.0.1:8737/card.svg"]
+
     # ---------- menu ----------
     def menu_genetica(self, m):
         import tkinter as tk
