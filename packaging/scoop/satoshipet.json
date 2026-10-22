@@ -1,0 +1,21 @@
+{
+    "##": "RASCUNHO scoop - NÃO enviado a nenhum bucket. Troque pamteech e o hash.",
+    "version": "1.5.0",
+    "description": "Pixel-art crypto pet that floats on your desktop and reacts to the market",
+    "homepage": "https://github.com/pamteech/satoshipet",
+    "license": "MIT",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/pamteech/satoshipet/releases/download/v1.5.0/SatoshiPet.exe#/satoshipet.exe",
+            "hash": "TROCAR_PELO_SHA256_DO_EXE"
+        }
+    },
+    "bin": "satoshipet.exe",
+    "shortcuts": [["satoshipet.exe", "SatoshiPet"]],
+    "checkver": "github",
+    "autoupdate": {
+        "architecture": {
+            "64bit": {"url": "https://github.com/pamteech/satoshipet/releases/download/v$version/SatoshiPet.exe#/satoshipet.exe"}
+        }
+    }
+}

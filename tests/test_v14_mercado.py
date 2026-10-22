@@ -1,7 +1,7 @@
 """v1.4 fase 2: paper trading, ETH/SOL watch-only, baleias e RSS (sem rede)."""
 import pytest
 
-from tamagoshi_cripto import baleias, multichain, noticias, papel
+from satoshipet import baleias, multichain, noticias, papel
 
 
 def test_paper_compra_vende_e_pnl():

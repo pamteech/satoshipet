@@ -8,7 +8,7 @@ import zlib
 
 import pytest
 
-from tamagoshi_cripto import genetica, loja, multichain, noticias, onchain, twitch
+from satoshipet import genetica, loja, multichain, noticias, onchain, twitch
 
 ALFABETO = string.printable + "áéíóúãõç€🚀\x00\u202e"
 
@@ -68,7 +68,7 @@ def test_petcode_bomba_de_zlib():
 
 
 def test_petcode_importado_cruza_e_luta():
-    from tamagoshi_cripto import batalha
+    from satoshipet import batalha
     pet, erro = genetica.importar(_forjar({"g": dict(g_ok, geracao="lixo", id=["x"]), "lv": 3, "e": "whale"}))
     assert erro is None
     filho, _ = genetica.cruzar(genetica.aleatorio(1), pet["genes"], semente=1)

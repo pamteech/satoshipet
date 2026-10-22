@@ -11,7 +11,7 @@ sys.path.insert(0, str(RAIZ / "src"))
 os.environ["HOME"] = tempfile.mkdtemp()
 from PIL import Image
 
-from tamagoshi_cripto import baleias, config, logic, lore, main, multichain, noticias, onchain
+from satoshipet import baleias, config, logic, lore, main, multichain, noticias, onchain
 
 OUT = Path(sys.argv[1] if len(sys.argv) > 1 else "preview")
 OUT.mkdir(parents=True, exist_ok=True)
@@ -27,7 +27,7 @@ onchain.hashrate = lambda timeout=10: 1.035e21
 onchain.gas_eth = lambda timeout=8: 0.4
 config.INTERVALO = 1
 
-app = main.Tamagoshi({"sem_tray": True, "mudo": True, "sem_updates": True, "sem_api": True,
+app = main.SatoshiPet({"sem_tray": True, "mudo": True, "sem_updates": True, "sem_api": True,
                       "sem_onboarding": True, "idioma": "pt"})
 app.cfg["chapeus"] = False
 app.root.geometry("+40+40")
@@ -61,7 +61,7 @@ def gif(nome, n, preparo=None, passo=None):
         fr[i].save(OUT / f"{nome}_{i:02d}.png")
 
 
-from tamagoshi_cripto import evolucao
+from satoshipet import evolucao
 
 xp = 0
 while evolucao.estagio(xp, app.conq.d["crashes"]) != "adulto":

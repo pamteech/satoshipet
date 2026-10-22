@@ -1,7 +1,7 @@
 """v1.6: saldo watch-only no painel - formato, privacidade, backoff, marcos e NADA vazando."""
 import json
 
-from tamagoshi_cripto import api, cartao, config, console, ranking, saldo
+from satoshipet import api, cartao, config, console, ranking, saldo
 
 
 class FakeResp:

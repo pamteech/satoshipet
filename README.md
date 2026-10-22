@@ -1,10 +1,10 @@
 <div align="center">
 
-# 🐣 Tamagoshi Cripto
+# 🐣 SatoshiPet
 
 **A pixel-art crypto pet that floats on your desktop (or lives in your terminal) and feels the market harder than you do.**
 
-[![CI](https://github.com/pamteech/tamagoshi-cripto/actions/workflows/ci.yml/badge.svg)](https://github.com/pamteech/tamagoshi-cripto/actions/workflows/ci.yml)
+[![CI](https://github.com/pamteech/satoshipet/actions/workflows/ci.yml/badge.svg)](https://github.com/pamteech/satoshipet/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)
@@ -58,16 +58,16 @@ Art: 48×48 sprites, Sweetie 16 palette, shading + ordered dithering, sel-out ou
 ### Install
 
 ```bash
-pipx install git+https://github.com/pamteech/tamagoshi-cripto     # or: pip install .
-tamagoshi
+pipx install git+https://github.com/pamteech/satoshipet     # or: pip install .
+satoshipet
 ```
 Linux needs Tk (`sudo apt install python3-tk`). The macOS python.org installer ships with Tk; with Homebrew, run `brew install python-tk`.
-Prebuilt **.app** (macOS) and **.exe** (Windows) builds are attached to each [release](https://github.com/pamteech/tamagoshi-cripto/releases).
+Prebuilt **.app** (macOS) and **.exe** (Windows) builds are attached to each [release](https://github.com/pamteech/satoshipet/releases).
 
 ### Terminal mode (for devs) 💻
 
 ```bash
-tamagoshi --tui --coin PEPE
+satoshipet --tui --coin PEPE
 ```
 <img src="docs/screenshots/tui.png" width="420">
 
@@ -76,7 +76,7 @@ Truecolor half-block rendering (`▀`), live prices, `space` to pet, `c` to cycl
 ### CLI
 
 ```
-tamagoshi [--tui] [--coin BTC|ETH|SOL|DOGE|PEPE] [--skin NAME|plugin:ID] [--scale 1-6]
+satoshipet [--tui] [--coin BTC|ETH|SOL|DOGE|PEPE] [--skin NAME|plugin:ID] [--scale 1-6]
           [--crt] [--mute] [--config PATH] [--skins-dir DIR] [--no-tray] [--no-api] [--status]
           [--list-skins] [--version]
 ```
@@ -87,12 +87,13 @@ tamagoshi [--tui] [--coin BTC|ETH|SOL|DOGE|PEPE] [--skin NAME|plugin:ID] [--scal
 - Menu: coin, skin, watch-only wallet, console, show in sats, settings, price alerts, achievements, mute, CRT, start at login, hide to tray, activate Pro, quit
 
 ### New in v1.7 🌦️ (unreleased)
+- **New name: SatoshiPet** (formerly "Tamagoshi Cripto"). Your pet, settings and Pro key carry over automatically on first launch.
 - **Real weather** (Open-Meteo, no key, **off by default**): pick a city or `lat,lon` in Settings (or opt into IP auto-detect).
   Rain + umbrella, sunglasses on sunny days, snow, fog, stars and moon at night. Refreshes every ~30 min, cached, offline-safe.
 - **Crypto calendar**: Genesis (03/01), Bitcoin Pizza Day (22/05), Whitepaper Day (31/10), Christmas, Carnaval and the **halving**
   (countdown from the block height, party at the halving block) with hats, items, toasts and themed lines.
 - **Market achievements** with pixel badges: survived -10% in 24h, live ATH, 30-day HODL, woke up to a whale, halving block, extreme fear.
-- **LAN friends** (opt-in): other Tamagoshis on your Wi-Fi visit from the screen edge and swap an emote. Only name/species/skin/mood
+- **LAN friends** (opt-in): other SatoshiPets on your Wi-Fi visit from the screen edge and swap an emote. Only name/species/skin/mood
   travel (UDP 47474); your OS firewall may ask once.
 - **Accessibility**: Reduce motion (also follows macOS/Windows), Large text (2x), high contrast, optional voice announcements,
   `M`/Shift+F10 opens the menu, `Tab` walks through the tooltips.
@@ -146,7 +147,7 @@ One tabbed **Settings** screen (press `S`) instead of a pile of dialogs, **keybo
 | 💥 **Juice** | screen shake + particles on moon/crash, day/night panel palette by local time, **seasonal hats** (halloween in October, Santa hat in December) |
 | 🔑 **Licensing providers** | `hmac` (offline), **Gumroad**, **Lemon Squeezy**, **Hotmart** (via webhook key server in `server/licencas.py`). 24 h cache + **14-day offline grace**. Clear pt-BR errors |
 | 🔔 **Update check** | asks GitHub Releases for the latest tag and shows a clickable "NOVA VERSÃO!" toast. **Never downloads or installs anything** |
-| 🧯 **Crash log** | `~/.tamagoshi_cripto/crash.log`; menu → Ajuda → *Enviar relatório* opens a **prefilled GitHub issue** in your browser (home path stripped). You review and submit |
+| 🧯 **Crash log** | `~/.satoshipet/crash.log`; menu → Ajuda → *Enviar relatório* opens a **prefilled GitHub issue** in your browser (home path stripped). You review and submit |
 | ♿ **Accessibility** | 6 sizes (menu → Aparência), high-contrast mode, every effect can be turned off |
 | ⚙️ **Settings migration** | configs from v1.0–v1.2 are upgraded automatically (`versao_config`) — your pet keeps its XP |
 | 🪶 **Light** | ~**1.1 % of one CPU core idle** (measured, see below) |
@@ -210,9 +211,9 @@ Press <kbd>`</kbd> on the widget (or <kbd>`</kbd> / <kbd>:</kbd> in `--tui`). �
 ```bash
 curl -s localhost:8737/status | jq .btc      # {"bloco": 921339, "fee_sat_vb": 3, "fome": "SACIADO", ...}
 curl -s localhost:8737/status.txt            # 🚀 BTC $67,123.00 +2.41% LV7
-tamagoshi --status                           # same JSON from the CLI
+satoshipet --status                           # same JSON from the CLI
 ```
-Bound to `127.0.0.1` only. Port via `TAMAGOSHI_API_PORT`, off with `--no-api`. Ready-made
+Bound to `127.0.0.1` only. Port via `SATOSHIPET_API_PORT`, off with `--no-api`. Ready-made
 [sketchybar plugin, polybar module and OBS overlay](examples/).
 
 #### Share card
@@ -260,7 +261,7 @@ Open an issue with the **Concurso de skins** template and send a PR. Validate lo
 | Start at login | | ✅ |
 
 ### Configuration
-`~/.tamagoshi_cripto.json` (override with `$TAMAGOSHI_CONFIG` or `--config`):
+`~/.satoshipet.json` (override with `$SATOSHIPET_CONFIG` or `--config`):
 
 | key | default | |
 |---|---|---|
@@ -278,7 +279,7 @@ Open an issue with the **Concurso de skins** template and send a PR. Validate lo
 | `api` | `true` | local HTTP API on 127.0.0.1 |
 | `onchain` | `true` | block/fee/hashrate/gas polling |
 | `ranking` / `ranking_url` / `nick` | `false` / `""` / `""` | opt-in leaderboard |
-| `site` | `https://pamteech.github.io/tamagoshi-cripto` | link printed on the share card |
+| `site` | `https://pamteech.github.io/satoshipet` | link printed on the share card |
 | `nome_pet` | `""` | pet nickname (onboarding). Empty = coin default |
 | `licenca_provedor` | `"hmac"` | `hmac` · `gumroad` · `lemonsqueezy` · `servidor` (Hotmart) |
 | `licenca_produto` / `licenca_url` | `""` | product id (Gumroad/Lemon) / key server URL (Hotmart) |
@@ -301,13 +302,13 @@ Drop a 192×192 sprite sheet and a `skin.json` in a folder and you're done. See 
 
 ### Build
 ```bash
-./tools/build_mac.sh          # → dist/Tamagoshi Cripto.app
-tools\build_windows.bat       # → dist\TamagoshiCripto.exe
+./tools/build_mac.sh          # → dist/SatoshiPet.app
+tools\build_windows.bat       # → dist\SatoshiPet.exe
 ```
 Pushing a `v*` tag triggers `.github/workflows/release.yml`, which builds both and attaches them to a GitHub Release.
 
 ### Open-core & licensing
-Code and art are **MIT**. Pro is unlocked by a license key checked against a secret that is **not** in the repo. It's injected at release time from the `TAMAGOSHI_LICENSE_SECRET` GitHub secret into a git-ignored `_segredo.py`. Dev builds use a dev secret. To switch to online validation, see the Gumroad notes in `src/tamagoshi_cripto/license.py`.
+Code and art are **MIT**. Pro is unlocked by a license key checked against a secret that is **not** in the repo. It's injected at release time from the `SATOSHIPET_LICENSE_SECRET` GitHub secret into a git-ignored `_segredo.py`. Dev builds use a dev secret. To switch to online validation, see the Gumroad notes in `src/satoshipet/license.py`.
 Not financial advice. The pet is emotionally unstable by design.
 
 ---
@@ -318,9 +319,9 @@ Um bichinho em pixel art que flutua na sua tela (sem bordas, sempre no topo, fun
 
 **Instalar e rodar**
 ```bash
-pipx install git+https://github.com/pamteech/tamagoshi-cripto
-tamagoshi            # janela
-tamagoshi --tui      # no terminal
+pipx install git+https://github.com/pamteech/satoshipet
+satoshipet            # janela
+satoshipet --tui      # no terminal
 ```
 
 **Modo nerd (v1.1):** o bicho **come cada bloco novo do Bitcoin** (mempool.space), fica com fome quando a fee da mempool sobe, **dorme** se passar 30 min sem bloco ("esperando bloco..."), mostra hash rate e gas do ETH, **evolui** (ovo → bebê → adulto → Whale ou Diamond Hands se sobreviver a 3 crashes) com nível e barra de XP, tem **console hacker** (tecla <kbd>`</kbd>: `help`, `neofetch`, `sudo moon`, `rm -rf /`, `git blame`...), teclas **hjkl** pra mover, modo **sats / Moscow time** e uma **API local** em `127.0.0.1:8737/status` pra polybar, sketchybar e OBS ([exemplos](examples/)). Tudo com APIs grátis sem chave; sem internet ele só mostra `?`.
@@ -334,7 +335,7 @@ tamagoshi --tui      # no terminal
 **Free:** Satoshinho (BTC), animações, carinho, vida em corações, conquistas, sons 8-bit, Fear & Greed, contagem do halving (5 carinhos no Satoshinho), código konami (skin secreta), criaturas da comunidade, modo terminal e botão de afiliado.
 **Pro:** ETH, SOL, DOGE e PEPE na janela, skins premium, limites e preço de referência configuráveis, alertas de preço, mini gráfico e "abrir ao iniciar".
 
-**Novidades v1.7 (em andamento):** **clima de verdade** (Open-Meteo, desligado por padrão; cidade/lat,lon ou auto por IP) com chuva e guarda-chuva, óculos no sol, neve, neblina e céu estrelado; **calendário cripto** (Genesis, Pizza Day, Whitepaper, Natal, Carnaval e o **halving** com contagem); **conquistas de mercado** com medalhas pixel; **amigos na LAN** (opt-in, só nome/espécie/skin/humor); **acessibilidade**: reduzir movimento, fonte grande, voz opcional, `M` abre o menu e `Tab` passeia pelas dicas.
+**Novidades v1.7 (em andamento):** **novo nome: SatoshiPet** (antes "Tamagoshi Cripto"; seu pet, ajustes e chave Pro vêm junto na 1ª abertura); **clima de verdade** (Open-Meteo, desligado por padrão; cidade/lat,lon ou auto por IP) com chuva e guarda-chuva, óculos no sol, neve, neblina e céu estrelado; **calendário cripto** (Genesis, Pizza Day, Whitepaper, Natal, Carnaval e o **halving** com contagem); **conquistas de mercado** com medalhas pixel; **amigos na LAN** (opt-in, só nome/espécie/skin/humor); **acessibilidade**: reduzir movimento, fonte grande, voz opcional, `M` abre o menu e `Tab` passeia pelas dicas.
 
 **Novidades v1.5 (qualidade):** tela única de **Ajustes** com abas (tecla `S`), **teclado em tudo**, interface **pt-BR/EN** com auto-detecção, formas finais únicas pra ETH/SOL/DOGE/PEPE, estágios nos pacotes da loja, chave da IA no **chaveiro do sistema**, API local blindada e [PRIVACY.md](PRIVACY.md). Detalhes no [CHANGELOG.md](CHANGELOG.md).
 
@@ -347,11 +348,11 @@ tamagoshi --tui      # no terminal
 **Pra colocar no ar:** veja o [docs/GO_LIVE.md](docs/GO_LIVE.md).
 
 **Vender a versão Pro**
-1. Gere um segredo forte e salve como GitHub Secret `TAMAGOSHI_LICENSE_SECRET`.
-2. Gere as chaves com `TAMAGOSHI_LICENSE_SECRET=... python tools/keygen.py cliente@email.com`, ou troque pela API de licenças do Gumroad (instruções em `license.py`).
+1. Gere um segredo forte e salve como GitHub Secret `SATOSHIPET_LICENSE_SECRET`.
+2. Gere as chaves com `SATOSHIPET_LICENSE_SECRET=... python tools/keygen.py cliente@email.com`, ou troque pela API de licenças do Gumroad (instruções em `license.py`).
 3. Crie um tag `v1.0.0`. O GitHub Actions gera o `.app` e o `.exe` e anexa no Release.
 4. Venda a licença no [Gumroad](https://gumroad.com) por um pagamento único de US$ 5–10 e distribua o app grátis.
-5. Troque `LINK_AFILIADO` em `src/tamagoshi_cripto/config.py`. Confira as regras do programa de afiliados da corretora e se ela opera legalmente onde você divulga.
+5. Troque `LINK_AFILIADO` em `src/satoshipet/config.py`. Confira as regras do programa de afiliados da corretora e se ela opera legalmente onde você divulga.
 
 **Criar uma criatura:** veja o [CONTRIBUTING.md](CONTRIBUTING.md) (folha PNG de 192×192 + `skin.json`).
 

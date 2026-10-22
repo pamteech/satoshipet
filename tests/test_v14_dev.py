@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from tamagoshi_cripto import ai, cartao, genetica
+from satoshipet import ai, cartao, genetica
 
 RAIZ = Path(__file__).resolve().parents[1]
 STATUS = {"nome": "Satoshinho", "moeda": "ETH", "nivel": 7, "xp": 640, "estagio": "ADULTO", "humor": "moon",
@@ -88,7 +88,7 @@ def test_ia_erro_de_rede_vira_piada(monkeypatch):
 @pytest.mark.skipif(not shutil.which("node"), reason="precisa de node")
 def test_extensao_vscode_smoke():
     pkg = json.loads((RAIZ / "vscode" / "package.json").read_text())
-    assert pkg["main"] == "./extension.js" and pkg["version"] == __import__("tamagoshi_cripto").__version__
+    assert pkg["main"] == "./extension.js" and pkg["version"] == __import__("satoshipet").__version__
     for m in ("BTC", "ETH", "SOL", "DOGE", "PEPE"):
         assert (RAIZ / "vscode" / "media" / f"{m}_padrao.png").exists()
     r = subprocess.run(["node", str(RAIZ / "vscode" / "test" / "smoke.js")], capture_output=True, text=True)

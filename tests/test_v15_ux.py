@@ -1,5 +1,5 @@
 """v1.5 - i18n e kit de UI (sem display: só a lógica)."""
-from tamagoshi_cripto import i18n, ui
+from satoshipet import i18n, ui
 
 
 def test_i18n_detecta_e_traduz(monkeypatch):
@@ -20,7 +20,7 @@ def test_i18n_detecta_e_traduz(monkeypatch):
 
 def test_i18n_rotulos_cabem_na_tela():
     """Abas têm ~52px = 6 caracteres; rótulos de ajuste até 18 (o valor fica do lado)."""
-    from tamagoshi_cripto.ajustes import Ajustes
+    from satoshipet.ajustes import Ajustes
     for aba in Ajustes.ABAS:
         assert len(aba) <= 6 and len(i18n.EN[aba]) <= 6, aba
     for pt, en in i18n.EN.items():
@@ -36,7 +36,7 @@ def test_idioma_mac_sem_lang(monkeypatch):
     import subprocess
     import sys
 
-    from tamagoshi_cripto import i18n
+    from satoshipet import i18n
     for v in ("LC_ALL", "LC_MESSAGES", "LANG", "LANGUAGE"):
         monkeypatch.delenv(v, raising=False)
     monkeypatch.setattr(i18n.locale, "getlocale", lambda: (None, None))
@@ -46,7 +46,7 @@ def test_idioma_mac_sem_lang(monkeypatch):
 
 
 def test_janela_sem_borda_mac_e_outros(monkeypatch):
-    from tamagoshi_cripto import sistema
+    from satoshipet import sistema
     class R:
         def __init__(s): s.chamadas = []; s._w = "."; s.tk = s
         def call(s, *a): s.chamadas.append(a)
@@ -70,7 +70,7 @@ def test_sprite_mac_tem_pixels_opacos(monkeypatch):
     import sys
     import tkinter as tk
 
-    from tamagoshi_cripto import graficos, recursos
+    from satoshipet import graficos, recursos
     root = tk.Tk()
     try:
         monkeypatch.setattr(sys, "platform", "darwin")

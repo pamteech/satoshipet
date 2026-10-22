@@ -1,7 +1,7 @@
 # Brand skins (sponsored packs) / Skins de marca (pacotes patrocinados)
 
-A **brand pack** is a skin pack paid for by a company. It is a normal shop pack (`src/tamagoshi_cripto/assets/loja/<id>/`
-or `~/.tamagoshi_cripto/loja/<id>/`) with `"tipo": "patrocinado"`. Example: `assets/loja/cafe_satoshi/` (a **fictional**
+A **brand pack** is a skin pack paid for by a company. It is a normal shop pack (`src/satoshipet/assets/loja/<id>/`
+or `~/.satoshipet/loja/<id>/`) with `"tipo": "patrocinado"`. Example: `assets/loja/cafe_satoshi/` (a **fictional**
 brand, only there to show the format).
 
 ## Format
@@ -12,8 +12,8 @@ brand, only there to show the format).
   "nome": "Café do Satoshi",
   "tipo": "patrocinado",
   "tier": "free",
-  "autor": "Tamagoshi Cripto",
-  "creditos": "arte: equipe Tamagoshi",
+  "autor": "SatoshiPet",
+  "creditos": "arte: equipe SatoshiPet",
   "licenca_arte": "MIT",
   "patrocinador": "Café do Satoshi (marca FICTÍCIA de exemplo)",
   "disclosure": "patrocinado",
@@ -59,7 +59,7 @@ accountant (MEI/Simples) before the first deal.
 
 `"tipo": "colab"` packs need `revenue_share` summing to 100 (e.g. `{"artista": 70, "projeto": 30}`) and credits.
 They are sold as **codes** (`"tier": "codigo"`) through the usual license provider (Gumroad/Lemon/Hotmart):
-`TAMAGOSHI_LICENSE_SECRET=... python tools/keygen.py --pack neon_nights buyer@email.com` → `SKIN-NEON_NIGHTS-...`
+`SATOSHIPET_LICENSE_SECRET=... python tools/keygen.py --pack neon_nights buyer@email.com` → `SKIN-NEON_NIGHTS-...`
 (or `'*'` for a promo code for everyone). Pay the artist from the provider's sales report; document it in
 `docs/GO_LIVE.md`.
 

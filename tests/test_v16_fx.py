@@ -2,7 +2,7 @@
 import random
 from pathlib import Path
 
-from tamagoshi_cripto import efeitos, energia, i18n
+from satoshipet import efeitos, energia, i18n
 
 
 def test_transicoes_revelam_ate_o_fim():

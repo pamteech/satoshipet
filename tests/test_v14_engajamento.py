@@ -3,8 +3,8 @@ import time
 
 from PIL import Image
 
-from tamagoshi_cripto import batalha, genetica, hardcore, recursos
-from tamagoshi_cripto.pixel import P, rgb
+from satoshipet import batalha, genetica, hardcore, recursos
+from satoshipet.pixel import P, rgb
 
 PALETA = {rgb(v) for v in P.values()}
 

@@ -8,8 +8,8 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from tamagoshi_cripto import arts, cli, config, conquistas, license, logic, lore, plugins, recursos, sistema, sons
-from tamagoshi_cripto import sprites as S
+from satoshipet import arts, cli, config, conquistas, license, logic, lore, plugins, recursos, sistema, sons
+from satoshipet import sprites as S
 
 OFFLINE = bool(os.environ.get("OFFLINE"))
 
@@ -56,7 +56,7 @@ def test_paleta_padrao_limitada():
     """Skin padrão usa só a paleta Sweetie 16 (efeitos inclusos)."""
     from PIL import Image
 
-    from tamagoshi_cripto.pixel import P, rgb
+    from satoshipet.pixel import P, rgb
     pal = {rgb(c) for c in P.values()}
     for m in config.MOEDAS:
         im = Image.open(recursos.sheet_path(m, "padrao")).convert("RGBA")
@@ -65,7 +65,7 @@ def test_paleta_padrao_limitada():
 
 
 def test_folhas_commitadas_batem_com_o_gerador():
-    """Se falhar: rode `python -m tamagoshi_cripto.sprites` e commite as folhas."""
+    """Se falhar: rode `python -m satoshipet.sprites` e commite as folhas."""
     from PIL import Image
     for m in ("BTC", "PEPE"):
         for sk in ("padrao", "cyberpunk"):
@@ -181,7 +181,7 @@ def test_cli_ajuda_e_lista(capsys):
 
 
 def test_tui_renderiza(monkeypatch, capsys):
-    from tamagoshi_cripto import tui
+    from satoshipet import tui
     monkeypatch.setattr(logic, "buscar_precos", lambda s, timeout=10: {m: 1.0 for m in s})
     assert tui.rodar({"moeda": "PEPE"}, frames=2) == 0
     out = capsys.readouterr().out

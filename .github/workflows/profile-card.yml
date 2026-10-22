@@ -1,13 +1,13 @@
-# Card do Tamagoshi pro README do seu perfil do GitHub.
+# Card do SatoshiPet pro README do seu perfil do GitHub.
 # Copie este arquivo pro SEU repositório de perfil (github.com/<você>/<você>), junto com
-# o tamagoshi-stats.json exportado pelo app (console: `export`). Ele gera tamagoshi-card.svg
+# o satoshipet-stats.json exportado pelo app (console: `export`). Ele gera satoshipet-card.svg
 # e commita no próprio repo. Roda só quando você manda (workflow_dispatch) ou quando o
 # stats.json muda. Nada de token extra: usa o GITHUB_TOKEN padrão do repositório.
-name: tamagoshi-profile-card
+name: satoshipet-profile-card
 on:
   workflow_dispatch:
   push:
-    paths: ["tamagoshi-stats.json"]
+    paths: ["satoshipet-stats.json"]
 permissions:
   contents: write
 jobs:
@@ -17,16 +17,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
-      - name: Baixa o Tamagoshi Cripto (só pra desenhar o card)
+      - name: Baixa o SatoshiPet (só pra desenhar o card)
         run: |
-          git clone --depth 1 https://github.com/pamteech/tamagoshi-cripto /tmp/tama
+          git clone --depth 1 https://github.com/pamteech/satoshipet /tmp/tama
           pip install pillow requests
       - name: Gera o card
-        run: python /tmp/tama/tools/profile_card.py --stats tamagoshi-stats.json -o tamagoshi-card.svg
+        run: python /tmp/tama/tools/profile_card.py --stats satoshipet-stats.json -o satoshipet-card.svg
       - name: Commita se mudou
         run: |
-          git config user.name "tamagoshi-bot"
-          git config user.email "tamagoshi-bot@users.noreply.github.com"
-          git add tamagoshi-card.svg
-          git diff --cached --quiet || git commit -m "tamagoshi: card atualizado"
+          git config user.name "satoshipet-bot"
+          git config user.email "satoshipet-bot@users.noreply.github.com"
+          git add satoshipet-card.svg
+          git diff --cached --quiet || git commit -m "satoshipet: card atualizado"
           git push

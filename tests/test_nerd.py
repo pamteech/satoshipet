@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from tamagoshi_cripto import api, conquistas, console, evolucao, onchain, sprites
+from satoshipet import api, conquistas, console, evolucao, onchain, sprites
 
 RAIZ = Path(__file__).resolve().parents[1]
 

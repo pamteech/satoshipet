@@ -4,7 +4,7 @@ import ssl
 
 import pytest
 
-from tamagoshi_cripto import config, console, evolucao, hardcore, logic, multichain, noticias, sprites, twitch
+from satoshipet import config, console, evolucao, hardcore, logic, multichain, noticias, sprites, twitch
 
 
 class Resp:
@@ -240,7 +240,7 @@ def test_sprites_contato_e_gifs(tmp_path):
 
 # ---------------- v1.5 passo 4: arte ----------------
 def test_formas_finais_unicas():
-    from tamagoshi_cripto import sprites as sp
+    from satoshipet import sprites as sp
     for m in ("ETH", "SOL", "DOGE", "PEPE"):
         adulto = sp.desenhar(m, "padrao", "garimpando", 0, estagio="adulto").tobytes()
         assert sp.desenhar(m, "padrao", "garimpando", 0, estagio="whale").tobytes() != adulto
@@ -248,7 +248,7 @@ def test_formas_finais_unicas():
 
 
 def test_pacotes_tem_estagios_e_genes_de_forma():
-    from tamagoshi_cripto import loja
+    from satoshipet import loja
     cat = loja.catalogo()
     for pid, m in cat.items():
         for est in ("ovo", "bebe", "whale", "diamond"):
@@ -262,7 +262,7 @@ def test_pacotes_tem_estagios_e_genes_de_forma():
 def test_chapeu_nao_cobre_olhos_do_sapo():
     from PIL import Image
 
-    from tamagoshi_cripto import juice, recursos
+    from satoshipet import juice, recursos
     sh = Image.open(recursos.ASSETS / "sprites" / "PEPE_padrao.png").convert("RGBA")
     fr = sh.crop((0, 0, 48, 48))
     com = juice.aplicar_chapeu(fr, "halloween")

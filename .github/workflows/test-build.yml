@@ -1,5 +1,5 @@
 # Build de TESTE (manual): gera só o .dmg do macOS (Apple Silicon) como artifact.
-# Não cria release nem tag. Sem TAMAGOSHI_LICENSE_SECRET -> usa o segredo de dev (chaves de dev).
+# Não cria release nem tag. Sem SATOSHIPET_LICENSE_SECRET -> usa o segredo de dev (chaves de dev).
 name: Test build (macOS)
 on:
   workflow_dispatch:
@@ -24,15 +24,15 @@ jobs:
         run: ./tools/build_mac.sh
       - name: Empacotar .dmg
         run: |
-          mkdir -p dmgsrc && cp -R "dist/Tamagoshi Cripto.app" dmgsrc/ && ln -s /Applications dmgsrc/Applications
-          DMG=dist/TamagoshiCripto-macos-$(uname -m).dmg
-          for i in 1 2 3 4 5; do hdiutil create -volname "Tamagoshi Cripto" -srcfolder dmgsrc -ov -format UDZO "$DMG" && break; echo "hdiutil ocupado, tentando de novo ($i)"; sleep 5; done
+          mkdir -p dmgsrc && cp -R "dist/SatoshiPet.app" dmgsrc/ && ln -s /Applications dmgsrc/Applications
+          DMG=dist/SatoshiPet-macos-$(uname -m).dmg
+          for i in 1 2 3 4 5; do hdiutil create -volname "SatoshiPet" -srcfolder dmgsrc -ov -format UDZO "$DMG" && break; echo "hdiutil ocupado, tentando de novo ($i)"; sleep 5; done
           test -f "$DMG"
-          file "dist/Tamagoshi Cripto.app/Contents/MacOS/Tamagoshi Cripto"
-          codesign -dv "dist/Tamagoshi Cripto.app" 2>&1 || true
+          file "dist/SatoshiPet.app/Contents/MacOS/SatoshiPet"
+          codesign -dv "dist/SatoshiPet.app" 2>&1 || true
           ls -la dist
       - uses: actions/upload-artifact@v4
         with:
-          name: TamagoshiCripto-macos-${{ inputs.runner }}
+          name: SatoshiPet-macos-${{ inputs.runner }}
           path: dist/*.dmg
           retention-days: 7

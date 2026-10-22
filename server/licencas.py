@@ -10,7 +10,7 @@ Fluxo Hotmart (o Hotmart não tem API pública de license key):
   4. Reembolso/chargeback/cancelamento → chave marcada como revogada (o app derruba o Pro na próxima validação;
      offline ele mantém só pelo período de graça).
 
-Env: HOTMART_HOTTOK (obrigatório p/ webhook), TAMAGOSHI_LICENSE_SECRET, ADMIN_TOKEN, DB, PORT, HOST,
+Env: HOTMART_HOTTOK (obrigatório p/ webhook), SATOSHIPET_LICENSE_SECRET, ADMIN_TOKEN, DB, PORT, HOST,
      SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS/SMTP_FROM (opcional).
 """
 import hashlib
@@ -83,7 +83,7 @@ def enviar_email(email, chave):
     if not host:
         return False
     msg = EmailMessage()
-    msg["Subject"] = "Sua chave do Tamagoshi Cripto Pro 🐣"
+    msg["Subject"] = "Sua chave do SatoshiPet Pro 🐣"
     msg["From"] = os.environ.get("SMTP_FROM", os.environ.get("SMTP_USER", ""))
     msg["To"] = email
     msg.set_content(f"Valeu pela compra!\n\nE-mail: {email}\nChave: {chave}\n\n"
@@ -97,7 +97,7 @@ def enviar_email(email, chave):
 
 
 def criar_servidor(host="127.0.0.1", porta=8741, db=":memory:", hottok=None, segredo=None, admin=None, mailer=enviar_email):
-    ch = Chaves(db, segredo or os.environ.get("TAMAGOSHI_LICENSE_SECRET", "dev-only-nao-use-em-producao").encode())
+    ch = Chaves(db, segredo or (os.environ.get("SATOSHIPET_LICENSE_SECRET") or os.environ.get("TAMAGOSHI_LICENSE_SECRET") or "dev-only-nao-use-em-producao").encode())
     hottok = hottok if hottok is not None else os.environ.get("HOTMART_HOTTOK", "")
     admin = admin if admin is not None else os.environ.get("ADMIN_TOKEN", "")
 

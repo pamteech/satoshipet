@@ -2,7 +2,7 @@
 import datetime as dt
 import json
 
-from tamagoshi_cripto import acessibilidade, calendario, clima, conquistas, i18n, lan
+from satoshipet import acessibilidade, calendario, clima, conquistas, i18n, lan
 
 
 class R:

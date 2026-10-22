@@ -2,6 +2,7 @@
 
 
 ## [não lançado] v1.7 (em andamento)
+- **Novo nome: SatoshiPet** (antes "Tamagoshi Cripto"). Pacote Python `satoshipet`, comando `satoshipet` (o `tamagoshi` segue como apelido deprecado), `SatoshiPet.app` / `SatoshiPet.exe`, bundle id `com.pamtech.satoshipet`, repo `pamteech/satoshipet`. **Nada se perde**: na 1ª abertura o app COPIA `~/.tamagoshi_cripto.json`, `~/.tamagoshi_cripto/` e `~/.tamagoshi_api_token` pros nomes novos (`~/.satoshipet*`; o antigo fica de backup), traz a chave da IA do chaveiro antigo e troca o "iniciar com o sistema" antigo pelo novo. Chaves Pro e códigos SKIN- antigos continuam valendo; variáveis `TAMAGOSHI_*` ainda são aceitas.
 - **Clima real** (Open-Meteo, sem chave, DESLIGADO por padrão): cidade (geocoding Open-Meteo) ou `lat,lon` em Ajustes > Geral; "auto" por IP (ipwho.is) só se você escolher. Chuva + guarda-chuva, óculos escuros no sol (em cima dos olhos detectados na folha), neve, neblina pontilhada, tempestade com relâmpago, estrelas e lua à noite. Atualiza a cada ~30 min, cache, backoff, offline usa o último clima.
 - **Calendário cripto**: Genesis (03/01), Pizza Day (22/05, com fatia de pizza), Whitepaper Day (31/10), Natal, Carnaval (calculado pela Páscoa) e **halving** (próximo pela altura do bloco; contagem nos últimos ~2016 blocos; festa no bloco do halving). Chapéus novos: festa e tiara de plumas.
 - **Conquistas de mercado** com medalhas 8x8: Survivor -10% (24h), ATH ao vivo (ATH da CoinGecko a cada 6 h), HODL 30 dias, Acordou com baleia, Bloco do Halving, Medo Extremo.

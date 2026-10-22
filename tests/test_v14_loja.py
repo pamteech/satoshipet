@@ -3,7 +3,7 @@ import datetime as dt
 import json
 import shutil
 
-from tamagoshi_cripto import loja, recursos, twitch
+from satoshipet import loja, recursos, twitch
 
 
 def test_catalogo_tem_os_4_pacotes_validos():

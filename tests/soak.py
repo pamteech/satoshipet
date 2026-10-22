@@ -15,9 +15,9 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "src"))
-os.environ["TAMAGOSHI_CONFIG"] = str(Path(tempfile.mkdtemp()) / "cfg.json")
+os.environ["SATOSHIPET_CONFIG"] = str(Path(tempfile.mkdtemp()) / "cfg.json")
 os.environ["HOME"] = tempfile.mkdtemp()
-os.environ.setdefault("TAMAGOSHI_API_PORT", "18799")
+os.environ.setdefault("SATOSHIPET_API_PORT", "18799")
 
 RELOGIO = [1_790_000_000.0]
 _time_real = time.time
@@ -47,7 +47,7 @@ def rodar(horas=6, semente=1, verbose=False):
     import tkinter.simpledialog as sd
     import webbrowser
 
-    from tamagoshi_cripto import (
+    from satoshipet import (
         baleias,
         cenas,
         conquistas,
@@ -90,7 +90,7 @@ def rodar(horas=6, semente=1, verbose=False):
     sd.askfloat = lambda *a, **k: None
     webbrowser.open = lambda *a, **k: True
 
-    app = main.Tamagoshi({"sem_tray": 1, "idioma": "pt", "sem_onboarding": 1, "sem_updates": 1, "mudo": True,
+    app = main.SatoshiPet({"sem_tray": 1, "idioma": "pt", "sem_onboarding": 1, "sem_updates": 1, "mudo": True,
                           "sem_confirmar": 1, "sem_twitch": 1})
     app.root.after = lambda *a, **k: None          # o soak dirige o relógio, não o Tk
     app.pro = True

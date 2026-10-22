@@ -1,11 +1,11 @@
 @echo off
 REM Build do .exe (Windows). Rode da raiz do repo: tools\build_windows.bat
-REM Para o build oficial, defina TAMAGOSHI_LICENSE_SECRET antes (vira src\tamagoshi_cripto\_segredo.py).
+REM Para o build oficial, defina SATOSHIPET_LICENSE_SECRET antes (vira src\satoshipet\_segredo.py).
 pip install -e ".[tray,build]" || exit /b 1
-if defined TAMAGOSHI_LICENSE_SECRET python -c "import os;open('src/tamagoshi_cripto/_segredo.py','w').write('SEGREDO=%%r\n'%%os.environ['TAMAGOSHI_LICENSE_SECRET'])"
-pyinstaller --noconsole --onefile --name TamagoshiCripto ^
-  --icon src\tamagoshi_cripto\assets\icone.ico ^
-  --add-data "src\tamagoshi_cripto\assets;tamagoshi_cripto\assets" ^
-  --hidden-import pystray._win32 --collect-submodules tamagoshi_cripto ^
+if defined SATOSHIPET_LICENSE_SECRET python -c "import os;open('src/satoshipet/_segredo.py','w').write('SEGREDO=%%r\n'%%os.environ['SATOSHIPET_LICENSE_SECRET'])"
+pyinstaller --noconsole --onefile --name SatoshiPet ^
+  --icon src\satoshipet\assets\icone.ico ^
+  --add-data "src\satoshipet\assets;satoshipet\assets" ^
+  --hidden-import pystray._win32 --collect-submodules satoshipet ^
   --paths src tools\run_app.py
-echo Pronto: dist\TamagoshiCripto.exe
+echo Pronto: dist\SatoshiPet.exe

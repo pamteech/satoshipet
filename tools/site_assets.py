@@ -10,8 +10,8 @@ from PIL import Image, ImageDraw
 
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "src"))
-from tamagoshi_cripto import recursos, share
-from tamagoshi_cripto.pixel import rgb
+from satoshipet import recursos, share
+from satoshipet.pixel import rgb
 
 SITE = RAIZ / "site" / "assets"
 
@@ -30,7 +30,7 @@ def og():
     for bx in range(0, W, 20):
         share._moldura(d, bx + 1, 178, bx + 18, 192, "laranja", luz="amarelo")
     d.rectangle([0, 195, W, H], fill=rgb("preto") + (255,))
-    t1, t2 = "TAMAGOSHI", "CRIPTO"
+    t1, t2 = "SATOSHIPET", "CRIPTO"
     f.escrever(img, (W - f.larg(t1 + " " + t2, 3)) // 2, 16, t1, "branco", 3, sombra="roxo")
     f.escrever(img, (W - f.larg(t1 + " " + t2, 3)) // 2 + f.larg(t1 + " ", 3), 16, t2, "laranja", 3, sombra="vinho")
     sub = "o pet pixel art que come blocos de bitcoin"

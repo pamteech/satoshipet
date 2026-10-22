@@ -28,9 +28,9 @@ def cpu_s(pid):
 def main():
     tmp = Path(tempfile.mkdtemp())
     (tmp / "cfg.json").write_text(json.dumps({"onboarding_ok": True, "mudo": True, "versao_config": 3}))
-    env = dict(os.environ, TAMAGOSHI_CONFIG=str(tmp / "cfg.json"), PYTHONPATH=str(RAIZ / "src"),
-               TAMAGOSHI_API_PORT="18799", HOME=str(tmp))
-    p = subprocess.Popen([sys.executable, "-m", "tamagoshi_cripto", "--no-tray"], env=env,
+    env = dict(os.environ, SATOSHIPET_CONFIG=str(tmp / "cfg.json"), PYTHONPATH=str(RAIZ / "src"),
+               SATOSHIPET_API_PORT="18799", HOME=str(tmp))
+    p = subprocess.Popen([sys.executable, "-m", "satoshipet", "--no-tray"], env=env,
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
         time.sleep(10)

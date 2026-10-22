@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-os.environ.setdefault("TAMAGOSHI_CONFIG", str(Path(tempfile.mkdtemp()) / "cfg.json"))
+os.environ.setdefault("SATOSHIPET_CONFIG", str(Path(tempfile.mkdtemp()) / "cfg.json"))
 
 import pytest
 
@@ -16,7 +16,7 @@ _MODULOS = ("logic", "lore", "onchain", "baleias", "noticias", "multichain", "li
 @pytest.fixture(autouse=True)
 def _restaura_modulos_mockados():
     import importlib
-    mods = [importlib.import_module(f"tamagoshi_cripto.{m}") for m in _MODULOS]
+    mods = [importlib.import_module(f"satoshipet.{m}") for m in _MODULOS]
     fotos = [(m, dict(vars(m))) for m in mods]
     yield
     for m, foto in fotos:

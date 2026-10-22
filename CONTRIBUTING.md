@@ -5,11 +5,11 @@ Thanks for wanting to make the pet even more degen! The easiest (and most fun) w
 ## Dev setup
 
 ```bash
-git clone https://github.com/pamteech/tamagoshi-cripto && cd tamagoshi-cripto
+git clone https://github.com/pamteech/satoshipet && cd satoshipet
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
-tamagoshi            # desktop window
-tamagoshi --tui      # terminal mode
+satoshipet            # desktop window
+satoshipet --tui      # terminal mode
 pytest               # Linux GUI tests: xvfb-run -a pytest
 ```
 
@@ -48,22 +48,22 @@ my-creature/
 `id`, `nome` and `autor` are required; `frases` (extra speech-bubble lines per mood) is optional.
 
 ### Try it
-Drop the folder in `~/.tamagoshi_cripto/skins/` (or pass `--skins-dir path/`), then:
+Drop the folder in `~/.satoshipet/skins/` (or pass `--skins-dir path/`), then:
 ```bash
-tamagoshi --list-skins
-tamagoshi --skin plugin:slime
-tamagoshi --tui --skin plugin:slime
+satoshipet --list-skins
+satoshipet --skin plugin:slime
+satoshipet --tui --skin plugin:slime
 ```
 
 ### Submit it
-Put it in `src/tamagoshi_cripto/assets/skins/<id>/` and open a PR. The CI validates the format. See `tools/exemplo_skin.py` for a creature drawn in code with the built-in pixel engine (`tamagoshi_cripto/pixel.py`: shaded volumes, dithering, sel-out outlines, squash & stretch).
+Put it in `src/satoshipet/assets/skins/<id>/` and open a PR. The CI validates the format. See `tools/exemplo_skin.py` for a creature drawn in code with the built-in pixel engine (`satoshipet/pixel.py`: shaded volumes, dithering, sel-out outlines, squash & stretch).
 
 **Rules:** original art only (no copyrighted characters or exchange logos), keep it fun, no financial advice.
 
 ## Changing built-in sprites
-The built-ins are drawn in code in `src/tamagoshi_cripto/sprites.py`. After editing, run:
+The built-ins are drawn in code in `src/satoshipet/sprites.py`. After editing, run:
 ```bash
-python -m tamagoshi_cripto.sprites   # regenerates sheets, docs/sprites_preview.png and docs/demo/*.gif
+python -m satoshipet.sprites   # regenerates sheets, docs/sprites_preview.png and docs/demo/*.gif
 ```
 and commit the results. A test checks that committed sheets match the generator.
 
@@ -72,7 +72,7 @@ Small modules, comments welcome (pt-BR or English), tests for any logic. The GUI
 
 ## Evolution stages (v1.1)
 Each creature has one sheet per stage: `COIN_SKIN_ovo.png`, `COIN_SKIN_bebe.png`, `COIN_SKIN.png` (adult),
-`COIN_SKIN_whale.png`, `COIN_SKIN_diamond.png` — same 192×192 / 4×4 layout. Run `python -m tamagoshi_cripto.sprites`
+`COIN_SKIN_whale.png`, `COIN_SKIN_diamond.png` — same 192×192 / 4×4 layout. Run `python -m satoshipet.sprites`
 to regenerate all 125 (~16 s). Plugin skins currently use their single sheet for every stage; a missing built-in stage sheet falls back to the adult one.
 
 ## Adding a console command
@@ -87,7 +87,7 @@ It works in the window and in `--tui` automatically.
 
 ## Concurso de skins / Skin contest 🏆
 **PT:** abra uma issue com o template **🏆 Concurso de skins** e mande o PR com a pasta
-`src/tamagoshi_cripto/assets/skins/<id>/` (`sheet.png` + `skin.json`, formato acima).
+`src/satoshipet/assets/skins/<id>/` (`sheet.png` + `skin.json`, formato acima).
 
 Regras (checadas por `tools/validate_skin.py` e pela Action **Skin contest check** em todo PR que mexe em skins):
 - `id` em `[a-z0-9_-]`, igual ao nome da pasta; `nome` e `autor` obrigatórios
@@ -97,14 +97,14 @@ Regras (checadas por `tools/validate_skin.py` e pela Action **Skin contest check
 - arte **original** (sem personagem/logo de terceiros), licenciada MIT junto com o projeto
 
 ```bash
-python tools/validate_skin.py src/tamagoshi_cripto/assets/skins/minha_skin --preview previews/
+python tools/validate_skin.py src/satoshipet/assets/skins/minha_skin --preview previews/
 # abre previews/minha_skin.png (4x) e previews/minha_skin.gif
 ```
 A Action anexa o preview como artifact **skin-preview** e escreve um resumo no PR.
 Julgamento sugerido: votos com 👍 na issue + escolha da mantenedora. Prêmio sugerido: licença Pro + skin no app.
 
 **EN:** open an issue with the **🏆 Concurso de skins** template and a PR adding your folder under
-`src/tamagoshi_cripto/assets/skins/<id>/`. Run `python tools/validate_skin.py <folder> --preview previews/`
+`src/satoshipet/assets/skins/<id>/`. Run `python tools/validate_skin.py <folder> --preview previews/`
 locally; CI runs the same checks and uploads a `skin-preview` artifact.
 
 ## Site, share card, leaderboard
@@ -126,7 +126,7 @@ locally; CI runs the same checks and uploads a `skin-preview` artifact.
 
 ## v1.4 internals
 - **Mixins**: `engajamento.py` (DNA, breeding, battles, hardcore), `mercado.py` (paper trading, ETH/SOL, whales, RSS),
-  `lojinha.py` (shop, stream overlay, Twitch) are mixed into `Tamagoshi`. Network work stays in threads that only push
+  `lojinha.py` (shop, stream overlay, Twitch) are mixed into `SatoshiPet`. Network work stays in threads that only push
   to `app.eventos`; `_evento_mercado` handles them on the Tk thread.
 - **DNA** (`genetica.py`): genes are recolors/overlays applied to the 48×48 frame **before** scaling, only with
   Sweetie-16 colors (a test checks every coin × 25 seeds). New gene option = add it to `GENES` (weight, rarity points)

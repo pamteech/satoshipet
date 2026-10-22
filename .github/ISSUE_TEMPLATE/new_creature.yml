@@ -15,4 +15,4 @@ body:
       label: Checklist
       options:
         - label: Original art (no copyrighted characters / logos)
-        - label: Passes `pytest tests/test_logic.py::test_plugins` and `tamagoshi --list-skins` shows it
+        - label: Passes `pytest tests/test_logic.py::test_plugins` and `satoshipet --list-skins` shows it

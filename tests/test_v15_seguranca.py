@@ -5,7 +5,7 @@ import urllib.request
 
 import pytest
 
-from tamagoshi_cripto import api, segredos
+from satoshipet import api, segredos
 
 
 @pytest.fixture
@@ -85,7 +85,7 @@ def test_chave_ia_vai_pro_chaveiro(monkeypatch):
 
 def test_chave_ia_fallback_sem_chaveiro(monkeypatch):
     monkeypatch.setattr(segredos, "_kr", lambda: None)
-    monkeypatch.delenv("TAMAGOSHI_AI_KEY", raising=False)
+    monkeypatch.delenv("SATOSHIPET_AI_KEY", raising=False)
     cfg = {}
     assert segredos.gravar(cfg, "sk-x") == "config local" and segredos.ler(cfg) == "sk-x"
     assert not segredos.migrar(cfg)

@@ -14,7 +14,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "server"))
 import licencas as srv_lic
 
-from tamagoshi_cripto import config, crashlog, juice, licencas, license, recursos, sons, updates
+from satoshipet import config, crashlog, juice, licencas, license, recursos, sons, updates
 
 
 class Resp:
@@ -159,7 +159,7 @@ def test_updates():
     info = updates.checar("x/y", "1.3.0", http=HTTP({"releases/latest": rel}))
     assert info == {"versao": "9.0.0", "url": "https://github.com/x/y/releases/tag/v9.0.0", "notas": ["novidades"]}
     assert updates.checar("x/y", "9.0.0", http=HTTP({"releases/latest": rel})) is None
-    assert updates.checar("pamteech/tamagoshi-cripto", http=HTTP(erro=AssertionError("não chama!"))) is None
+    assert updates.checar("pamteech/satoshipet", http=HTTP(erro=AssertionError("não chama!"))) is None
     pre = Resp(200, {"tag_name": "v10.0.0", "prerelease": True})
     assert updates.checar("x/y", "1.0", http=HTTP({"latest": pre})) is None
     assert updates.checar("x/y", "1.0", http=HTTP(erro=OSError())) is None

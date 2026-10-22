@@ -16,8 +16,8 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parents[1]
 RANK_URL = ""
 sys.path.insert(0, str(RAIZ / "src"))
-os.environ["TAMAGOSHI_CONFIG"] = str(Path(tempfile.mkdtemp()) / "cfg.json")
-os.environ.setdefault("TAMAGOSHI_API_PORT", "18737")
+os.environ["SATOSHIPET_CONFIG"] = str(Path(tempfile.mkdtemp()) / "cfg.json")
+os.environ.setdefault("SATOSHIPET_API_PORT", "18737")
 
 import pytest
 
@@ -61,7 +61,7 @@ def _gif(app, nome, n=16, ms=180, passo=None):
 def _resetar_extras(app):
     """O _invocar_tudo clica em TUDO: abre jogo/intro, muda escala e opções. Volta pro normal."""
     app.cena = None
-    from tamagoshi_cripto import config as _c
+    from satoshipet import config as _c
     for k in ("alto_contraste", "dia_noite", "chapeus", "juice", "musica", "checar_updates"):
         app.cfg[k] = _c.PADRAO[k]
     app.som.musica(False)
@@ -94,7 +94,7 @@ def _invocar_tudo(app):
 
 def _ajuste(app, aba, rotulo, texto=None, setas=0, enter=False):
     """Dirige a tela de Ajustes SÓ pelo teclado (é o teste da navegação v1.5)."""
-    from tamagoshi_cripto.ajustes import Ajustes
+    from satoshipet.ajustes import Ajustes
     K = lambda k, ch="", st=0: type("E", (), {"keysym": k, "char": ch, "state": st})()
     if not isinstance(app.cena, Ajustes):
         app._tecla(K("s", "s"))
@@ -134,7 +134,7 @@ def executar():
     threading.Thread(target=srv_rank.serve_forever, daemon=True).start()
     global RANK_URL
     RANK_URL = f"http://127.0.0.1:{srv_rank.server_address[1]}"
-    from tamagoshi_cripto import config, license, logic, lore, main, onchain
+    from satoshipet import config, license, logic, lore, main, onchain
 
     chamadas = []
     messagebox.askyesno = lambda *a, **k: (chamadas.append(("askyesno", a[0])), False)[1]
@@ -160,9 +160,9 @@ def executar():
     logic.buscar_precos = lambda simbolos, timeout=10: {s: precos[s] for s in simbolos}
     lore.fear_greed = lambda timeout=10: (72, "GANANCIA")
     lore.altura_bloco = lambda timeout=10: 921_337
-    from tamagoshi_cripto import baleias as _bal
-    from tamagoshi_cripto import multichain as _mc
-    from tamagoshi_cripto import noticias as _news
+    from satoshipet import baleias as _bal
+    from satoshipet import multichain as _mc
+    from satoshipet import noticias as _news
     _bal.recentes = lambda timeout=10: []
     _news.buscar = lambda timeout=10: [{"titulo": "Bitcoin volta aos US$ 100 mil e o bicho comemora", "link":
                                         "https://example.com/noticia", "fonte": "Teste"}]
@@ -177,10 +177,10 @@ def executar():
     config.INTERVALO = 1
 
     falhas = []
-    app = main.Tamagoshi({"sem_tray": True, "mudo": True, "sem_updates": True, "idioma": "pt"})
+    app = main.SatoshiPet({"sem_tray": True, "mudo": True, "sem_updates": True, "idioma": "pt"})
 
     # ---------- onboarding (1ª vez): ovo choca, escolhe moeda, batiza, dicas, opt-ins ----------
-    from tamagoshi_cripto import cenas
+    from satoshipet import cenas
     assert isinstance(app.cena, cenas.Onboarding)
     app.root.geometry("+24+24")
     for _ in range(5):
@@ -333,7 +333,7 @@ def executar():
     esperado = {"help": "comandos", "price": "BTC", "stats": "nível", "mempool": "fees", "halving": "halving",
                 "fng": "fear", "hashrate": "EH/s", "gas": "gwei", "wallet": "watch-only", "sats": "unidade",
                 "git blame": "Satoshi", "sudo moon": "sudo", "rm -rf /": "blockchain", "skin gato": "skin",
-                "coin ETH": "Pro", "neofetch": "Tamagoshi OS", "comando_que_nao_existe": "não encontrado"}
+                "coin ETH": "Pro", "neofetch": "SatoshiPet OS", "comando_que_nao_existe": "não encontrado"}
     for cmd, trecho in esperado.items():
         app.console_linhas = []
         antes = 0
@@ -343,7 +343,7 @@ def executar():
     assert {"sudo", "rm_rf", "moscow"} <= set(app.conq.d["desbloqueadas"])
     del app._exige_pro
     app.alternar_sats(False)
-    app.console_linhas = ["Tamagoshi OS - digite 'help'"]
+    app.console_linhas = ["SatoshiPet OS - digite 'help'"]
     app.panico_t = 0; app.toast = None
     app.console_aberto = True
     app.executar_console("neofetch")
@@ -356,7 +356,7 @@ def executar():
             app._tecla_console(type("E", (), {"keysym": "Return", "char": "\r"})())
         elif ch:
             app._tecla_console(type("E", (), {"keysym": "space" if ch == " " else ch, "char": ch})())
-    app.console_linhas = ["Tamagoshi OS - digite 'help'"]
+    app.console_linhas = ["SatoshiPet OS - digite 'help'"]
     app.console_input = ""
     _gif(app, "console", n=len(roteiro), ms=140, passo=_digita)
     app.console_aberto = True
@@ -438,7 +438,7 @@ def executar():
     app.mudar_escala(2); assert app.LARG >= 272 and app.cv.winfo_reqheight() == app.ALT
     app.mudar_escala(3)
     # update: toast clicável abre o Release (nunca instala)
-    app.eventos.append(("update", {"versao": "9.9.9", "url": "https://github.com/pamteech/tamagoshi-cripto/releases/tag/v9.9.9"}))
+    app.eventos.append(("update", {"versao": "9.9.9", "url": "https://github.com/pamteech/satoshipet/releases/tag/v9.9.9"}))
     _bombear(app, 400)
     assert app.toast and app.toast[2] == "NOVA VERSÃO!"
     _shot(app, "update")
@@ -450,7 +450,7 @@ def executar():
     app.enviar_relatorio()  # 1º toque só explica
     assert len(abertos) == n_abertos
     app.enviar_relatorio()  # 2º abre a issue preenchida (nunca envia sozinho)
-    assert abertos[-1].startswith("https://github.com/pamteech/tamagoshi-cripto/issues/new?")
+    assert abertos[-1].startswith("https://github.com/pamteech/satoshipet/issues/new?")
     app.toast = None
 
     # ---------- vim keys ----------
@@ -461,11 +461,11 @@ def executar():
     app.root.geometry("+24+24"); app.root.update()
 
     # ---------- API local ----------
-    st = json.loads(urllib.request.urlopen(f"http://127.0.0.1:{os.environ['TAMAGOSHI_API_PORT']}/status", timeout=3).read())
+    st = json.loads(urllib.request.urlopen(f"http://127.0.0.1:{os.environ['SATOSHIPET_API_PORT']}/status", timeout=3).read())
     assert st["btc"]["comidos"] >= 1 and "nivel" in st and st["btc"]["fome"] == "MORRENDO DE FOME"
-    txt = urllib.request.urlopen(f"http://127.0.0.1:{os.environ['TAMAGOSHI_API_PORT']}/status.txt", timeout=3).read().decode()
+    txt = urllib.request.urlopen(f"http://127.0.0.1:{os.environ['SATOSHIPET_API_PORT']}/status.txt", timeout=3).read().decode()
     assert "LV" in txt
-    html = urllib.request.urlopen(f"http://127.0.0.1:{os.environ['TAMAGOSHI_API_PORT']}/overlay", timeout=3).read().decode()
+    html = urllib.request.urlopen(f"http://127.0.0.1:{os.environ['SATOSHIPET_API_PORT']}/overlay", timeout=3).read().decode()
     assert "fetch('/status')" in html
 
     # ---------- evolução ----------
@@ -503,8 +503,8 @@ def executar():
     assert app.cfg["moeda"] == "PEPE", app.cfg["moeda"]
 
     # ---------- v1.4 fase 1: genes, cruzamento, batalha, hardcore ----------
-    from tamagoshi_cripto import cenas as _cenas
-    from tamagoshi_cripto import genetica as _gen
+    from satoshipet import cenas as _cenas
+    from satoshipet import genetica as _gen
     for w in app.root.winfo_children():
         if w.winfo_class() == "Toplevel":
             w.destroy()
@@ -599,7 +599,7 @@ def executar():
     assert "SALDO 1.5000 ETH ≈ R$ 30.000" in infos and "SALDO 5.0000 SOL" in infos
     st_txt = json.dumps(app.status(), ensure_ascii=False)
     assert "carteiras" not in st_txt and "saldo_sats" not in st_txt and "30.000" not in st_txt
-    pub = urllib.request.urlopen(f"http://127.0.0.1:{os.environ['TAMAGOSHI_API_PORT']}/status", timeout=3).read().decode()
+    pub = urllib.request.urlopen(f"http://127.0.0.1:{os.environ['SATOSHIPET_API_PORT']}/status", timeout=3).read().decode()
     assert "1.5" not in json.loads(pub).get("carteira", {}).__repr__() and "carteiras" not in pub
     assert "ESCONDIDOS" in app.console.executar("saldo off")[-1]
     assert all("••••" in t for t, _ in app.linhas_saldo())
@@ -694,9 +694,9 @@ def executar():
     arq = Path(out[0].split(": ", 1)[1])
     assert "carteira" not in json.loads(arq.read_text())
     assert app.console.executar("card")[0].startswith("card:")
-    svg = urllib.request.urlopen(f"http://127.0.0.1:{os.environ['TAMAGOSHI_API_PORT']}/card.svg", timeout=3).read()
+    svg = urllib.request.urlopen(f"http://127.0.0.1:{os.environ['SATOSHIPET_API_PORT']}/card.svg", timeout=3).read()
     assert svg.startswith(b"<svg")
-    from tamagoshi_cripto import ai as _ai
+    from satoshipet import ai as _ai
     assert app.console.executar("ask vai subir?")[0]
     app.executar_console("ai set https://api.exemplo.com/v1 sk-SEGREDO modelo-x")
     assert not any("sk-SEGREDO" in l for l in app.console_linhas) and app.cfg["ai_key"] == "sk-SEGREDO"
@@ -715,7 +715,7 @@ def executar():
     app.console_aberto = False
 
     # ---------- v1.4 fase 4: loja, pacote de marca, overlay de streamer ----------
-    from tamagoshi_cripto import loja as _loja
+    from satoshipet import loja as _loja
     app.abrir_loja()
     assert isinstance(app.cena, _cenas.Loja) and app.cena.ids
     app.cena.i = app.cena.ids.index("neon_nights")
@@ -735,7 +735,7 @@ def executar():
     _bombear(app, 400)
     _shot(app, "skin_patrocinada")
     assert app.status()["patrocinado"] is True
-    porta = os.environ["TAMAGOSHI_API_PORT"]
+    porta = os.environ["SATOSHIPET_API_PORT"]
     html_s = urllib.request.urlopen(f"http://127.0.0.1:{porta}/stream", timeout=3).read().decode()
     assert "PATROCINADO" in html_s and "/sprite.png" in html_s
     png_s = urllib.request.urlopen(f"http://127.0.0.1:{porta}/sprite.png", timeout=3).read()

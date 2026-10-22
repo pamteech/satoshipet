@@ -1,30 +1,30 @@
 {
-  "name": "tamagoshi-cripto",
-  "displayName": "Tamagoshi Cripto",
+  "name": "satoshipet",
+  "displayName": "SatoshiPet",
   "description": "O bichinho que sente o mercado, agora na barra de status do VS Code (preço + humor + sprite).",
   "version": "1.5.0",
   "publisher": "pamteech",
   "license": "MIT",
   "icon": "media/icon.png",
-  "repository": {"type": "git", "url": "https://github.com/pamteech/tamagoshi-cripto"},
+  "repository": {"type": "git", "url": "https://github.com/pamteech/satoshipet"},
   "engines": {"vscode": "^1.80.0"},
   "categories": ["Other"],
-  "keywords": ["bitcoin", "crypto", "tamagotchi", "pixel art", "status bar"],
+  "keywords": ["bitcoin", "crypto", "virtual pet", "pixel art", "status bar"],
   "activationEvents": ["onStartupFinished"],
   "main": "./extension.js",
   "contributes": {
     "commands": [
-      {"command": "tamagoshi.abrir", "title": "Tamagoshi: abrir o bicho"},
-      {"command": "tamagoshi.carinho", "title": "Tamagoshi: fazer carinho"}
+      {"command": "satoshipet.abrir", "title": "SatoshiPet: abrir o bicho"},
+      {"command": "satoshipet.carinho", "title": "SatoshiPet: fazer carinho"}
     ],
     "configuration": {
-      "title": "Tamagoshi Cripto",
+      "title": "SatoshiPet",
       "properties": {
-        "tamagoshi.moeda": {"type": "string", "default": "BTC", "enum": ["BTC", "ETH", "SOL", "DOGE", "PEPE"],
+        "satoshipet.moeda": {"type": "string", "default": "BTC", "enum": ["BTC", "ETH", "SOL", "DOGE", "PEPE"],
                             "description": "Moeda (usada quando o app desktop não está rodando)"},
-        "tamagoshi.apiLocal": {"type": "string", "default": "http://127.0.0.1:8737",
+        "satoshipet.apiLocal": {"type": "string", "default": "http://127.0.0.1:8737",
                                "description": "API local do app desktop (só 127.0.0.1)"},
-        "tamagoshi.intervaloSeg": {"type": "number", "default": 60, "minimum": 20,
+        "satoshipet.intervaloSeg": {"type": "number", "default": 60, "minimum": 20,
                                    "description": "De quanto em quanto tempo atualiza"}
       }
     }

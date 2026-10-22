@@ -6,7 +6,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "src"))
 from PIL import Image, ImageDraw, ImageFont
 
-from tamagoshi_cripto import tui
+from satoshipet import tui
 
 CEL_W, CEL_H = 8, 16
 sprites = tui.carregar("PEPE", "padrao")
@@ -19,7 +19,7 @@ d = ImageDraw.Draw(img)
 d.rectangle((0, 0, img.width, 22), fill=(52, 52, 64))
 for i, c in enumerate(((255, 95, 86), (255, 189, 46), (39, 201, 63))):
     d.ellipse((10 + i * 18, 6, 20 + i * 18, 16), fill=c)
-d.text((img.width // 2 - 70, 5), "~ tamagoshi --tui", fill=(200, 200, 210))
+d.text((img.width // 2 - 70, 5), "~ satoshipet --tui", fill=(200, 200, 210))
 ox, oy = 16, 34
 px = spr.load()
 for y in range(0, 48, 2):  # cada célula ▀: metade de cima/baixo

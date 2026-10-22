@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """make_packs.py - gera as folhas dos pacotes de exemplo da loja (recolor + acessórios em pixel art).
 
-    python tools/make_packs.py     -> src/tamagoshi_cripto/assets/loja/<id>/<MOEDA>.png
+    python tools/make_packs.py     -> src/satoshipet/assets/loja/<id>/<MOEDA>.png
 Artista de verdade? Desenhe as folhas 192x192 à mão e só escreva o pack.json (veja docs/BRAND_SKINS.md).
 """
 import json
@@ -11,23 +11,23 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from PIL import Image
 
-from tamagoshi_cripto import genetica, juice, recursos
-from tamagoshi_cripto.pixel import P, rgb
+from satoshipet import genetica, juice, recursos
+from satoshipet.pixel import P, rgb
 
 MOEDAS = ("BTC", "ETH", "SOL", "DOGE", "PEPE")
 RECEITAS = {
     "halloween": {"paleta": {"azul": "roxo", "celeste": "vinho", "ciano": "laranja", "verde": "roxo", "lima": "laranja",
                              "branco": "cinza_claro", "marinho": "preto", "petroleo": "roxo", "amarelo": "laranja"},
                   "chapeu": "halloween",
-                  "meta": {"nome": "Noites de Bruxa", "tipo": "sazonal", "tier": "pro", "autor": "Tamagoshi Cripto",
-                           "creditos": "arte: equipe Tamagoshi", "licenca_arte": "MIT",
+                  "meta": {"nome": "Noites de Bruxa", "tipo": "sazonal", "tier": "pro", "autor": "SatoshiPet",
+                           "creditos": "arte: equipe SatoshiPet", "licenca_arte": "MIT",
                            "temporada": {"de": "10-01", "ate": "11-02"}, "preco_sugerido_brl": 0,
                            "descricao": "abóbora, roxo e chapéu de bruxa. incluso no Pro."}},
     "natal": {"paleta": {"laranja": "vinho", "amarelo": "branco", "azul": "verde", "celeste": "lima", "ciano": "branco",
                          "roxo": "petroleo", "marinho": "petroleo"},
               "chapeu": "natal",
-              "meta": {"nome": "Natal na Blockchain", "tipo": "sazonal", "tier": "pro", "autor": "Tamagoshi Cripto",
-                       "creditos": "arte: equipe Tamagoshi", "licenca_arte": "MIT",
+              "meta": {"nome": "Natal na Blockchain", "tipo": "sazonal", "tier": "pro", "autor": "SatoshiPet",
+                       "creditos": "arte: equipe SatoshiPet", "licenca_arte": "MIT",
                        "temporada": {"de": "12-01", "ate": "01-06"}, "preco_sugerido_brl": 0,
                        "descricao": "gorro de Noel e verde-pinheiro. incluso no Pro."}},
     "neon_nights": {"paleta": {"laranja": "ciano", "amarelo": "branco", "vinho": "roxo", "azul": "roxo",
@@ -44,7 +44,7 @@ RECEITAS = {
                                 "ciano": "amarelo", "verde": "vinho", "lima": "laranja", "roxo": "preto"},
                      "genes": {"acessorio": "fone"},
                      "meta": {"nome": "Café do Satoshi", "tipo": "patrocinado", "tier": "free",
-                              "autor": "Tamagoshi Cripto", "creditos": "arte: equipe Tamagoshi",
+                              "autor": "SatoshiPet", "creditos": "arte: equipe SatoshiPet",
                               "licenca_arte": "MIT", "patrocinador": "Café do Satoshi (marca FICTÍCIA de exemplo)",
                               "disclosure": "patrocinado",
                               "autorizacao": "exemplo - num pacote real: nº do contrato/autorização de uso da marca",

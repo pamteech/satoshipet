@@ -11,7 +11,7 @@ build/
 dist/
 previews/
 server/data/
-src/tamagoshi_cripto/_segredo.py
+src/satoshipet/_segredo.py
 vscode/*.vsix
 monkeytype.sqlite3
 .mypy_cache/

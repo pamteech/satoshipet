@@ -1,0 +1,22 @@
+{
+  "nome": "Café do Satoshi",
+  "tipo": "patrocinado",
+  "tier": "free",
+  "autor": "SatoshiPet",
+  "creditos": "arte: equipe SatoshiPet",
+  "licenca_arte": "MIT",
+  "patrocinador": "Café do Satoshi (marca FICTÍCIA de exemplo)",
+  "disclosure": "patrocinado",
+  "autorizacao": "exemplo - num pacote real: nº do contrato/autorização de uso da marca",
+  "vigencia": {
+    "de": "2026-01-01",
+    "ate": "2099-12-31"
+  },
+  "contato": "marcas@exemplo.invalid",
+  "preco_sugerido_brl": 0,
+  "descricao": "exemplo do formato de pacote de marca. grátis pro usuário.",
+  "id": "cafe_satoshi",
+  "genes": {
+    "acessorio": "fone"
+  }
+}

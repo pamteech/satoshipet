@@ -1,6 +1,6 @@
 """validate_skin.py - juiz do Concurso de Skins. Valida pastas de skin e gera preview.
 
-    python tools/validate_skin.py src/tamagoshi_cripto/assets/skins/slime [outra/pasta ...] [--preview DIR]
+    python tools/validate_skin.py src/satoshipet/assets/skins/slime [outra/pasta ...] [--preview DIR]
     python tools/validate_skin.py --all --preview previews/
 
 Regras (falha = exit 1):
@@ -20,7 +20,7 @@ from pathlib import Path
 from PIL import Image
 
 RAIZ = Path(__file__).resolve().parents[1]
-PASTA_SKINS = RAIZ / "src" / "tamagoshi_cripto" / "assets" / "skins"
+PASTA_SKINS = RAIZ / "src" / "satoshipet" / "assets" / "skins"
 LINHAS = ["garimpando", "moon", "rekt", "pulo"]
 FUNDO = (26, 28, 44, 255)
 

@@ -1,4 +1,4 @@
-"""ranking.py - servidor de leaderboard do Tamagoshi Cripto. Só stdlib (http.server + sqlite3).
+"""ranking.py - servidor de leaderboard do SatoshiPet. Só stdlib (http.server + sqlite3).
 
 Privacidade por design (é anônimo mesmo, juro de dedinho):
   - guarda só: device_id aleatório (gerado no cliente), apelido, xp, nível, estágio, blocos, conquistas, moeda;
@@ -7,7 +7,7 @@ Privacidade por design (é anônimo mesmo, juro de dedinho):
   - o IP só vive na memória, pro rate limit, e some depois de 1 min.
 
 Rodar:  python server/ranking.py          (PORT=8740 HOST=0.0.0.0 DB=ranking.db)
-Docker: docker build -t tamagoshi-ranking server && docker run -p 8740:8740 -v $PWD/data:/data tamagoshi-ranking
+Docker: docker build -t satoshipet-ranking server && docker run -p 8740:8740 -v $PWD/data:/data satoshipet-ranking
 """
 import json
 import os

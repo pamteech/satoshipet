@@ -13,9 +13,9 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            artifact: TamagoshiCripto-windows
+            artifact: SatoshiPet-windows
           - os: macos-latest
-            artifact: TamagoshiCripto-macos
+            artifact: SatoshiPet-macos
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -26,15 +26,15 @@ jobs:
         if: runner.os == 'Windows'
         shell: cmd
         env:
-          TAMAGOSHI_LICENSE_SECRET: ${{ secrets.TAMAGOSHI_LICENSE_SECRET }}
+          SATOSHIPET_LICENSE_SECRET: ${{ secrets.SATOSHIPET_LICENSE_SECRET }}
         run: tools\build_windows.bat
       - name: Build macOS .app
         if: runner.os == 'macOS'
         env:
-          TAMAGOSHI_LICENSE_SECRET: ${{ secrets.TAMAGOSHI_LICENSE_SECRET }}
+          SATOSHIPET_LICENSE_SECRET: ${{ secrets.SATOSHIPET_LICENSE_SECRET }}
         run: |
           ./tools/build_mac.sh
-          cd dist && ditto -c -k --keepParent "Tamagoshi Cripto.app" TamagoshiCripto-macos.zip
+          cd dist && ditto -c -k --keepParent "SatoshiPet.app" SatoshiPet-macos.zip
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}

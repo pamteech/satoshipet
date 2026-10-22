@@ -1,4 +1,4 @@
-# Leaderboard do Tamagoshi Cripto: imagem minúscula, só stdlib.
+# Leaderboard do SatoshiPet: imagem minúscula, só stdlib.
 FROM python:3.12-alpine
 WORKDIR /app
 COPY ranking.py .

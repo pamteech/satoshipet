@@ -1,6 +1,6 @@
-// Tamagoshi Cripto — landing. Sem framework, sem tracker, sem cookie. Só o bicho.
+// SatoshiPet — landing. Sem framework, sem tracker, sem cookie. Só o bicho.
 (() => {
-  const C = Object.assign({}, window.TAMAGOSHI || {});
+  const C = Object.assign({}, window.SATOSHIPET || {});
   const qs = new URLSearchParams(location.search);
   if (qs.get("ranking")) C.rankingUrl = qs.get("ranking");   // teste local: ?ranking=http://127.0.0.1:8740
   if (qs.get("lang")) localStorage.setItem("lang", qs.get("lang"));

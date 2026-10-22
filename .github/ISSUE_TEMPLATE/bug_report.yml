@@ -15,6 +15,6 @@ body:
       label: Mode
       options: [Desktop window, Terminal (--tui), Built .exe/.app]
   - type: input
-    attributes: { label: "Version (`tamagoshi --version`)" }
+    attributes: { label: "Version (`satoshipet --version`)" }
   - type: textarea
     attributes: { label: Logs / screenshot, render: shell }

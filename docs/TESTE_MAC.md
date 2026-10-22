@@ -1,6 +1,6 @@
 # Teste no Mac — checklist rápido (~20 min)
 
-> Tudo local. Nada é publicado. Se algo der errado, anote o que viu e mande o `~/.tamagoshi_cripto/crash.log`.
+> Tudo local. Nada é publicado. Se algo der errado, anote o que viu e mande o `~/.satoshipet/crash.log`.
 
 ## 1. Preparar (uma vez)
 ```bash
@@ -8,17 +8,17 @@
 python3 --version
 python3 -c "import tkinter; print(tkinter.TkVersion)"      # precisa imprimir 8.6 (ou 9.0)
 
-cd ~/Downloads && unzip -o tamagoshi.zip && cd tamagoshi
+cd ~/Downloads && unzip -o satoshipet.zip && cd satoshipet
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]" || pip install -e . pytest
 ```
 
 ## 2. Rodar
 ```bash
-TAMAGOSHI_CONFIG=/tmp/tama_teste.json tamagoshi       # config limpa → mostra o onboarding
+SATOSHIPET_CONFIG=/tmp/tama_teste.json satoshipet       # config limpa → mostra o onboarding
 # depois, com a config de verdade:
-tamagoshi
-tamagoshi --tui                                       # modo terminal
+satoshipet
+satoshipet --tui                                       # modo terminal
 ```
 
 ## 3. O que conferir (marque ✅/❌)
@@ -31,7 +31,7 @@ tamagoshi --tui                                       # modo terminal
 - [ ] **Chapéu de halloween** aparece (em outubro). Menu → Aparência → desligar *Chapéus de época* tira.
 - [ ] **Alto contraste** e **Tamanho 1x…6x** redesenham certo (sem cortar).
 - [ ] **Menu bar (experimental)**: `"menubar_mac": true` na config → reabrir → ícone aparece na barra; *Esconder* e *Mostrar* funcionam.
-- [ ] **Abrir ao iniciar** (Pro): cria `~/Library/LaunchAgents/com.tamagoshi.cripto.plist`.
+- [ ] **Abrir ao iniciar** (Pro): cria `~/Library/LaunchAgents/com.pamtech.satoshipet.plist`.
 - [ ] **CPU**: Monitor de Atividade → processo `Python` parado deve ficar perto de **1–2 %**. Ou:
       `python tools/medir_cpu.py 60` (num Terminal com sessão gráfica).
 - [ ] **Share**: console `share` → PNG em `~/Pictures` e o navegador abre o X com o texto (não posta nada).
@@ -45,9 +45,9 @@ python -m pytest -q          # deve passar tudo (o teste de GUI abre e fecha jan
 ## 5. Build do .app
 ```bash
 ./tools/build_mac.sh
-open "dist/Tamagoshi Cripto.app"      # 1ª vez: botão direito → Abrir (app sem assinatura)
+open "dist/SatoshiPet.app"      # 1ª vez: botão direito → Abrir (app sem assinatura)
 ```
-- [ ] O `.app` abre, tem ícone, som e fonte iguais ao `tamagoshi` do terminal.
+- [ ] O `.app` abre, tem ícone, som e fonte iguais ao `satoshipet` do terminal.
 - [ ] Apple Silicon e Intel: o build gera para a arquitetura da máquina em que rodou.
 
 ## 6. Me conta

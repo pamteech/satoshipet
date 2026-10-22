@@ -3,14 +3,14 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tamagoshi-cripto"
+name = "satoshipet"
 version = "1.5.0"
 description = "A pixel-art crypto pet that floats on your desktop (or lives in your terminal) and reacts to the market."
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "Pamella Soares" }]
 requires-python = ">=3.9"
-keywords = ["crypto", "bitcoin", "tamagotchi", "pixel-art", "desktop-pet", "tui", "tkinter"]
+keywords = ["crypto", "bitcoin", "virtual-pet", "pixel-art", "desktop-pet", "tui", "tkinter"]
 classifiers = [
   "Programming Language :: Python :: 3",
   "License :: OSI Approved :: MIT License",
@@ -30,17 +30,18 @@ dev = ["pytest>=7"]
 build = ["pyinstaller>=6"]
 
 [project.scripts]
-tamagoshi = "tamagoshi_cripto.cli:main"
+satoshipet = "satoshipet.cli:main"
+tamagoshi = "satoshipet.cli:main"  # apelido do nome antigo (deprecado), some numa versão futura
 
 [project.urls]
-Homepage = "https://github.com/pamteech/tamagoshi-cripto"
-Issues = "https://github.com/pamteech/tamagoshi-cripto/issues"
+Homepage = "https://github.com/pamteech/satoshipet"
+Issues = "https://github.com/pamteech/satoshipet/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-tamagoshi_cripto = ["assets/**/*"]
+satoshipet = ["assets/**/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -58,11 +59,11 @@ ignore = ["E741", "RUF001", "RUF002", "RUF003", "SIM108", "B008", "UP035", "UP00
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["E402", "B011", "SIM", "B023", "E702", "E501", "B017", "RUF059", "E731"]
 "tools/*" = ["E402"]
-"src/tamagoshi_cripto/api.py" = ["E501"]  # HTML/JS embutido
-"src/tamagoshi_cripto/sprites.py" = ["E702"]  # DSL de pixel art: 1 traço por linha, de propósito
+"src/satoshipet/api.py" = ["E501"]  # HTML/JS embutido
+"src/satoshipet/sprites.py" = ["E702"]  # DSL de pixel art: 1 traço por linha, de propósito
 
 [tool.coverage.run]
-source = ["tamagoshi_cripto"]
+source = ["satoshipet"]
 branch = true
 
 [tool.coverage.report]
@@ -75,20 +76,20 @@ check_untyped_defs = true
 follow_imports = "silent"
 warn_unused_ignores = true
 files = [
-    "src/tamagoshi_cripto/genetica.py", "src/tamagoshi_cripto/batalha.py", "src/tamagoshi_cripto/hardcore.py",
-    "src/tamagoshi_cripto/papel.py", "src/tamagoshi_cripto/loja.py", "src/tamagoshi_cripto/multichain.py",
-    "src/tamagoshi_cripto/config.py", "src/tamagoshi_cripto/logic.py", "src/tamagoshi_cripto/evolucao.py",
-    "src/tamagoshi_cripto/conquistas.py", "src/tamagoshi_cripto/license.py", "src/tamagoshi_cripto/baleias.py",
-    "src/tamagoshi_cripto/noticias.py", "src/tamagoshi_cripto/pixel.py", "src/tamagoshi_cripto/i18n.py",
-    "src/tamagoshi_cripto/ui.py", "src/tamagoshi_cripto/ajustes.py",
+    "src/satoshipet/genetica.py", "src/satoshipet/batalha.py", "src/satoshipet/hardcore.py",
+    "src/satoshipet/papel.py", "src/satoshipet/loja.py", "src/satoshipet/multichain.py",
+    "src/satoshipet/config.py", "src/satoshipet/logic.py", "src/satoshipet/evolucao.py",
+    "src/satoshipet/conquistas.py", "src/satoshipet/license.py", "src/satoshipet/baleias.py",
+    "src/satoshipet/noticias.py", "src/satoshipet/pixel.py", "src/satoshipet/i18n.py",
+    "src/satoshipet/ui.py", "src/satoshipet/ajustes.py",
 ]
 
 # núcleo de regras do jogo: tudo tipado, sem desculpa 🧐
 [[tool.mypy.overrides]]
 module = [
-    "tamagoshi_cripto.batalha", "tamagoshi_cripto.hardcore", "tamagoshi_cripto.papel", "tamagoshi_cripto.loja",
-    "tamagoshi_cripto.multichain", "tamagoshi_cripto.config", "tamagoshi_cripto.logic", "tamagoshi_cripto.evolucao",
-    "tamagoshi_cripto.conquistas", "tamagoshi_cripto.license", "tamagoshi_cripto.baleias", "tamagoshi_cripto.noticias",
-    "tamagoshi_cripto.genetica",
+    "satoshipet.batalha", "satoshipet.hardcore", "satoshipet.papel", "satoshipet.loja",
+    "satoshipet.multichain", "satoshipet.config", "satoshipet.logic", "satoshipet.evolucao",
+    "satoshipet.conquistas", "satoshipet.license", "satoshipet.baleias", "satoshipet.noticias",
+    "satoshipet.genetica",
 ]
 disallow_untyped_defs = true

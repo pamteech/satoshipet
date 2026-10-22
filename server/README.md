@@ -14,8 +14,8 @@ no wallet address (nicks that look like addresses/e-mails are rejected), no pric
 
 ```bash
 python server/ranking.py                       # http://0.0.0.0:8740, ranking.db in cwd
-docker build -t tamagoshi-ranking server
-docker run -p 8740:8740 -v "$PWD/data:/data" tamagoshi-ranking
+docker build -t satoshipet-ranking server
+docker run -p 8740:8740 -v "$PWD/data:/data" satoshipet-ranking
 ```
 Deploy anywhere that runs a container (Fly.io, Render, a $5 VPS) behind HTTPS, then set the URL in the
 app config (`"ranking_url"`) and in `site/config.js`.
@@ -26,7 +26,7 @@ Hotmart has no public license-key API, so a purchase webhook generates the key:
 optional e-mail via `SMTP_*`; refund/chargeback/cancel = revoked. The app validates with
 `GET /api/licenca/validar?email=&chave=`. Admin list: `GET /admin/chaves` with `Authorization: Bearer $ADMIN_TOKEN`.
 ```bash
-HOTMART_HOTTOK=... TAMAGOSHI_LICENSE_SECRET=... ADMIN_TOKEN=... python server/licencas.py   # :8741
-docker build -f server/Dockerfile.licencas -t tamagoshi-licencas server
+HOTMART_HOTTOK=... SATOSHIPET_LICENSE_SECRET=... ADMIN_TOKEN=... python server/licencas.py   # :8741
+docker build -f server/Dockerfile.licencas -t satoshipet-licencas server
 ```
 Stores only e-mail, key, status and transaction id (needed to deliver and revoke the license).

@@ -1,4 +1,4 @@
-// extension.js - Tamagoshi Cripto no VS Code. Zero dependências, zero conta, zero chave.
+// extension.js - SatoshiPet no VS Code. Zero dependências, zero conta, zero chave.
 // 1) tenta a API local do app desktop (127.0.0.1:8737/status) -> nome, humor, nível, preço
 // 2) se o app não estiver rodando, pega o preço direto da CoinGecko (pública, sem chave)
 // Barra de status: "⛏ BTC $97.000 +1,2%". Clique abre um painel com o sprite animado.
@@ -10,13 +10,13 @@ const EMOJI = { moon: "🚀", rekt: "💀", garimpando: "⛏" };
 const LINHA = { garimpando: 0, moon: 1, rekt: 2, pulo: 3 };
 let barra, painel, timer, ultimo = null, ref = {};
 
-function cfg() { return vscode.workspace.getConfiguration("tamagoshi"); }
+function cfg() { return vscode.workspace.getConfiguration("satoshipet"); }
 
 async function buscarJSON(url, ms = 6000) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
   try {
-    const r = await fetch(url, { signal: ctrl.signal, headers: { "User-Agent": "TamagoshiCripto-VSCode/1.4" } });
+    const r = await fetch(url, { signal: ctrl.signal, headers: { "User-Agent": "SatoshiPet-VSCode/1.4" } });
     if (!r.ok) throw new Error("HTTP " + r.status);
     return await r.json();
   } finally { clearTimeout(t); }
@@ -40,7 +40,7 @@ async function atualizar() {
       s.humor = humorPor(s.variacao_pct);
       s.preco_fmt = "$" + (d.usd >= 1 ? d.usd.toLocaleString("pt-BR", { maximumFractionDigits: 2 }) : d.usd.toPrecision(3));
     } catch (e) {
-      barra.text = "$(debug-disconnect) tamagoshi offline";
+      barra.text = "$(debug-disconnect) satoshipet offline";
       return;
     }
   }
@@ -65,7 +65,7 @@ body{background:#1a1c2c;color:#f4f4f4;font:14px monospace;display:flex;flex-dire
 small{color:#566c86;margin-top:12px}
 </style></head><body>
 <div id="s" title="carinho!"></div><div class="n" id="n">...</div><div id="p"></div><div id="h"></div>
-<small>Tamagoshi Cripto · não é conselho financeiro</small>
+<small>SatoshiPet · não é conselho financeiro</small>
 <script nonce="tama">
 const SPR=${JSON.stringify(sprites)},L=${JSON.stringify(LINHA)};let s={moeda:"BTC",humor:"garimpando"},f=0,pulo=0;
 const el=document.getElementById("s");
@@ -82,19 +82,19 @@ document.getElementById("h").className=s.humor;document.getElementById("h").text
 
 function activate(ctx) {
   barra = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-  barra.command = "tamagoshi.abrir";
-  barra.text = "⛏ tamagoshi...";
+  barra.command = "satoshipet.abrir";
+  barra.text = "⛏ satoshipet...";
   barra.show();
   ctx.subscriptions.push(barra);
-  ctx.subscriptions.push(vscode.commands.registerCommand("tamagoshi.abrir", () => {
+  ctx.subscriptions.push(vscode.commands.registerCommand("satoshipet.abrir", () => {
     if (painel) { painel.reveal(); return; }
-    painel = vscode.window.createWebviewPanel("tamagoshi", "Tamagoshi Cripto", vscode.ViewColumn.Beside,
+    painel = vscode.window.createWebviewPanel("satoshipet", "SatoshiPet", vscode.ViewColumn.Beside,
       { enableScripts: true, localResourceRoots: [vscode.Uri.file(path.join(ctx.extensionPath, "media"))] });
     painel.webview.html = html(painel.webview, ctx);
     painel.onDidDispose(() => { painel = null; });
     if (ultimo) setTimeout(() => painel && painel.webview.postMessage({ tipo: "status", s: ultimo }), 300);
   }));
-  ctx.subscriptions.push(vscode.commands.registerCommand("tamagoshi.carinho", () => {
+  ctx.subscriptions.push(vscode.commands.registerCommand("satoshipet.carinho", () => {
     vscode.window.showInformationMessage(["hehe, cosquinha!", "HODL e carinho, a única estratégia", "gm, fren!"][Math.floor(Math.random() * 3)]);
   }));
   atualizar();

@@ -1,4 +1,4 @@
-# Privacidade do Tamagoshi Cripto 🔒
+# Privacidade do SatoshiPet 🔒
 
 Resumo: **o bicho mora no seu computador.** Nada sai daqui sem você ligar. Sem conta, sem telemetria, sem analytics.
 
@@ -21,11 +21,11 @@ Resumo: **o bicho mora no seu computador.** Nada sai daqui sem você ligar. Sem 
 - Nada é instalado sozinho: "update" só abre a página do Release.
 
 ## Onde ficam seus dados
-- `~/.tamagoshi_cripto.json`: config, progresso, endereços públicos (se você colou).
+- `~/.satoshipet.json`: config, progresso, endereços públicos (se você colou).
 - **Chave da IA**: no chaveiro do sistema (Keychain / Credential Manager / Secret Service) via `keyring`
-  (`pip install tamagoshi-cripto[secure]`). Sem chaveiro, cai pro JSON local (o console avisa onde ficou).
+  (`pip install satoshipet[secure]`). Sem chaveiro, cai pro JSON local (o console avisa onde ficou).
   Chaves antigas no JSON são migradas sozinhas pro chaveiro no próximo start.
-- `~/.tamagoshi_api_token` (permissão 0600): token das rotas de escrita da API local.
+- `~/.satoshipet_api_token` (permissão 0600): token das rotas de escrita da API local.
 
 ## API local (127.0.0.1:8737)
 - Escuta **só** em 127.0.0.1; recusa `Host` que não seja localhost (anti DNS-rebinding).
@@ -34,7 +34,7 @@ Resumo: **o bicho mora no seu computador.** Nada sai daqui sem você ligar. Sem 
 - Escrita (`POST /pet`, `/feed`) desligada por padrão (`"api_escrita": true` liga) e exige `Authorization: Bearer <token>`.
 
 ## Apagar tudo
-Apague `~/.tamagoshi_cripto.json`, `~/.tamagoshi_api_token` e, se usou, a entrada `tamagoshi-cripto` do chaveiro.
+Apague `~/.satoshipet.json`, `~/.satoshipet_api_token` e, se usou, a entrada `satoshipet` do chaveiro.
 
 ## Saldo das carteiras (v1.6)
 O saldo das carteiras watch-only é consultado em APIs públicas (mempool.space, publicnode, Solana RPC) e cotado na CoinGecko. Ele fica **só na memória**: não é salvo em disco, não aparece na API local, no card, no ranking, no overlay nem é enviado pra IA. `saldo off` esconde os valores na tela.
@@ -47,3 +47,6 @@ Ligado, o app manda um pacote UDP de broadcast **só na sua rede local** (porta 
 
 ## Voz (v1.7) - desligado por padrão
 Os anúncios usam a voz do próprio sistema (`say` no macOS, SAPI no Windows, `spd-say` no Linux), tudo local.
+
+## Mudança de nome (Tamagoshi Cripto -> SatoshiPet)
+Na primeira abertura o SatoshiPet copia, **só no seu computador**, a config/save antiga (`~/.tamagoshi_cripto.json`, `~/.tamagoshi_cripto/`, `~/.tamagoshi_api_token`) pros nomes novos (`~/.satoshipet.json`, `~/.satoshipet/`, `~/.satoshipet_api_token`). Nada é enviado pra lugar nenhum; os arquivos antigos ficam onde estavam (pode apagar quando quiser).

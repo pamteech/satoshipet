@@ -17,7 +17,7 @@ sys.path.insert(0, str(RAIZ / "tools"))
 import ranking as srv_mod
 
 import validate_skin
-from tamagoshi_cripto import console, ranking, share
+from satoshipet import console, ranking, share
 
 DEV = "0123456789abcdef0123456789abcdef"
 
@@ -130,7 +130,7 @@ def test_console_share_e_rank():
 
 # ---------- skins ----------
 def test_validador_aceita_slime_e_recusa_ruim(tmp_path):
-    erros, _, img = validate_skin.validar(RAIZ / "src/tamagoshi_cripto/assets/skins/slime")
+    erros, _, img = validate_skin.validar(RAIZ / "src/satoshipet/assets/skins/slime")
     assert not erros and img.size == (192, 192)
     ruim = tmp_path / "ruim"
     ruim.mkdir()

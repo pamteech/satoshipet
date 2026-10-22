@@ -8,8 +8,8 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "src"))
 
-from tamagoshi_cripto import sprites as S
-from tamagoshi_cripto.pixel import W
+from satoshipet import sprites as S
+from satoshipet.pixel import W
 
 
 def slime(s, e, f, k):
@@ -32,7 +32,7 @@ def slime(s, e, f, k):
 
 
 if __name__ == "__main__":
-    pasta = RAIZ / "src" / "tamagoshi_cripto" / "assets" / "skins" / "slime"
+    pasta = RAIZ / "src" / "satoshipet" / "assets" / "skins" / "slime"
     pasta.mkdir(parents=True, exist_ok=True)
     from PIL import Image
     folha = Image.new("RGBA", (W * 4, W * 4), (0, 0, 0, 0))
@@ -41,7 +41,7 @@ if __name__ == "__main__":
             folha.paste(S.desenhar("BTC", "padrao", linha, fr, extra=slime), (fr * W, j * W))
     folha.save(pasta / "sheet.png")
     (pasta / "skin.json").write_text(json.dumps({
-        "id": "slime", "nome": "Slime da Liquidez", "autor": "tamagoshi-cripto",
+        "id": "slime", "nome": "Slime da Liquidez", "autor": "satoshipet",
         "descricao": "Criatura de exemplo da comunidade: uma pool de liquidez com sentimentos.",
         "frases": {"garimpando": ["provendo liquidez...", "impermanent loss? nunca ouvi"],
                    "moon": ["APY de 9000%!", "TVL nas alturas!"],
