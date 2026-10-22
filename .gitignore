@@ -16,3 +16,4 @@ vscode/*.vsix
 monkeytype.sqlite3
 .mypy_cache/
 .ruff_cache/
+!packaging/pyinstaller/*.spec
