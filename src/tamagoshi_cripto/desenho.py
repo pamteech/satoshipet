@@ -315,7 +315,7 @@ class MixinDesenho:
             return self.plugins[skin]["_folha"]
         if skin.startswith("loja:") and skin[5:] in self.catalogo:
             from . import loja
-            return loja.folha(self.catalogo[skin[5:]], moeda)
+            return loja.folha(self.catalogo[skin[5:]], moeda, self.estagio)
         caminho = recursos.ASSETS / "sprites" / nome_folha(moeda, skin, self.estagio)
         if not caminho.exists():  # estágio sem folha? volta pro adulto, ninguém fica invisível
             caminho = recursos.ASSETS / "sprites" / nome_folha(moeda, skin, "adulto")
@@ -323,7 +323,11 @@ class MixinDesenho:
 
     def _dna(self):
         # skins de plugin/secretas mantêm as cores do artista; o DNA vale pras skins oficiais
-        g = self.genes() if not self.cfg["skin"].startswith(("plugin:", "loja:")) else None
+        sk = self.cfg["skin"]
+        g = None if sk.startswith("plugin:") else self.genes()
+        if sk.startswith("loja:"):  # v1.5: pacotes da loja aceitam os genes de FORMA (olhos/acessório/padrão)
+            from . import loja
+            g = loja.genes_permitidos(self.catalogo.get(sk[5:], {}), g)
         return {"genes": g, "fantasma": bool(self.cfg.get("fantasma"))}
 
     def _chave_dna(self):

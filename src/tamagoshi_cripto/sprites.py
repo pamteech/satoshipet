@@ -565,7 +565,7 @@ def baleia(s, e, f, k):
         olhos(s, 33, 25, 5, "x")
         s.linha([(42, 44), (42, 33)], "vinho", "madeira", 2)
         s.caixa(36, 27, 47.5, 34, "papelao", raio=0)
-        s.texto(37, 28, "HODL", "roxo") if False else s.texto(37, 28, "SOS", "branco")
+        s.texto(37, 28, "SOS", "branco")
     else:
         olhos(s, 33, 25, 5, "pisca" if f == 3 else "normal")
         for i in range(3):  # chafariz d'água
@@ -590,6 +590,139 @@ def maos_diamante(s):
         s.efeito(x0 + 2, 28, "branco")
 
 
+# ======================= formas finais únicas (v1.5) =======================
+# Antes o "whale" de ETH/SOL/DOGE/PEPE era só o adulto + coroa. Agora cada um ganha a sua lenda:
+#   ETH  = Arcanjo Ultrasound (asas + auréola)     SOL  = Supernova (coroa solar girando + planetinhas)
+#   DOGE = Doge Astronauta (capacete-bolha + jetpack) PEPE = Rei Sapo (capa, vitória-régia e coroa de gemas)
+# Cada forma tem um "antes" (atrás do corpo) e um "depois" (por cima). No rekt o enfeite cai no chão. RIP.
+
+def _asas(s, e, f):
+    bate = [0, -2, -3, -1][f] if e != "rekt" else 3
+    for lado in (-1, 1):
+        x0 = 24 + lado * 9
+        pena = [(x0, 22), (x0 + lado * 14, 12 + bate), (x0 + lado * 16, 18 + bate), (x0 + lado * 13, 24 + bate // 2),
+                (x0 + lado * 14, 29), (x0 + lado * 8, 31), (x0, 30)]
+        s.poly(pena, "nuvem", 0.75, grad=0.35)
+        for k in range(3):  # penas separadas por fendas
+            s.linha([(x0 + lado * (5 + k * 3), 24 + k), (x0 + lado * (9 + k * 3), 18 + bate + k * 2)], "cinza_claro", "nuvem")
+
+
+def _anel(s, cx, cy, rx, ry, frente, cores=("amarelo", "laranja")):
+    """Anel achatado: a metade de trás é pixel normal (o corpo cobre), a da frente é efeito (fica por cima)."""
+    for k in range(48):
+        ang = k / 48 * math.tau
+        x, y = cx + math.cos(ang) * rx, cy + math.sin(ang) * ry
+        if frente and math.sin(ang) >= 0:
+            X, Y = s.T(x, y)
+            s.efeito(X, Y, cores[0] if math.cos(ang) > -0.6 else cores[1])
+        elif not frente and math.sin(ang) < 0:
+            s.ret(x, y, 1, 1, cores[1] if k % 3 else cores[0], "ouro")
+
+
+def _eth_antes(s, e, f):
+    if e != "rekt":
+        _asas(s, e, f)
+        _anel(s, 24, 13 + [0, -1, -1, 0][f], 13, 3, frente=False)
+
+
+def _eth_depois(s, e, f):
+    if e == "rekt":  # auréola caída, torta no chão
+        for i in range(-4, 5):
+            s.efeito(36 + i, 42 + (1 if abs(i) == 4 else 0), "amarelo")
+        return
+    _anel(s, 24, 13 + [0, -1, -1, 0][f], 13, 3, frente=True)
+    if e == "moon":
+        faiscas(s, [(6, 8 + f), (42, 6 + (f + 2) % 4)], ("ciano", "branco"))
+
+
+def _sol_antes(s, e, f):
+    if e == "rekt":
+        return
+    for k in range(12):  # coroa solar girando
+        ang = (k / 12) * math.tau + f * (math.tau / 48)
+        r0, r1 = 15, 21 + (2 if k % 2 == 0 else 0)
+        x0, y0 = 24 + math.cos(ang) * r0, 26 + math.sin(ang) * r0 * .9
+        x1, y1 = 24 + math.cos(ang) * r1, 26 + math.sin(ang) * r1 * .9
+        lat = 1.6
+        s.poly([(x0 - math.sin(ang) * lat, y0 + math.cos(ang) * lat), (x1, y1),
+                (x0 + math.sin(ang) * lat, y0 - math.cos(ang) * lat)], "fogo", 0.55 if k % 2 else 0.8)
+
+
+def _sol_depois(s, e, f):
+    if e == "rekt":
+        s.efeito(38, 41, "roxo"); s.efeito(39, 41, "roxo"); s.efeito(38, 40, "vinho")  # planetinha apagado
+        return
+    for i, (raio, cor, vel) in enumerate(((20, "ciano", 1), (17, "roxo", -2))):
+        ang = f * vel * math.tau / 8 + i * 2.2
+        x, y = 24 + math.cos(ang) * raio, 26 + math.sin(ang) * raio * .45
+        for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1)):
+            s.efeito(x + dx, y + dy, cor)
+        s.efeito(x, y, "branco")
+
+
+def _doge_antes(s, e, f):
+    if e == "rekt":
+        return
+    s.caixa(6, 22, 14, 37, "metal", raio=1)  # jetpack (aparece do lado esquerdo)
+    s.ret(8, 25, 2, 2, "vinho", "metal"); s.ret(11, 25, 2, 2, "lima", "metal")
+    s.ret(8, 30, 5, 1, "grafite", "metal")
+
+
+def _doge_depois(s, e, f):
+    cx, t, _w = s.ancora
+    if e == "rekt":  # capacete rachado rolando
+        for i in range(8):
+            s.efeito(35 + i, 41 - (2 if 1 < i < 6 else 1 if i in (1, 6) else 0), "ciano")
+        s.efeito(38, 39, "branco"); s.efeito(39, 40, "branco")
+        return
+    for bocal in (7, 11):  # fogo do jetpack
+        X, Y = s.T(bocal, 38)
+        comp = [4, 6, 3, 7][(f + bocal) % 4]
+        for i in range(comp):
+            cor = "branco" if i < 1 else "amarelo" if i < 3 else "laranja" if i < 5 else "vinho"
+            s.efeito(X, Y + i, cor); s.efeito(X + 1, Y + i, cor if i < comp - 1 else "laranja")
+    cy = t + 9
+    rx, ry = 13, 12
+    for k in range(96):  # bolha: contorno duplo + reflexo (o doge continua visível lá dentro)
+        ang = k / 96 * math.tau
+        if math.sin(ang) > 0.62:
+            continue  # gola do traje: aberto embaixo
+        for dr, cor in ((0, "ciano"), (-1, "celeste" if (k + f * 4) % 12 else "branco")):
+            s.efeito(cx + math.cos(ang) * (rx + dr), cy + math.sin(ang) * (ry + dr), cor)
+    for i in range(4):
+        s.efeito(cx - 8 + i, cy - 8 + i // 2, "branco")
+    s.efeito(cx - 10, cy - 4, "branco"); s.efeito(cx - 10, cy - 3, "branco")
+
+
+def _pepe_antes(s, e, f):
+    if e == "rekt":
+        return
+    onda = [0, 1, 0, -1][f]
+    s.poly([(15, 24), (33, 24), (38 + onda, 43), (24, 41), (10 - onda, 43)], "vermelho", 0.7, grad=0.4)  # capa
+    s.esfera(24, 45, 20, 2.6, "verde")  # vitória-régia
+    s.ret(31, 44, 3, 1, "petroleo", "verde")
+
+
+def _pepe_depois(s, e, f):
+    cx, t, _w = s.ancora
+    if e == "rekt":  # coroa largada no chão
+        s.poly([(34, 43), (34, 39), (36, 41), (38, 38), (40, 41), (42, 39), (42, 43)], "ouro", 0.8)
+        return
+    t = max(t, 8)
+    s.poly([(cx - 8, t + 1), (cx - 8, t - 5), (cx - 5, t - 2), (cx - 2, t - 7), (cx, t - 3), (cx + 2, t - 7),
+            (cx + 5, t - 2), (cx + 8, t - 5), (cx + 8, t + 1)], "ouro", 0.8)
+    for gx, cor in ((-5, "vinho"), (0, "ciano"), (5, "lima")):  # gemas
+        s.ret(int(cx + gx) - (1 if gx == 0 else 0), int(t) - 1, 2, 2, cor, "ouro")
+    s.linha([(40, 40), (40, 24 + [0, -1, -1, 0][f])], "laranja", "madeira", 1)  # cetro
+    s.esfera(40, 22 + [0, -1, -1, 0][f], 2, 2, "cristal")
+
+
+FINAIS = {"ETH": (_eth_antes, _eth_depois), "SOL": (_sol_antes, _sol_depois),
+          "DOGE": (_doge_antes, _doge_depois), "PEPE": (_pepe_antes, _pepe_depois)}
+NOMES_FINAIS = {"BTC": "Baleia Mineradora", "ETH": "Arcanjo Ultrasound", "SOL": "Supernova",
+                "DOGE": "Doge Astronauta", "PEPE": "Rei Sapo"}
+
+
 def desenhar(moeda, skin, linha, frame, extra=None, estagio="adulto"):
     """Renderiza um frame. linha: garimpando/moon/rekt/pulo. estagio: ovo..diamond."""
     estado = "garimpando" if linha == "pulo" else linha
@@ -608,9 +741,13 @@ def desenhar(moeda, skin, linha, frame, extra=None, estagio="adulto"):
         ovo(s, estado, f_logico, moeda)
     elif estagio == "whale" and moeda == "BTC":
         baleia(s, estado, f_logico, None)
+    elif estagio == "whale" and moeda in FINAIS:
+        FINAIS[moeda][0](s, estado, f_logico)
+        PERSONAGENS[moeda](s, estado, f_logico, None)
+        FINAIS[moeda][1](s, estado, f_logico)
     else:
         PERSONAGENS[moeda](s, estado, f_logico, None)
-    if estagio == "whale" and moeda != "BTC":
+    if estagio == "whale" and moeda not in FINAIS and moeda != "BTC":
         coroa(s, "ouro")
     if estagio == "diamond":
         maos_diamante(s)
@@ -639,11 +776,35 @@ def nome_folha(moeda, skin, estagio="adulto"):
     return f"{moeda}_{skin}.png" if estagio == "adulto" else f"{moeda}_{skin}_{estagio}.png"
 
 
+def _centralizar(frames):
+    """v1.5: pose torta (corpo 2-3px pra um lado) volta pro meio. Desloca a LINHA inteira, então a
+    animação dentro dela (picareta balançando etc.) continua igualzinha."""
+    cs = []
+    for fr in frames:
+        bb = fr.getchannel("A").crop((0, 0, W, 43)).getbbox()  # ignora o chão
+        if bb:
+            cs.append((bb[0] + bb[2]) / 2)
+    if not cs:
+        return frames
+    d = round(W / 2 - sum(cs) / len(cs))
+    if abs(d) < 2:
+        return frames
+    out = []
+    for fr in frames:
+        n = Image.new("RGBA", fr.size, (0, 0, 0, 0))
+        n.paste(fr, (d, 0))
+        if fr.getchannel("A").crop((0, 43, 1, 48)).getbbox() or fr.getchannel("A").crop((W - 1, 43, W, 48)).getbbox():
+            n.paste(fr.crop((0, 43, W, W)), (0, 43))  # chão de ponta a ponta (ondas) fica parado
+        out.append(n)
+    return out
+
+
 def sheet(moeda, skin, estagio="adulto"):
     s = Image.new("RGBA", (W * FRAMES, W * len(LINHAS)), (0, 0, 0, 0))
     for j, linha in enumerate(LINHAS):
-        for f in range(FRAMES):
-            s.paste(desenhar(moeda, skin, linha, f, estagio=estagio), (f * W, j * W))
+        frames = _centralizar([desenhar(moeda, skin, linha, f, estagio=estagio) for f in range(FRAMES)])
+        for f, fr in enumerate(frames):
+            s.paste(fr, (f * W, j * W))
     return s
 
 

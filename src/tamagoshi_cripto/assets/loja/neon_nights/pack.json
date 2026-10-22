@@ -11,5 +11,9 @@
   },
   "preco_sugerido_brl": 9.9,
   "descricao": "cyber-neon. 70% da venda vai pro artista.",
-  "id": "neon_nights"
+  "id": "neon_nights",
+  "genes": {
+    "olhos": "neon",
+    "padrao": "brilho"
+  }
 }

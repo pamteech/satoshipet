@@ -68,6 +68,15 @@ def validar_pack(pasta: PosixPath) -> Any:
                                                    int.from_bytes(cab[20:24], "big")) != (192, 192):
             return None, f"{Path(f).name} precisa ser PNG 192x192"
     meta["_folhas"] = folhas
+    # v1.5: folhas por estágio (BTC_ovo.png, ETH_whale.png...). Opcionais: falta = usa a do adulto.
+    meta["_estagios"] = {}
+    for p in pasta.glob("*_*.png"):
+        m, _, est = p.stem.partition("_")
+        if m.upper() in folhas and est in ESTAGIOS_PACK:
+            with open(p, "rb") as fh:
+                cab = fh.read(24)
+            if cab[:8] == b"\x89PNG\r\n\x1a\n" and cab[16:24] == (192).to_bytes(4, "big") * 2:
+                meta["_estagios"][(m.upper(), est)] = str(p)
     return meta, None
 
 
@@ -143,5 +152,26 @@ def destravado(meta: Dict[str, Any], pro: bool, codigos: Any) -> bool:
     return meta["id"] in codigos
 
 
-def folha(meta: Dict[str, Any], moeda: str) -> str:
+ESTAGIOS_PACK = ("ovo", "bebe", "whale", "diamond")
+# genes que combinam com qualquer pacote (forma, não cor): a paleta é do artista e não se mexe
+GENES_EM_PACK = ("olhos", "acessorio", "padrao")
+
+
+def folha(meta: Dict[str, Any], moeda: str, estagio: str = "adulto") -> str:
+    est = meta.get("_estagios", {})
+    if estagio != "adulto":
+        f = est.get((moeda, estagio)) or (est.get(("BTC", estagio)) if moeda not in meta["_folhas"] else None)
+        if f:
+            return str(f)
     return meta["_folhas"].get(moeda) or meta["_folhas"]["BTC"]
+
+
+def genes_permitidos(meta: Dict[str, Any], genes: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    """Genes do bicho que valem em cima da skin da loja. pack.json pode restringir com "genes_ok": [...]."""
+    if not genes:
+        return None
+    ok = set(meta.get("genes_ok", GENES_EM_PACK)) & set(GENES_EM_PACK)
+    if meta.get("genes"):  # o pacote já fixou esse gene na arte (ex.: Neon Nights = olhos neon)
+        ok -= set(meta["genes"])
+    g = {k: v for k, v in genes.items() if k in ok}
+    return g or None

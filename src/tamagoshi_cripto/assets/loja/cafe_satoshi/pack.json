@@ -15,5 +15,8 @@
   "contato": "marcas@exemplo.invalid",
   "preco_sugerido_brl": 0,
   "descricao": "exemplo do formato de pacote de marca. grátis pro usuário.",
-  "id": "cafe_satoshi"
+  "id": "cafe_satoshi",
+  "genes": {
+    "acessorio": "fone"
+  }
 }

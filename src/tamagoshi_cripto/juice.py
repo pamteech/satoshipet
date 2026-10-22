@@ -88,7 +88,14 @@ def aplicar_chapeu(fr, tipo):
     out = fr.copy()
     cx, topo = _topo_cabeca(fr)
     w, h = max(len(l) for l in arte), len(arte)
-    x0, y0 = cx - w // 2, max(0, topo - h + 4)  # afunda 4px na cabeça pra "vestir"
+    x0 = cx - w // 2
+    # v1.5: perfil do topo embaixo da aba. Cabeça com "vale" (olhos do sapo, orelhas do doge): o chapéu
+    # apoia nos picos em vez de afundar entre eles (antes cobria os olhos do Pepe). A ponta pode sair
+    # do quadro, mas a aba nunca desce pra cara.
+    al = fr.getchannel("A")
+    tops = [next((y for y in range(48) if al.getpixel((x, y))), 48) for x in range(max(0, x0 + 1), min(48, x0 + w - 1))]
+    pico = min(tops) if tops else topo
+    y0 = max(-3, pico - h + 2 if topo - pico >= 3 else topo - h + 4)  # no máx. 3px da ponta saem do quadro
     px = out.load()
     for j, linha in enumerate(arte):
         for i, ch in enumerate(linha):

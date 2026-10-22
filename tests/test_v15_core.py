@@ -236,3 +236,35 @@ def test_sprites_contato_e_gifs(tmp_path):
     sprites.gif_demo("SOL", "padrao", tmp_path / "d.gif", escala=1)
     sprites.gif_evolucao("DOGE", tmp_path / "e.gif", escala=1)
     assert (tmp_path / "d.gif").stat().st_size > 0 and (tmp_path / "e.gif").stat().st_size > 0
+
+
+# ---------------- v1.5 passo 4: arte ----------------
+def test_formas_finais_unicas():
+    from tamagoshi_cripto import sprites as sp
+    for m in ("ETH", "SOL", "DOGE", "PEPE"):
+        adulto = sp.desenhar(m, "padrao", "garimpando", 0, estagio="adulto").tobytes()
+        assert sp.desenhar(m, "padrao", "garimpando", 0, estagio="whale").tobytes() != adulto
+        assert m in sp.FINAIS and sp.NOMES_FINAIS[m]
+
+
+def test_pacotes_tem_estagios_e_genes_de_forma():
+    from tamagoshi_cripto import loja
+    cat = loja.catalogo()
+    for pid, m in cat.items():
+        for est in ("ovo", "bebe", "whale", "diamond"):
+            assert loja.folha(m, "PEPE", est).endswith(f"PEPE_{est}.png"), (pid, est)
+        assert loja.folha(m, "PEPE").endswith("PEPE.png")
+        g = loja.genes_permitidos(m, {"paleta": "noir", "olhos": "laser", "acessorio": "laco"})
+        assert g is None or "paleta" not in g
+    assert "olhos" not in (loja.genes_permitidos(cat["neon_nights"], {"olhos": "laser", "acessorio": "laco"}) or {})
+
+
+def test_chapeu_nao_cobre_olhos_do_sapo():
+    from PIL import Image
+
+    from tamagoshi_cripto import juice, recursos
+    sh = Image.open(recursos.ASSETS / "sprites" / "PEPE_padrao.png").convert("RGBA")
+    fr = sh.crop((0, 0, 48, 48))
+    com = juice.aplicar_chapeu(fr, "halloween")
+    olho = [(x, y) for y in range(48) for x in range(48) if fr.getpixel((x, y))[:3] == (244, 244, 244)][:6]
+    assert olho and all(com.getpixel(p) == fr.getpixel(p) for p in olho)

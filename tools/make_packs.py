@@ -70,8 +70,9 @@ def main():
     for pid, rec in RECEITAS.items():
         pasta = base / pid
         pasta.mkdir(parents=True, exist_ok=True)
-        for m in MOEDAS:
-            folha = Image.open(recursos.ASSETS / "sprites" / f"{m}_padrao.png").convert("RGBA")
+        for m, est in [(m, e) for m in MOEDAS for e in ("adulto", "ovo", "bebe", "whale", "diamond")]:
+            sufixo = "" if est == "adulto" else f"_{est}"
+            folha = Image.open(recursos.ASSETS / "sprites" / f"{m}_padrao{sufixo}.png").convert("RGBA")
             out = Image.new("RGBA", folha.size, (0, 0, 0, 0))
             for j in range(4):
                 for f in range(4):
@@ -79,11 +80,11 @@ def main():
                     fr = recolor(fr, rec["paleta"])
                     if rec.get("genes"):
                         fr = genetica.aplicar(fr, rec["genes"])
-                    if rec.get("chapeu"):
+                    if rec.get("chapeu") and est != "ovo":
                         fr = juice.aplicar_chapeu(fr, rec["chapeu"])
                     out.paste(fr, (f * 48, j * 48))
-            out.save(pasta / f"{m}.png", optimize=True)
-        meta = dict(rec["meta"], id=pid)
+            out.save(pasta / f"{m}{sufixo}.png", optimize=True)
+        meta = dict(rec["meta"], id=pid, **({"genes": rec["genes"]} if rec.get("genes") else {}))
         (pasta / "pack.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         print("pacote:", pasta)
 
