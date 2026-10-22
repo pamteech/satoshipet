@@ -10,9 +10,11 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
+RANK_URL = ""
 sys.path.insert(0, str(RAIZ / "src"))
 os.environ["TAMAGOSHI_CONFIG"] = str(Path(tempfile.mkdtemp()) / "cfg.json")
 os.environ.setdefault("TAMAGOSHI_API_PORT", "18737")
@@ -86,6 +88,14 @@ def executar():
     import time
     import urllib.request
 
+    os.environ["HOME"] = tempfile.mkdtemp()  # card de share cai aqui, não no ~ de verdade
+    (Path(os.environ["HOME"]) / "Pictures").mkdir()
+    sys.path.insert(0, str(RAIZ / "server"))
+    import ranking as servidor_ranking
+    srv_rank = servidor_ranking.criar_servidor("127.0.0.1", 0)
+    threading.Thread(target=srv_rank.serve_forever, daemon=True).start()
+    global RANK_URL
+    RANK_URL = f"http://127.0.0.1:{srv_rank.server_address[1]}"
     from tamagoshi_cripto import config, evolucao, license, logic, lore, main, onchain
 
     chamadas = []
@@ -96,8 +106,14 @@ def executar():
     simpledialog.askfloat = lambda *a, **k: (chamadas.append(("askfloat", a[1])), next(floats))[1]
     email = "teste@exemplo.com"
     strs = iter([email, "CHAVE-ERRADA", email, license.gerar_chave(email)])
+    import webbrowser
+    abertos = []
+    webbrowser.open = lambda url, *a, **k: abertos.append(url) or True
+
     def _ask(*a, **k):
         chamadas.append(("askstring", a[1]))
+        if a[0].startswith("Ranking"):
+            return RANK_URL if "URL" in a[1] else "gui_tester"
         if a[0] != "Ativar Pro":  # carteira watch-only: endereço público, nunca chave
             return "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
         return next(strs)
@@ -238,6 +254,29 @@ def executar():
     assert any("pong" in l.lower() for l in app.console_linhas if isinstance(l, str)), app.console_linhas[-3:]
     app._tecla_console(type("E", (), {"keysym": "grave", "char": "`"})())
     assert not app.console_aberto
+
+    # ---------- share card ----------
+    linhas = app.compartilhar()
+    assert app.ultimo_card.exists() and app.ultimo_card.parent.name == "Pictures"
+    from PIL import Image
+    assert Image.open(app.ultimo_card).size == (1200, 675)
+    assert abertos and abertos[-1].startswith("https://x.com/intent/post?")
+    assert any("nada foi postado" in l for l in linhas)
+
+    # ---------- ranking (servidor local de verdade, ponta a ponta) ----------
+    assert config.PADRAO["ranking"] is False  # opt-in: desligado por padrão
+    app.cfg["ranking"] = False
+    app.config_ranking()
+    assert app.cfg["ranking"] and app.cfg["nick"] == "gui_tester" and len(app.cfg["device_id"]) == 32
+    app.console_linhas = []
+    app.ranking([])
+    for _ in range(50):
+        _bombear(app, 100)
+        if any("gui_tester" in l for l in app.console_linhas if isinstance(l, str)):
+            break
+    assert any("gui_tester" in l for l in app.console_linhas if isinstance(l, str)), app.console_linhas
+    top = srv_rank.ranking.top()
+    assert top[0]["nick"] == "gui_tester" and "device_id" not in top[0]
 
     # ---------- vim keys ----------
     x_antes = app.root.winfo_x()

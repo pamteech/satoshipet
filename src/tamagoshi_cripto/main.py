@@ -16,7 +16,7 @@ from tkinter import messagebox, simpledialog
 
 from PIL import Image
 
-from . import api, arts, config, conquistas, evolucao, license, logic, lore, onchain, plugins, recursos, sistema, sons
+from . import api, arts, config, conquistas, evolucao, license, logic, lore, onchain, plugins, ranking, recursos, share, sistema, sons
 from .console import SPRITE, Console
 from .fonte import FontePixel
 from .sprites import FRAMES, LINHAS, SKINS_SECRETAS, nome_folha
@@ -205,6 +205,8 @@ class Tamagoshi:
         m.add_command(label="Conquistas", command=self.ver_conquistas)
         m.add_command(label="Carteira watch-only...", command=self.config_carteira)
         m.add_command(label="Console hacker (`)", command=self.alternar_console)
+        m.add_command(label="Compartilhar card (X)", command=self._menu_share)
+        m.add_command(label="Ranking (opt-in)...", command=self.config_ranking)
         self.var_sats = tk.BooleanVar(value=self.cfg.get("unidade") == "sats")
         m.add_checkbutton(label="Mostrar em sats", variable=self.var_sats,
                           command=lambda: self.alternar_sats(self.var_sats.get()))
@@ -472,6 +474,51 @@ class Tamagoshi:
         self._comemorar(self.conq.especial("not_your_keys"))
         return ["carteira watch-only salva. o bicho só OLHA, nunca mexe.", "(atualiza a cada 2 min via mempool.space)"]
 
+    # ---------- share card & ranking ----------
+    def compartilhar(self, abrir=True):
+        try:
+            caminho = share.salvar(self.status(), self.conq.d["desbloqueadas"], self.cfg.get("site") or share.SITE)
+        except Exception as e:
+            return [f"share: falhou ({e})"]
+        url = share.url_x(self.status(), self.cfg.get("site") or share.SITE)
+        if abrir:
+            webbrowser.open(url)
+        self.ultimo_card = caminho
+        return [f"card salvo: {caminho}", "abri o X com o texto pronto. anexe o PNG e poste você mesmo.",
+                "(nada foi postado automaticamente)"]
+
+    def _menu_share(self):
+        linhas = self.compartilhar()
+        messagebox.showinfo("Compartilhar", "\n".join(linhas), parent=self.root)
+
+    def ranking(self, args):
+        """Roda em thread (rede); a resposta cai no console quando chegar."""
+        def tarefa():
+            linhas = ranking.comando(self.cfg, self.status(), list(args), config.salvar)
+            with self.lock:
+                self.eventos.append(("console", linhas))
+        threading.Thread(target=tarefa, daemon=True).start()
+        return ["consultando ranking..."]
+
+    def config_ranking(self):
+        if self.cfg.get("ranking"):
+            if messagebox.askyesno("Ranking", f"Ranking ligado como {self.cfg.get('nick')}. Desligar?", parent=self.root):
+                ranking.comando(self.cfg, self.status(), ["off"], config.salvar)
+            return
+        url = simpledialog.askstring("Ranking (opt-in)", "URL do servidor de ranking:", parent=self.root,
+                                     initialvalue=self.cfg.get("ranking_url") or "http://127.0.0.1:8740")
+        if not url:
+            return
+        nick = simpledialog.askstring("Ranking (opt-in)",
+                                      "Apelido público (3-16 letras/números/_/-).\n"
+                                      "Enviado: apelido, XP, nível, estágio, blocos, nº de conquistas.\n"
+                                      "NUNCA carteira, e-mail ou nome real.", parent=self.root)
+        if not nick:
+            return
+        self.cfg["ranking_url"] = url.strip()
+        linhas = ranking.comando(self.cfg, self.status(), ["on", nick.strip()], config.salvar)
+        messagebox.showinfo("Ranking", "\n".join(linhas[:6]), parent=self.root)
+
     def config_carteira(self):
         end = simpledialog.askstring(
             "Carteira watch-only",
@@ -562,6 +609,11 @@ class Tamagoshi:
                             self.eventos.append(("saldo", s))
                     except Exception:
                         pass
+            if n % 10 == 5 and ranking.ligado(self.cfg):  # a cada ~10 min, só se você ligou
+                try:
+                    ranking.enviar(self.cfg, self.status())
+                except Exception:
+                    pass
             n += 1
             time.sleep(60)
 
@@ -569,6 +621,9 @@ class Tamagoshi:
         with self.lock:
             evs, self.eventos = self.eventos, []
         for ev in evs:
+            if ev[0] == "console":
+                self.console_linhas = (self.console_linhas + ev[1])[-60:]
+                continue
             if ev[0] == "tip":
                 for h in self.estomago.novo_tip(ev[1], ev[2]):
                     self._comer(h)

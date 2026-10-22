@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tamagoshi Cripto — o bichinho pixel art que sente o mercado</title>
+<meta name="description" content="Um pet em pixel art que flutua na sua tela, come blocos de Bitcoin de verdade, evolui pra Whale e tem console hacker. Grátis e open source.">
+<meta name="theme-color" content="#1a1c2c">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<!-- Open Graph / X (troque OWNER pela sua conta do GitHub) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Tamagoshi Cripto 🐣 — pixel-art crypto pet">
+<meta property="og:description" content="Come blocos de Bitcoin, fica com fome quando a fee sobe, evolui pra Whale. Desktop + terminal. Grátis.">
+<meta property="og:url" content="https://OWNER.github.io/tamagoshi-cripto/">
+<meta property="og:image" content="https://OWNER.github.io/tamagoshi-cripto/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tamagoshi Cripto 🐣">
+<meta name="twitter:description" content="O bichinho pixel art que come blocos de Bitcoin e evolui pra Whale.">
+<meta name="twitter:image" content="https://OWNER.github.io/tamagoshi-cripto/assets/og.png">
+<link rel="stylesheet" href="style.css">
+<script src="config.js"></script>
+</head>
+<body>
+<div class="estrelas" aria-hidden="true"></div>
+
+<header class="topo">
+  <a class="logo" href="#"><img src="assets/favicon.png" alt="" width="32" height="32"> TAMAGOSHI<span>CRIPTO</span></a>
+  <nav>
+    <a href="#demo" data-i18n="nav_demo">demo</a>
+    <a href="#recursos" data-i18n="nav_feat">recursos</a>
+    <a href="#precos" data-i18n="nav_price">preço</a>
+    <a href="#ranking" data-i18n="nav_rank">ranking</a>
+    <a href="#faq">FAQ</a>
+    <button id="lang" class="px-btn mini" aria-label="mudar idioma">EN</button>
+  </nav>
+</header>
+
+<main>
+<section class="hero">
+  <div class="hero-txt">
+    <p class="tag" data-i18n="tag">v1.2 · open source · MIT</p>
+    <h1 data-i18n="h1">Um bichinho que sente o mercado <em>mais que você</em>.</h1>
+    <p class="sub" data-i18n="sub">Pixel art que flutua na sua tela, come cada bloco novo do Bitcoin, passa fome quando a fee sobe e evolui de ovo até <b>Whale</b>. Tem até console hacker.</p>
+    <div class="ctas">
+      <a class="px-btn verde dl" data-dl="mac" href="#"> <span data-i18n="dl_mac">Baixar p/ macOS</span></a>
+      <a class="px-btn verde dl" data-dl="win" href="#"> <span data-i18n="dl_win">Baixar p/ Windows</span></a>
+      <a class="px-btn" data-dl="repo" href="#"><span data-i18n="dl_src">pipx / código</span></a>
+    </div>
+    <p class="mini-txt" data-i18n="free_note">Grátis pra sempre. Pro é pagamento único.</p>
+  </div>
+  <div class="hero-pet" id="demo">
+    <div class="balao" id="balao">carregando o mercado...</div>
+    <canvas id="pet" width="48" height="48" aria-label="bichinho animado"></canvas>
+    <div class="chao"></div>
+    <div class="painel">
+      <div class="linha"><span id="p-moeda">BTC</span><span id="p-var" class="amarelo">+0.00%</span></div>
+      <div class="linha grande" id="p-preco">$—</div>
+      <div class="linha"><span id="p-bloco">bloco #—</span><span id="p-fee">fee — sat/vB</span></div>
+    </div>
+    <div class="seletor" role="group" aria-label="moeda">
+      <button class="px-btn mini ativo" data-moeda="BTC">BTC</button>
+      <button class="px-btn mini" data-moeda="ETH">ETH</button>
+      <button class="px-btn mini" data-moeda="SOL">SOL</button>
+      <button class="px-btn mini" data-moeda="DOGE">DOGE</button>
+      <button class="px-btn mini" data-moeda="PEPE">PEPE</button>
+    </div>
+    <div class="seletor" role="group" aria-label="humor">
+      <button class="px-btn mini" data-humor="auto" data-i18n="m_live">ao vivo</button>
+      <button class="px-btn mini" data-humor="moon">🚀 moon</button>
+      <button class="px-btn mini" data-humor="garimpando">⛏ hodl</button>
+      <button class="px-btn mini" data-humor="rekt">💀 rekt</button>
+    </div>
+    <p class="mini-txt" data-i18n="demo_note">Preço ao vivo (CoinGecko) e bloco (mempool.space), direto do seu navegador. Clique no bicho.</p>
+  </div>
+</section>
+
+<section class="faixa">
+  <figure><img src="assets/gif/comendo.gif" alt="comendo bloco" loading="lazy"><figcaption data-i18n="g1">come blocos reais</figcaption></figure>
+  <figure><img src="assets/gif/evoluindo.gif" alt="evoluindo" loading="lazy"><figcaption data-i18n="g2">evolui pra Whale</figcaption></figure>
+  <figure><img src="assets/gif/console.gif" alt="console hacker" loading="lazy"><figcaption data-i18n="g3">console hacker (`)</figcaption></figure>
+</section>
+
+<section id="recursos">
+  <h2 data-i18n="crew">A tripulação</h2>
+  <div class="crew">
+    <figure><img src="assets/gif/btc.gif" alt="Satoshinho"><figcaption><b>Satoshinho</b><br>BTC</figcaption></figure>
+    <figure><img src="assets/gif/eth.gif" alt="Vitalikinho"><figcaption><b>Vitalikinho</b><br>ETH</figcaption></figure>
+    <figure><img src="assets/gif/sol.gif" alt="Solzinho"><figcaption><b>Solzinho</b><br>SOL</figcaption></figure>
+    <figure><img src="assets/gif/doge.gif" alt="Doguinho"><figcaption><b>Doguinho</b><br>DOGE</figcaption></figure>
+    <figure><img src="assets/gif/pepe.gif" alt="Sapo Degen"><figcaption><b>Sapo Degen</b><br>PEPE</figcaption></figure>
+  </div>
+  <h2 data-i18n="evo">Evolução</h2>
+  <div class="evo">
+    <canvas class="mini-pet" data-sheet="BTC_padrao_ovo" width="48" height="48"></canvas><span>›</span>
+    <canvas class="mini-pet" data-sheet="BTC_padrao_bebe" width="48" height="48"></canvas><span>›</span>
+    <canvas class="mini-pet" data-sheet="BTC_padrao" width="48" height="48"></canvas><span>›</span>
+    <canvas class="mini-pet" data-sheet="BTC_padrao_whale" width="48" height="48"></canvas><span data-i18n="ou">ou</span>
+    <canvas class="mini-pet" data-sheet="BTC_padrao_diamond" width="48" height="48"></canvas>
+  </div>
+  <p class="centro mini-txt" data-i18n="evo_note">XP por bloco comido, tempo de HODL e crash sobrevivido. 3 crashes = Diamond Hands.</p>
+</section>
+
+<section id="precos">
+  <h2>Free vs Pro</h2>
+  <div class="tabela-wrap">
+  <table class="tabela">
+    <thead><tr><th></th><th>Free</th><th>Pro <small id="preco-pro"></small></th></tr></thead>
+    <tbody>
+      <tr><td data-i18n="f1">Satoshinho (BTC), animações, carinho, vida, sons 8-bit</td><td>✔</td><td>✔</td></tr>
+      <tr><td data-i18n="f2">Come blocos, fome = fee, sono, hash rate</td><td>✔</td><td>✔</td></tr>
+      <tr><td data-i18n="f3">Evolução ovo → Whale / Diamond Hands, XP e nível</td><td>✔</td><td>✔</td></tr>
+      <tr><td data-i18n="f4">Console hacker, hjkl, sats, conquistas nerd</td><td>✔</td><td>✔</td></tr>
+      <tr><td data-i18n="f5">Carteira watch-only (só endereço público)</td><td>✔</td><td>✔</td></tr>
+      <tr><td data-i18n="f6">API local p/ sketchybar, polybar, OBS · card de share · ranking opt-in</td><td>✔</td><td>✔</td></tr>
+      <tr><td data-i18n="f7">Modo terminal (todas as moedas) e criaturas da comunidade</td><td>✔</td><td>✔</td></tr>
+      <tr><td data-i18n="f8">ETH, SOL, DOGE e PEPE na janela</td><td>—</td><td>✔</td></tr>
+      <tr><td data-i18n="f9">Skins premium (cyberpunk, gato, sapo)</td><td>—</td><td>✔</td></tr>
+      <tr><td data-i18n="f10">Alertas de preço, limites, gráfico, abrir ao iniciar</td><td>—</td><td>✔</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="skins">
+    <canvas class="mini-pet" data-sheet="BTC_cyberpunk" width="48" height="48"></canvas>
+    <canvas class="mini-pet" data-sheet="BTC_gato" width="48" height="48"></canvas>
+    <canvas class="mini-pet" data-sheet="BTC_sapo" width="48" height="48"></canvas>
+  </div>
+  <div class="ctas centro">
+    <a class="px-btn ouro" id="comprar" href="#" target="_blank" rel="noopener" data-i18n="buy">Comprar Pro</a>
+  </div>
+  <p class="centro mini-txt" data-i18n="buy_note">Pagamento único via Gumroad. A chave chega por e-mail; cole em “Ativar Pro”.</p>
+</section>
+
+<section id="ranking">
+  <h2 data-i18n="rank_t">Ranking dos bichos</h2>
+  <p class="centro mini-txt" data-i18n="rank_note">Opt-in: no app, digite <code>rank on seu_apelido</code> no console. Só apelido + stats do bicho.</p>
+  <div class="tabela-wrap"><table class="tabela" id="tab-rank">
+    <thead><tr><th>#</th><th data-i18n="nick">apelido</th><th>LV</th><th data-i18n="stage">estágio</th><th data-i18n="blocks">blocos</th></tr></thead>
+    <tbody><tr><td colspan="5" class="centro" id="rank-msg">...</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="faq">
+  <h2>FAQ</h2>
+  <details open><summary data-i18n="q1">Ele pede minha chave privada ou seed?</summary><p data-i18n="a1"><b>Nunca.</b> A carteira é watch-only: você cola só um endereço público (bc1…, 1…, 3…). Se colar algo que parece chave privada, xprv ou seed, o app recusa e não salva. Ninguém legítimo pede sua seed — nem a gente.</p></details>
+  <details><summary data-i18n="q2">Ele mexe no meu dinheiro ou faz trade?</summary><p data-i18n="a2">Não. Só lê preços (CoinGecko), blocos e fees (mempool.space). Não conecta em corretora, não assina nada.</p></details>
+  <details><summary data-i18n="q3">Que dados saem do meu computador?</summary><p data-i18n="a3">Só as consultas públicas de preço/bloco. O ranking é opcional e desligado por padrão; se ligar, envia apelido, XP, nível, estágio, blocos e nº de conquistas com um ID aleatório. Sem e-mail, sem carteira.</p></details>
+  <details><summary data-i18n="q4">Funciona offline?</summary><p data-i18n="a4">Sim: sem internet ele mostra “?” e continua vivo (e um pouco carente).</p></details>
+  <details><summary data-i18n="q5">Mac e Windows avisam que o app não é assinado</summary><p data-i18n="a5">No Mac: botão direito → Abrir na primeira vez. No Windows: “Mais informações” → “Executar assim mesmo”. Ou instale pelo código com <code>pipx</code>.</p></details>
+  <details><summary data-i18n="q6">É conselho financeiro?</summary><p data-i18n="a6">É um bichinho de pixel. Ele chora quando cai. Não é conselho financeiro.</p></details>
+</section>
+</main>
+
+<footer>
+  <p><a data-dl="repo" href="#">GitHub</a> · MIT · <span data-i18n="foot">feito com sats e café ☕</span></p>
+  <p class="mini-txt" data-i18n="disc">Não afiliado ao Bitcoin, Ethereum, Solana, Dogecoin ou PEPE. Preços: CoinGecko. Blocos: mempool.space.</p>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

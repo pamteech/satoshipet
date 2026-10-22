@@ -1,0 +1,4 @@
+Fontes empacotadas (ambas SIL Open Font License 1.1 — https://openfontlicense.org):
+- PressStart2P-Regular.ttf — Copyright 2012 The Press Start 2P Project Authors (cody@zone38.net)
+- VT323-Regular.ttf — Copyright 2011 The VT323 Project Authors (peter.hull@oikoi.com)
+O texto completo da OFL 1.1 está em https://openfontlicense.org/open-font-license-official-text/

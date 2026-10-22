@@ -84,3 +84,32 @@ It works in the window and in `--tui` automatically.
 - Keyless, free, public APIs only, with timeouts. Never block the Tk thread; push events to the queue.
 - Offline must degrade to `?`, never a crash.
 - **Never** add anything that asks for private keys, seeds or signing. Watch-only forever.
+
+## Concurso de skins / Skin contest 🏆
+**PT:** abra uma issue com o template **🏆 Concurso de skins** e mande o PR com a pasta
+`src/tamagoshi_cripto/assets/skins/<id>/` (`sheet.png` + `skin.json`, formato acima).
+
+Regras (checadas por `tools/validate_skin.py` e pela Action **Skin contest check** em todo PR que mexe em skins):
+- `id` em `[a-z0-9_-]`, igual ao nome da pasta; `nome` e `autor` obrigatórios
+- `sheet.png` 192×192, 4 linhas (garimpando, moon, rekt, pulo) × 4 frames de 48×48
+- fundo 100% transparente, alfa só 0 ou 255, no máximo **32 cores**, nenhum frame vazio
+- frases opcionais com até 60 caracteres
+- arte **original** (sem personagem/logo de terceiros), licenciada MIT junto com o projeto
+
+```bash
+python tools/validate_skin.py src/tamagoshi_cripto/assets/skins/minha_skin --preview previews/
+# abre previews/minha_skin.png (4x) e previews/minha_skin.gif
+```
+A Action anexa o preview como artifact **skin-preview** e escreve um resumo no PR.
+Julgamento sugerido: votos com 👍 na issue + escolha da mantenedora. Prêmio sugerido: licença Pro + skin no app.
+
+**EN:** open an issue with the **🏆 Concurso de skins** template and a PR adding your folder under
+`src/tamagoshi_cripto/assets/skins/<id>/`. Run `python tools/validate_skin.py <folder> --preview previews/`
+locally; CI runs the same checks and uploads a `skin-preview` artifact.
+
+## Site, share card, leaderboard
+- `site/` is plain HTML/CSS/JS. Preview with `cd site && python -m http.server 8765`.
+  Regenerate assets with `PYTHONPATH=src python tools/site_assets.py` and screenshots with
+  `python tools/site_screenshots.py` (needs Chrome).
+- `share.py` draws the 1200×675 card on a 400×225 grid scaled 3× — keep it pixel-perfect (no smoothing).
+- `server/ranking.py` is stdlib-only on purpose. Any new field must be non-personal and added to the whitelist + tests.

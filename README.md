@@ -93,6 +93,8 @@ tamagoshi [--tui] [--coin BTC|ETH|SOL|DOGE|PEPE] [--skin NAME|plugin:ID] [--scal
 | 🇷🇺 **Moscow time / sats** toggle (`sats` or menu) | — | ✅ | Free |
 | 🏆 Nerd achievements (Genesis Block, Proof of Work 100, Not Your Keys, Whale Alert, `sudo`, `rm -rf /`, Moscow Time…) | local | ✅ | Free |
 | 🔌 **Local JSON API** `/status` for polybar / sketchybar / OBS | `127.0.0.1:8737` | ✅ | Free |
+| 🖼️ **Share card** 1200×675 pixel-art PNG + prefilled X post (`share`) | local | ✅ | Free |
+| 🏆 **Leaderboard** (opt-in, anonymous nickname) `rank on <nick>` | your own `server/` | "offline" message | Free |
 
 <img src="docs/evolucao_preview.png" width="560">
 
@@ -135,6 +137,31 @@ tamagoshi --status                           # same JSON from the CLI
 Bound to `127.0.0.1` only. Port via `TAMAGOSHI_API_PORT`, off with `--no-api`. Ready-made
 [sketchybar plugin, polybar module and OBS overlay](examples/).
 
+#### Share card
+Console `share` (or menu → *Compartilhar card (X)*) renders a 1200×675 pixel-art card with the pet, stage,
+level/XP, price, mood and latest achievements, saves it to `~/Pictures` (or `~`), and opens an
+**X intent URL** with the text prefilled. **Nothing is posted automatically.** Attach the PNG and post it yourself.
+The card never includes your watch-only address.
+
+<img src="docs/share_card.png" width="600">
+
+#### Leaderboard (opt-in, off by default)
+`rank on <nickname>` in the console (or menu → *Ranking (opt-in)…*) turns it on. The app then sends **only**
+a random device id (uuid4), the nickname, XP, level, stage, blocks eaten, achievement count and coin, every ~10 min.
+No wallet, e-mail, price or IP is stored. `rank` shows the top 10, `rank off` stops sending.
+The server is a ~200-line stdlib app in [`server/`](server/) (SQLite, rate limit, Dockerfile). See its README.
+
+### Landing page
+[`site/`](site/) is a static page (GitHub Pages-ready) with a live in-browser demo of the pet (CoinGecko +
+mempool.space), Free vs Pro table, downloads, a Gumroad button, FAQ, EN/PT toggle and OG/Twitter cards.
+Edit `site/config.js` (repo, downloads, Gumroad, ranking URL). Preview: `cd site && python -m http.server 8765`.
+
+<img src="docs/screenshots/site_desktop_hero.png" width="560"> <img src="docs/screenshots/site_mobile_hero.png" width="180">
+
+### Skin contest 🏆
+Open an issue with the **Concurso de skins** template and send a PR. Validate locally with
+`python tools/validate_skin.py <folder> --preview previews/`. CI checks the same rules and uploads a preview. See [CONTRIBUTING](CONTRIBUTING.md#concurso-de-skins--skin-contest).
+
 ### More nerd stuff 🤓
 - **Fear & Greed index** ([alternative.me](https://alternative.me/crypto/fear-and-greed-index/)) in the panel. Extreme greed slowly heals the pet; extreme fear hurts it.
 - **Block height + halving countdown**: pet Satoshinho 5 times (data from [mempool.space](https://mempool.space)).
@@ -172,6 +199,8 @@ Bound to `127.0.0.1` only. Port via `TAMAGOSHI_API_PORT`, off with `--no-api`. R
 | `carteira` | `""` | public BTC address (watch-only). Never a key |
 | `api` | `true` | local HTTP API on 127.0.0.1 |
 | `onchain` | `true` | block/fee/hashrate/gas polling |
+| `ranking` / `ranking_url` / `nick` | `false` / `""` / `""` | opt-in leaderboard |
+| `site` | `https://OWNER.github.io/tamagoshi-cripto` | link printed on the share card |
 | `progresso` / `evolucao` | — | life, achievements, XP (managed by the app) |
 
 ### Platform notes
@@ -212,12 +241,16 @@ tamagoshi --tui      # no terminal
 
 **Modo nerd (v1.1):** o bicho **come cada bloco novo do Bitcoin** (mempool.space), fica com fome quando a fee da mempool sobe, **dorme** se passar 30 min sem bloco ("esperando bloco..."), mostra hash rate e gas do ETH, **evolui** (ovo → bebê → adulto → Whale ou Diamond Hands se sobreviver a 3 crashes) com nível e barra de XP, tem **console hacker** (tecla <kbd>`</kbd>: `help`, `neofetch`, `sudo moon`, `rm -rf /`, `git blame`...), teclas **hjkl** pra mover, modo **sats / Moscow time** e uma **API local** em `127.0.0.1:8737/status` pra polybar, sketchybar e OBS ([exemplos](examples/)). Tudo com APIs grátis sem chave; sem internet ele só mostra `?`.
 
+**Novidades v1.2:** `share` gera um card 1200×675 em pixel art e abre o X com o texto pronto (quem posta é você). `rank on <apelido>` liga o ranking (opcional, desligado por padrão; envia só apelido + stats do bicho). Site de vendas em `site/` e concurso de skins (template de issue + `tools/validate_skin.py` + Action).
+
 **Carteira watch-only:** cole só o **endereço público** (bc1/1/3). O app **nunca pede chave privada, seed ou xprv**; se você colar algo assim ele recusa e não salva. É só leitura.
 
 **Como usar:** arraste com o botão esquerdo, clique no bicho pra fazer carinho e use o botão direito (ou ctrl-clique no Mac) pro menu.
 
 **Free:** Satoshinho (BTC), animações, carinho, vida em corações, conquistas, sons 8-bit, Fear & Greed, contagem do halving (5 carinhos no Satoshinho), código konami (skin secreta), criaturas da comunidade, modo terminal e botão de afiliado.
 **Pro:** ETH, SOL, DOGE e PEPE na janela, skins premium, limites e preço de referência configuráveis, alertas de preço, mini gráfico e "abrir ao iniciar".
+
+**Pra colocar no ar:** veja o [docs/GO_LIVE.md](docs/GO_LIVE.md).
 
 **Vender a versão Pro**
 1. Gere um segredo forte e salve como GitHub Secret `TAMAGOSHI_LICENSE_SECRET`.

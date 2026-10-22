@@ -11,7 +11,7 @@ import time
 
 from PIL import Image
 
-from . import arts, config, conquistas, evolucao, logic, onchain, plugins, recursos
+from . import arts, config, conquistas, evolucao, logic, onchain, plugins, ranking, recursos, share
 from .console import SPRITE, Console
 from .sprites import FRAMES, LINHAS
 
@@ -155,6 +155,25 @@ class CtxTUI:
             return [msg]
         s = onchain.saldo_endereco(end)
         return [f"saldo watch-only: {s['total']:,} sats em {s['txs']} txs".replace(",", ".")]
+
+
+    def _st(self):
+        st = self.status()
+        st["skin"] = self.e.get("skin", "padrao")
+        return st
+
+    def compartilhar(self):
+        import webbrowser
+        cfg = config.carregar()
+        site = cfg.get("site") or share.SITE
+        caminho = share.salvar(self._st(), self.e["vida"].d["desbloqueadas"], site)
+        url = share.url_x(self._st(), site)
+        aberto = webbrowser.open(url)
+        return [f"card salvo: {caminho}", "post pronto (você que posta):" if aberto else "abra e poste você mesmo:", url]
+
+    def ranking(self, args):
+        cfg = config.carregar()
+        return ranking.comando(cfg, self._st(), list(args), config.salvar)
 
 
 def _modo_comando(console, tec, est):

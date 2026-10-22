@@ -37,6 +37,11 @@ PADRAO = {
     "carteira": "",         # endereço BTC PÚBLICO (watch-only). Nunca chave privada!
     "api": True,            # API local em 127.0.0.1:8737
     "onchain": {},          # blocos comidos (gerenciado pelo app)
+    "ranking": False,       # leaderboard é opt-in: só liga com `rank on <apelido>`
+    "ranking_url": "",      # ex.: "https://ranking.seu-dominio.com" (servidor em server/)
+    "nick": "",
+    "device_id": "",        # aleatório (uuid4), gerado só se você ligar o ranking
+    "site": "https://OWNER.github.io/tamagoshi-cripto",
     "evolucao": {},         # xp (gerenciado pelo app)   # ícone na menu bar do Mac (experimental)
 }
 

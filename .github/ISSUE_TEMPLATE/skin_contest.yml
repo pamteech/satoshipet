@@ -1,0 +1,46 @@
+name: 🏆 Concurso de skins
+description: Inscreva sua skin no concurso (pixel art original, 48x48 por frame)
+title: "[Concurso] "
+labels: [concurso-de-skins, creature]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Valeu por participar! 🐣 Regras completas no [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md#concurso-de-skins--skin-contest).
+        Resumo: sheet 192×192 (4 humores × 4 frames), fundo transparente, até 32 cores, arte **original**.
+  - type: input
+    id: nome
+    attributes: { label: Nome da criatura, placeholder: "Slime da Liquidez" }
+    validations: { required: true }
+  - type: input
+    id: autor
+    attributes: { label: Seu @ (como quer ser creditado), placeholder: "@pixel_degen" }
+    validations: { required: true }
+  - type: dropdown
+    id: moeda
+    attributes:
+      label: Moeda / tema
+      options: [BTC, ETH, SOL, DOGE, PEPE, "Qualquer moeda", Outro meme]
+    validations: { required: true }
+  - type: textarea
+    id: conceito
+    attributes: { label: Conceito, description: "O que ela faz em garimpando / moon / rekt / pulo?" }
+    validations: { required: true }
+  - type: textarea
+    id: sheet
+    attributes: { label: Sprite sheet ou preview, description: "Arraste o sheet.png aqui (ou o link do PR)." }
+    validations: { required: true }
+  - type: input
+    id: pr
+    attributes: { label: Link do PR (opcional), placeholder: "https://github.com/OWNER/tamagoshi-cripto/pull/123" }
+  - type: checkboxes
+    id: regras
+    attributes:
+      label: Checklist
+      options:
+        - label: A arte é original (sem personagem, logo ou marca de terceiros)
+          required: true
+        - label: "`python tools/validate_skin.py <pasta>` passou sem erros"
+          required: true
+        - label: Concordo em licenciar a skin sob MIT junto com o projeto
+          required: true

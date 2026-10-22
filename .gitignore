@@ -8,3 +8,6 @@ dist/
 .pytest_cache/
 # segredo de licença do build oficial: NUNCA commitar
 src/tamagoshi_cripto/_segredo.py
+previews/
+*.db
+server/data/

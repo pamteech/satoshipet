@@ -28,6 +28,8 @@ AJUDA = [
     "  skin <x>        troca skin",
     "  coin <x>        troca moeda",
     "  neofetch        info do sistema (do bicho)",
+    "  share           card PNG + post pronto no X",
+    "  rank [on <nick>|off]  leaderboard (opt-in)",
     "  clear / exit",
 ]
 
@@ -134,6 +136,12 @@ class Console:
             return ["skins: " + ", ".join(self.ctx.skins())]
         r = self.ctx.trocar_skin(a[0])
         return [r or f"skin: {a[0]} (se for Pro, destrave no menu)"]
+
+    def cmd_share(self, a):
+        return self.ctx.compartilhar()
+
+    def cmd_rank(self, a):
+        return self.ctx.ranking(a)
 
     def cmd_coin(self, a):
         if not a:
