@@ -2,7 +2,7 @@
   "name": "tamagoshi-cripto",
   "displayName": "Tamagoshi Cripto",
   "description": "O bichinho que sente o mercado, agora na barra de status do VS Code (preço + humor + sprite).",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "publisher": "OWNER",
   "license": "MIT",
   "icon": "media/icon.png",

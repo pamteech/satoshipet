@@ -10,7 +10,7 @@ import requests
 
 ETH_RPCS = ["https://ethereum-rpc.publicnode.com", "https://cloudflare-eth.com"]
 SOL_RPCS = ["https://api.mainnet-beta.solana.com", "https://solana-rpc.publicnode.com"]
-UA = {"User-Agent": "TamagoshiCripto/1.4 (+github)"}
+UA = {"User-Agent": "TamagoshiCripto/1.5 (+github)"}
 
 RE_ETH = re.compile(r"^0x[0-9a-fA-F]{40}$")
 RE_SOL = re.compile(r"^[1-9A-HJ-NP-Za-km-z]{32,44}$")

@@ -13,3 +13,6 @@ previews/
 server/data/
 src/tamagoshi_cripto/_segredo.py
 vscode/*.vsix
+monkeytype.sqlite3
+.mypy_cache/
+.ruff_cache/

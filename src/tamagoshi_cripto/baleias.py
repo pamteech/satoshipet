@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 import requests
 
 URL = "https://mempool.space/api/mempool/recent"
-UA = {"User-Agent": "TamagoshiCripto/1.4 (+github)"}
+UA = {"User-Agent": "TamagoshiCripto/1.5 (+github)"}
 
 
 def recentes(timeout: float = 10) -> Any:

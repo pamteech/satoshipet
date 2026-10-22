@@ -1,0 +1,12 @@
+# RASCUNHO winget (locale manifest)
+PackageIdentifier: OWNER.TamagoshiCripto
+PackageVersion: 1.5.0
+PackageLocale: pt-BR
+Publisher: Pamella Soares
+PackageName: Tamagoshi Cripto
+License: MIT
+ShortDescription: Bichinho em pixel art que flutua na área de trabalho e reage ao mercado cripto.
+Tags: [crypto, bitcoin, tamagotchi, pixel-art, desktop-pet]
+PrivacyUrl: https://github.com/OWNER/tamagoshi-cripto/blob/main/PRIVACY.md
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

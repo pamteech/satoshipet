@@ -12,7 +12,7 @@ import requests
 
 FEEDS = {"CoinDesk": "https://www.coindesk.com/arc/outboundfeeds/rss/",
          "Cointelegraph": "https://cointelegraph.com/rss"}
-UA = {"User-Agent": "TamagoshiCripto/1.4 (+github)"}
+UA = {"User-Agent": "TamagoshiCripto/1.5 (+github)"}
 
 
 def limpar(t: Optional[str]) -> str:
