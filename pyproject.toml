@@ -33,8 +33,8 @@ build = ["pyinstaller>=6"]
 tamagoshi = "tamagoshi_cripto.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/OWNER/tamagoshi-cripto"
-Issues = "https://github.com/OWNER/tamagoshi-cripto/issues"
+Homepage = "https://github.com/pamteech/tamagoshi-cripto"
+Issues = "https://github.com/pamteech/tamagoshi-cripto/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]

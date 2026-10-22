@@ -4,7 +4,7 @@ Nada foi publicado, deployado ou criado fora deste computador. Ordem sugerida:
 
 ## 1. Repositório
 - [ ] Criar o repo no GitHub (ex.: `tamagoshi-cripto`), `git remote add origin ...` e `git push -u origin main`.
-- [ ] Trocar **`OWNER`** pelo seu usuário em todos os arquivos: `grep -rl OWNER . --exclude-dir=.git | xargs sed -i 's/OWNER/seu-usuario/g'`
+- [ ] Trocar **`pamteech`** pelo seu usuário em todos os arquivos: `grep -rl pamteech . --exclude-dir=.git | xargs sed -i 's/pamteech/seu-usuario/g'`
       (README badges, `site/config.js`, `site/index.html` meta OG, `share.py`/`config.py` `site`, issue template).
 
 ## 2. Licenças Pro — escolha UM provedor
@@ -41,7 +41,7 @@ Em todos: cache de 24 h + **14 dias de graça offline**; reembolso derruba o Pro
 - [ ] Lembrete: quem descompilar o app acha o segredo. Use só pra começar.
 
 ## 3. Release (downloads)
-- [ ] Trocar `REPO = "OWNER/tamagoshi-cripto"` em `src/tamagoshi_cripto/updates.py` e `crashlog.py` (o aviso de versão nova e o "enviar relatório" usam isso; com OWNER o check fica desligado).
+- [ ] Trocar `REPO = "pamteech/tamagoshi-cripto"` em `src/tamagoshi_cripto/updates.py` e `crashlog.py` (o aviso de versão nova e o "enviar relatório" usam isso; com pamteech o check fica desligado).
 - [ ] `git tag v1.4.0 && git push --tags` → Action **Release** gera `TamagoshiCripto.exe` e `TamagoshiCripto-macos.zip`.
       Os links do site (`releases/latest/download/...`) passam a funcionar sozinhos.
 - [ ] (Opcional) assinar/notarizar no Mac e assinar o .exe para tirar o aviso de "app não assinado".
@@ -72,7 +72,7 @@ Em todos: cache de 24 h + **14 dias de graça offline**; reembolso derruba o Pro
       `vigencia`; o selo PATROCINADO é obrigatório (o app recusa sem). Preços sugeridos em `docs/BRAND_SKINS.md`.
       O `cafe_satoshi` é uma marca **fictícia** de exemplo: apague antes de vender o primeiro patrocínio.
 - [ ] **Extensão do VS Code**: `cd vscode && npx @vscode/vsce package` já funciona. Publicar exige criar um publisher
-      no Marketplace + token (`vsce publish`) e trocar `"publisher": "OWNER"` no `vscode/package.json`.
-- [ ] **Card de perfil**: trocar `OWNER` em `.github/workflows/profile-card.yml` e testar no seu repo de perfil.
+      no Marketplace + token (`vsce publish`) e trocar `"publisher": "pamteech"` no `vscode/package.json`.
+- [ ] **Card de perfil**: trocar `pamteech` em `.github/workflows/profile-card.yml` e testar no seu repo de perfil.
 - [ ] **IA (`ask`)**: continua BYO. Se quiser oferecer IA "de fábrica", isso vira custo seu — não está implementado.
 - [ ] **Twitch**: nada a configurar (leitura anônima). Avisar no stream que os comandos são só visuais.

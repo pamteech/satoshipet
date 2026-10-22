@@ -12,7 +12,7 @@ from . import __version__
 PASTA = Path.home() / ".tamagoshi_cripto"
 ARQUIVO = PASTA / "crash.log"
 MAX_BYTES = 200_000
-REPO = "OWNER/tamagoshi-cripto"
+REPO = "pamteech/tamagoshi-cripto"
 
 
 def registrar(exc_tipo, exc, tb, contexto=""):

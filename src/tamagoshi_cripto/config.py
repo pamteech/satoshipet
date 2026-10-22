@@ -42,7 +42,7 @@ PADRAO = {
     "ranking_url": "",      # ex.: "https://ranking.seu-dominio.com" (servidor em server/)
     "nick": "",
     "device_id": "",        # aleatório (uuid4), gerado só se você ligar o ranking
-    "site": "https://OWNER.github.io/tamagoshi-cripto",
+    "site": "https://pamteech.github.io/tamagoshi-cripto",
     "evolucao": {},
     # v1.3
     "versao_config": 4,

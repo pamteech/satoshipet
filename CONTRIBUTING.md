@@ -5,7 +5,7 @@ Thanks for wanting to make the pet even more degen! The easiest (and most fun) w
 ## Dev setup
 
 ```bash
-git clone https://github.com/OWNER/tamagoshi-cripto && cd tamagoshi-cripto
+git clone https://github.com/pamteech/tamagoshi-cripto && cd tamagoshi-cripto
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 tamagoshi            # desktop window

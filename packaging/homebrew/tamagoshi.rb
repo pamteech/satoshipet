@@ -1,11 +1,11 @@
-# RASCUNHO - NÃO enviado pro homebrew-core nem pra nenhum tap. Troque OWNER e os sha256 antes de publicar.
-# Uso futuro (tap próprio):  brew tap OWNER/tamagoshi && brew install tamagoshi
+# RASCUNHO - NÃO enviado pro homebrew-core nem pra nenhum tap. Troque pamteech e os sha256 antes de publicar.
+# Uso futuro (tap próprio):  brew tap pamteech/tamagoshi && brew install tamagoshi
 class Tamagoshi < Formula
   include Language::Python::Virtualenv
 
   desc "Pixel-art crypto pet that floats on your desktop and reacts to the market"
-  homepage "https://github.com/OWNER/tamagoshi-cripto"
-  url "https://github.com/OWNER/tamagoshi-cripto/archive/refs/tags/v1.5.0.tar.gz"
+  homepage "https://github.com/pamteech/tamagoshi-cripto"
+  url "https://github.com/pamteech/tamagoshi-cripto/archive/refs/tags/v1.5.0.tar.gz"
   sha256 "TROCAR_PELO_SHA256_DO_TARBALL_DA_TAG"
   license "MIT"
 

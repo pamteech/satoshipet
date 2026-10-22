@@ -1,12 +1,12 @@
 # RASCUNHO winget (installer manifest). Preencha InstallerSha256 com: winget hash TamagoshiCripto.exe
-PackageIdentifier: OWNER.TamagoshiCripto
+PackageIdentifier: pamteech.TamagoshiCripto
 PackageVersion: 1.5.0
 InstallerType: portable
 Commands:
   - tamagoshi
 Installers:
   - Architecture: x64
-    InstallerUrl: https://github.com/OWNER/tamagoshi-cripto/releases/download/v1.5.0/TamagoshiCripto.exe
+    InstallerUrl: https://github.com/pamteech/tamagoshi-cripto/releases/download/v1.5.0/TamagoshiCripto.exe
     InstallerSha256: TROCAR_PELO_SHA256_DO_EXE
 ManifestType: installer
 ManifestVersion: 1.6.0

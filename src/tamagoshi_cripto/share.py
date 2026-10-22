@@ -14,7 +14,7 @@ from . import conquistas, recursos
 from .pixel import rgb
 from .sprites import nome_folha
 
-SITE = "https://OWNER.github.io/tamagoshi-cripto"   # troque quando o site estiver no ar
+SITE = "https://pamteech.github.io/tamagoshi-cripto"   # troque quando o site estiver no ar
 W, H, ESC = 400, 225, 3
 COR_HUMOR = {"moon": "lima", "rekt": "vermelho", "garimpando": "amarelo"}
 TXT_HUMOR = {"moon": "TO THE MOON", "rekt": "REKT", "garimpando": "GARIMPANDO"}

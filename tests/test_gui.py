@@ -438,7 +438,7 @@ def executar():
     app.mudar_escala(2); assert app.LARG >= 272 and app.cv.winfo_reqheight() == app.ALT
     app.mudar_escala(3)
     # update: toast clicável abre o Release (nunca instala)
-    app.eventos.append(("update", {"versao": "9.9.9", "url": "https://github.com/OWNER/tamagoshi-cripto/releases/tag/v9.9.9"}))
+    app.eventos.append(("update", {"versao": "9.9.9", "url": "https://github.com/pamteech/tamagoshi-cripto/releases/tag/v9.9.9"}))
     _bombear(app, 400)
     assert app.toast and app.toast[2] == "NOVA VERSÃO!"
     _shot(app, "update")
@@ -450,7 +450,7 @@ def executar():
     app.enviar_relatorio()  # 1º toque só explica
     assert len(abertos) == n_abertos
     app.enviar_relatorio()  # 2º abre a issue preenchida (nunca envia sozinho)
-    assert abertos[-1].startswith("https://github.com/OWNER/tamagoshi-cripto/issues/new?")
+    assert abertos[-1].startswith("https://github.com/pamteech/tamagoshi-cripto/issues/new?")
     app.toast = None
 
     # ---------- vim keys ----------

@@ -34,5 +34,5 @@ image proxy renders it animated. ~12 KB.
 
 1. No console: `export` (só campos públicos, nunca carteira/e-mail/licença).
 2. `python tools/profile_card.py --stats tamagoshi-stats.json -o tamagoshi-card.svg` (ou o workflow
-   `profile-card.yml` no SEU repo de perfil; troque `OWNER` pelo dono do repo do app).
+   `profile-card.yml` no SEU repo de perfil; troque `pamteech` pelo dono do repo do app).
 3. `![meu tamagoshi](tamagoshi-card.svg)` no README.

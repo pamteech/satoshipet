@@ -1,12 +1,12 @@
 {
-    "##": "RASCUNHO scoop - NÃO enviado a nenhum bucket. Troque OWNER e o hash.",
+    "##": "RASCUNHO scoop - NÃO enviado a nenhum bucket. Troque pamteech e o hash.",
     "version": "1.5.0",
     "description": "Pixel-art crypto pet that floats on your desktop and reacts to the market",
-    "homepage": "https://github.com/OWNER/tamagoshi-cripto",
+    "homepage": "https://github.com/pamteech/tamagoshi-cripto",
     "license": "MIT",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/OWNER/tamagoshi-cripto/releases/download/v1.5.0/TamagoshiCripto.exe#/tamagoshi.exe",
+            "url": "https://github.com/pamteech/tamagoshi-cripto/releases/download/v1.5.0/TamagoshiCripto.exe#/tamagoshi.exe",
             "hash": "TROCAR_PELO_SHA256_DO_EXE"
         }
     },
@@ -15,7 +15,7 @@
     "checkver": "github",
     "autoupdate": {
         "architecture": {
-            "64bit": {"url": "https://github.com/OWNER/tamagoshi-cripto/releases/download/v$version/TamagoshiCripto.exe#/tamagoshi.exe"}
+            "64bit": {"url": "https://github.com/pamteech/tamagoshi-cripto/releases/download/v$version/TamagoshiCripto.exe#/tamagoshi.exe"}
         }
     }
 }

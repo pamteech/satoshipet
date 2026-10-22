@@ -4,7 +4,7 @@
 |---|---|---|
 | pyinstaller/tamagoshi_mac.spec | .app do macOS (LSUIElement, sem ícone no Dock) | não testado num Mac |
 | pyinstaller/tamagoshi_win.spec | .exe onefile do Windows | não testado num Windows |
-| homebrew/tamagoshi.rb | fórmula (tap próprio) | rascunho: OWNER + sha256 a preencher |
+| homebrew/tamagoshi.rb | fórmula (tap próprio) | rascunho: pamteech + sha256 a preencher |
 | winget/*.yaml | manifests winget 1.6 | rascunho, não submetido |
 | scoop/tamagoshi.json | manifest scoop | rascunho, não submetido |
 

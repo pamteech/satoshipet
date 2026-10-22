@@ -5,7 +5,7 @@ import requests
 
 from . import __version__
 
-REPO = "OWNER/tamagoshi-cripto"
+REPO = "pamteech/tamagoshi-cripto"
 API = "https://api.github.com/repos/{repo}/releases/latest"
 
 

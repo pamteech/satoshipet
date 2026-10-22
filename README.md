@@ -4,7 +4,7 @@
 
 **A pixel-art crypto pet that floats on your desktop (or lives in your terminal) and feels the market harder than you do.**
 
-[![CI](https://github.com/OWNER/tamagoshi-cripto/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/tamagoshi-cripto/actions/workflows/ci.yml)
+[![CI](https://github.com/pamteech/tamagoshi-cripto/actions/workflows/ci.yml/badge.svg)](https://github.com/pamteech/tamagoshi-cripto/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)
@@ -58,11 +58,11 @@ Art: 48×48 sprites, Sweetie 16 palette, shading + ordered dithering, sel-out ou
 ### Install
 
 ```bash
-pipx install git+https://github.com/OWNER/tamagoshi-cripto     # or: pip install .
+pipx install git+https://github.com/pamteech/tamagoshi-cripto     # or: pip install .
 tamagoshi
 ```
 Linux needs Tk (`sudo apt install python3-tk`). The macOS python.org installer ships with Tk; with Homebrew, run `brew install python-tk`.
-Prebuilt **.app** (macOS) and **.exe** (Windows) builds are attached to each [release](https://github.com/OWNER/tamagoshi-cripto/releases).
+Prebuilt **.app** (macOS) and **.exe** (Windows) builds are attached to each [release](https://github.com/pamteech/tamagoshi-cripto/releases).
 
 ### Terminal mode (for devs) 💻
 
@@ -267,7 +267,7 @@ Open an issue with the **Concurso de skins** template and send a PR. Validate lo
 | `api` | `true` | local HTTP API on 127.0.0.1 |
 | `onchain` | `true` | block/fee/hashrate/gas polling |
 | `ranking` / `ranking_url` / `nick` | `false` / `""` / `""` | opt-in leaderboard |
-| `site` | `https://OWNER.github.io/tamagoshi-cripto` | link printed on the share card |
+| `site` | `https://pamteech.github.io/tamagoshi-cripto` | link printed on the share card |
 | `nome_pet` | `""` | pet nickname (onboarding). Empty = coin default |
 | `licenca_provedor` | `"hmac"` | `hmac` · `gumroad` · `lemonsqueezy` · `servidor` (Hotmart) |
 | `licenca_produto` / `licenca_url` | `""` | product id (Gumroad/Lemon) / key server URL (Hotmart) |
@@ -307,7 +307,7 @@ Um bichinho em pixel art que flutua na sua tela (sem bordas, sempre no topo, fun
 
 **Instalar e rodar**
 ```bash
-pipx install git+https://github.com/OWNER/tamagoshi-cripto
+pipx install git+https://github.com/pamteech/tamagoshi-cripto
 tamagoshi            # janela
 tamagoshi --tui      # no terminal
 ```

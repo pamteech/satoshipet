@@ -19,7 +19,7 @@ jobs:
         with: {python-version: "3.12"}
       - name: Baixa o Tamagoshi Cripto (só pra desenhar o card)
         run: |
-          git clone --depth 1 https://github.com/OWNER/tamagoshi-cripto /tmp/tama
+          git clone --depth 1 https://github.com/pamteech/tamagoshi-cripto /tmp/tama
           pip install pillow requests
       - name: Gera o card
         run: python /tmp/tama/tools/profile_card.py --stats tamagoshi-stats.json -o tamagoshi-card.svg

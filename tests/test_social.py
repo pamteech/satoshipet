@@ -157,6 +157,6 @@ def test_site_estatico_completo():
     chaves_en = set(re.findall(r"(\w+): \"", js.split("const EN = {")[1].split("};")[0]))
     assert chaves_pt <= chaves_en, chaves_pt - chaves_en                # EN cobre tudo
     cfg = (site / "config.js").read_text(encoding="utf-8")
-    assert "OWNER" in cfg and "gumroad" in cfg and "releases" in cfg
+    assert "pamteech" in cfg and "gumroad" in cfg and "releases" in cfg
     for nome in re.findall(r'data-sheet="(\w+)"', html):
         assert (site / "assets" / "sprites" / f"{nome}.png").exists()
