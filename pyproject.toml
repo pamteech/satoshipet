@@ -21,9 +21,10 @@ classifiers = [
   "Environment :: Console",
   "Topic :: Games/Entertainment",
 ]
-dependencies = ["requests>=2.28", "Pillow>=10"]
+dependencies = ["requests>=2.32", "Pillow>=10.3"]
 
 [project.optional-dependencies]
+secure = ["keyring>=24"]
 tray = ["pystray>=0.19; sys_platform == 'win32' or sys_platform == 'darwin'"]
 dev = ["pytest>=7"]
 build = ["pyinstaller>=6"]

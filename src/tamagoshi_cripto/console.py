@@ -241,19 +241,22 @@ class Console:
         if cfg is None:
             return ["só na janela"]
         if a[:1] == ["off"]:
-            cfg["ai_url"] = cfg["ai_key"] = ""
+            from . import segredos
+            cfg["ai_url"] = ""
+            segredos.gravar(cfg, "")
             self.ctx.salvar_cfg()
             return ["IA desligada. voltei pras respostas enlatadas (grátis)"]
         if a[:1] == ["set"] and len(a) >= 2:
             if not a[1].startswith(("https://", "http://127.0.0.1", "http://localhost")):
                 return ["URL precisa ser https:// (ou http://localhost pra Ollama/LM Studio)"]
             cfg["ai_url"] = a[1]
-            cfg["ai_key"] = a[2] if len(a) >= 3 else ""
+            from . import segredos
+            onde = segredos.gravar(cfg, a[2] if len(a) >= 3 else "")
             if len(a) >= 4:
                 cfg["ai_modelo"] = a[3]
             self.ctx.salvar_cfg()
             return ["IA ligada (BYO). só a pergunta + humor/preço/nível são enviados.",
-                    "a chave fica no seu config local. 'ai off' desliga."]
+                    f"a chave fica no {onde}. 'ai off' desliga."]
         from . import ai
         return [f"IA: {'LIGADA ' + cfg['ai_url'] if ai.ligado(cfg) else 'desligada (respostas enlatadas)'}",
                 "uso: ai set <url> [chave] [modelo]  |  ai off"]

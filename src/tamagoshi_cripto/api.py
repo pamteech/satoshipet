@@ -5,14 +5,56 @@ GET /status.txt   -> uma linha (barra de status)
 GET /overlay      -> página HTML transparente pro OBS (Browser Source)
 GET /card.svg     -> card de perfil animado (README do GitHub) - v1.4
 GET /stream       -> overlay de streamer (sprite + preço + chat da Twitch) - v1.4
+POST /pet, /feed  -> v1.5: escrita, SÓ com "Authorization: Bearer <token>" (token em ~/.tamagoshi_api_token, 0600)
+
+Segurança v1.5: escuta só em 127.0.0.1; recusa Host estranho (anti DNS-rebinding); sem CORS "*"
+(antes qualquer site aberto no navegador conseguia ler seu /status); endereços de carteira saem mascarados.
 Porta padrão 8737 (T-A-M-A no teclado do celular, mais ou menos). Mude com $TAMAGOSHI_API_PORT.
 """
+import hmac
 import json
 import os
+import re
+import secrets
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 
 PORTA = int(os.environ.get("TAMAGOSHI_API_PORT", "8737"))
+TOKEN_PATH = Path(os.environ.get("TAMAGOSHI_API_TOKEN_FILE", Path.home() / ".tamagoshi_api_token"))
+HOSTS_OK = re.compile(r"^(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$")
+MAX_CORPO = 4096
+
+
+def token() -> str:
+    """Token das rotas de escrita: gerado 1x, arquivo só seu (0600)."""
+    try:
+        t = TOKEN_PATH.read_text(encoding="utf-8").strip()
+        if len(t) >= 32:
+            return t
+    except OSError:
+        pass
+    t = secrets.token_urlsafe(32)
+    try:
+        TOKEN_PATH.write_text(t + "\n", encoding="utf-8")
+        os.chmod(TOKEN_PATH, 0o600)
+    except OSError:
+        pass  # sem disco? token só em memória nesta sessão
+    return t
+
+
+def _mascarar(end):
+    return f"{end[:6]}…{end[-4:]}" if isinstance(end, str) and len(end) > 12 else end
+
+
+def publico(st: dict) -> dict:
+    """Cópia do status sem coisa sensível (endereços completos, nada de chave/e-mail)."""
+    s = dict(st)
+    if isinstance(s.get("carteira"), dict):
+        s["carteira"] = dict(s["carteira"], endereco=_mascarar(s["carteira"].get("endereco")))
+    for k in ("email", "licenca", "ai_key", "device_id"):
+        s.pop(k, None)
+    return s
 
 OVERLAY = """<!doctype html><meta charset=utf-8><style>
 body{margin:0;background:transparent;font:16px monospace;color:#f4f4f4;text-shadow:2px 2px #1a1c2c}
@@ -51,7 +93,7 @@ if(s.t&&s.t!==ult){ult=s.t;pulo=8;c.textContent=s.ultimo;c.style.opacity=1;setTi
 t();setInterval(t,2000)</script>"""
 
 
-def iniciar(obter_status, porta=PORTA, folha=None):
+def iniciar(obter_status, porta=PORTA, folha=None, acoes=None):
     """Sobe o servidor numa thread daemon. obter_status() deve ser thread-safe e barato.
     folha() -> bytes PNG da folha de sprites atual (com DNA), usada pelo /stream."""
 
@@ -60,18 +102,44 @@ def iniciar(obter_status, porta=PORTA, folha=None):
             dados = corpo.encode()
             self.send_response(200)
             self.send_header("Content-Type", tipo)
-            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Cache-Control", "no-store")
             self.send_header("Content-Length", str(len(dados)))
             self.end_headers()
             self.wfile.write(dados)
 
+        def _host_ok(self):
+            if not HOSTS_OK.match(self.headers.get("Host", "")):
+                self.send_error(403, "host não permitido (só 127.0.0.1/localhost)")
+                return False
+            return True
+
+        def do_POST(self):
+            if not self._host_ok():
+                return
+            n = int(self.headers.get("Content-Length") or 0)
+            if n > MAX_CORPO:
+                return self.send_error(413, "corpo grande demais")
+            self.rfile.read(n)
+            dado = self.headers.get("Authorization", "")
+            if not (dado.startswith("Bearer ") and hmac.compare_digest(dado[7:].strip(), TOKEN)):
+                return self.send_error(401, "precisa do token (veja ~/.tamagoshi_api_token)")
+            rota = self.path.split("?")[0].strip("/")
+            f = (acoes or {}).get(rota)
+            if not f:
+                return self.send_error(404, "rotas de escrita: /pet, /feed")
+            self._enviar(json.dumps({"ok": True, "resposta": str(f() or "ok")[:200]}, ensure_ascii=False),
+                         "application/json")
+
         def do_GET(self):
+            if not self._host_ok():
+                return
             if self.path.startswith("/status.txt"):
                 s = obter_status()
                 self._enviar(f"{s['emoji']} {s['moeda']} {s['preco_fmt']} {s['variacao_pct']:+.2f}% "
                              f"LV{s['nivel']}\n", "text/plain; charset=utf-8")
             elif self.path.startswith("/status"):
-                self._enviar(json.dumps(obter_status(), ensure_ascii=False), "application/json")
+                self._enviar(json.dumps(publico(obter_status()), ensure_ascii=False), "application/json")
             elif self.path.startswith("/card.svg"):
                 from . import cartao
                 self._enviar(cartao.svg(cartao.exportar_stats(obter_status())), "image/svg+xml")
@@ -93,6 +161,7 @@ def iniciar(obter_status, porta=PORTA, folha=None):
         def log_message(self, *a):  # silêncio no console
             pass
 
+    TOKEN = token() if acoes else secrets.token_urlsafe(32)
     try:
         srv = ThreadingHTTPServer(("127.0.0.1", porta), H)
     except OSError as e:

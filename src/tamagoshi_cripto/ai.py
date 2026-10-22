@@ -4,7 +4,6 @@ Sem ai_url configurada, o bicho responde com sabedoria enlatada (de graça e off
 Com ai_url (OpenAI, OpenRouter, Groq, Ollama local, LM Studio...), manda SÓ a pergunta + humor/preço/nível.
 Nunca manda carteira, e-mail, licença ou histórico. A chave fica no seu config (ou em $TAMAGOSHI_AI_KEY).
 """
-import os
 import random
 
 import requests
@@ -48,7 +47,8 @@ def perguntar(pergunta, cfg, contexto=None, timeout=25):
     url = cfg["ai_url"].rstrip("/")
     if not url.endswith("/chat/completions"):
         url += "/chat/completions"
-    chave = cfg.get("ai_key") or os.environ.get("TAMAGOSHI_AI_KEY", "")
+    from . import segredos
+    chave = segredos.ler(cfg)
     ctx = contexto or {}
     msgs = [{"role": "system", "content": SISTEMA + f" Seu estado agora: moeda {ctx.get('moeda')}, humor "
                                                     f"{ctx.get('humor')}, variação {ctx.get('variacao_pct')}%, "

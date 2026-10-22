@@ -156,7 +156,7 @@ def test_api_status():
     try:
         url = f"http://127.0.0.1:{porta}"
         r = urllib.request.urlopen(url + "/status", timeout=3)
-        assert r.headers["Access-Control-Allow-Origin"] == "*"
+        assert r.headers.get("Access-Control-Allow-Origin") is None  # v1.5: sem CORS aberto
         assert json.loads(r.read())["btc"]["bloco"] == 921_337
         assert "LV3" in urllib.request.urlopen(url + "/status.txt", timeout=3).read().decode()
         assert srv.server_address[0] == "127.0.0.1"   # nunca 0.0.0.0

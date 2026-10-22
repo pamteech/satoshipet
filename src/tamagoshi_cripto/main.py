@@ -127,6 +127,9 @@ class Tamagoshi(MixinVida, MixinDesenho, MixinEntrada, MixinMenus, MixinRede,
 
         self.cv.tag_bind("botao", "<Enter>", lambda e: self.cv.config(cursor="hand2"))
         self.cv.tag_bind("botao", "<Leave>", lambda e: self.cv.config(cursor=""))
+        from . import segredos
+        if segredos.migrar(self.cfg):
+            config.salvar(self.cfg)
         i18n.definir(self.op.get("idioma") or self.cfg.get("idioma", "auto"))
         self._montar_menu()
         self.cv.bind("<ButtonPress-1>", self.inicio_arraste)
@@ -153,7 +156,14 @@ class Tamagoshi(MixinVida, MixinDesenho, MixinEntrada, MixinMenus, MixinRede,
         threading.Thread(target=self.loop_mercado, daemon=True).start()
         self.iniciar_twitch()
         api_ligada = self.cfg.get("api", True) and not op.get("sem_api")
-        self.api = api.iniciar(self.status, folha=self.folha_png) if api_ligada else None
+        def _acao(nome):
+            def f():
+                with self.lock:
+                    self.eventos.append(("api", nome))
+                return f"{nome}: na fila"
+            return f
+        acoes = {n: _acao(n) for n in ("pet", "feed")} if self.cfg.get("api_escrita") else None
+        self.api = api.iniciar(self.status, folha=self.folha_png, acoes=acoes) if api_ligada else None
         self.root.after(1000, self.atualizar_tela)
         self.root.after(FRAME_MS, self.animar)
         self.root.after(FRASE_MS, self.trocar_frase)

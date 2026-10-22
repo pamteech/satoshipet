@@ -117,6 +117,9 @@ class MixinRede:
         for ev in evs:
             if self._evento_mercado(ev):
                 continue
+            if ev[0] == "api":  # v1.5: escrita via API local (com token) -> roda aqui, na thread da GUI
+                {"pet": self.carinho, "feed": self.alimentar}.get(ev[1], lambda: None)()
+                continue
             if ev[0] == "update":
                 self.update = ev[1]
                 self.toast = [f"v{ev[1]['versao']} - clique aqui", 60, "NOVA VERSÃO!"]
