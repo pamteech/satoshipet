@@ -557,6 +557,46 @@ def executar():
     assert not app.cfg["ai_url"] and not app.cfg["ai_key"]
     app.console_aberto = False
 
+    # ---------- v1.4 fase 4: loja, pacote de marca, overlay de streamer ----------
+    from tamagoshi_cripto import loja as _loja
+    app.abrir_loja()
+    assert isinstance(app.cena, _cenas.Loja) and app.cena.ids
+    app.cena.i = app.cena.ids.index("neon_nights")
+    _bombear(app, 300)
+    _shot(app, "loja_trancada")
+    assert "inválido" in app.console.executar("redeem SKIN-NEON_NIGHTS-000000000000")[0]
+    assert "destravado" in app.console.executar("redeem " + _loja.gerar_codigo("neon_nights", "*"))[0]
+    app.cena.acao("usar")
+    assert app.cfg["skin"] == "loja:neon_nights"
+    _gif(app, "loja", n=10, passo=lambda i: app.cena and app.cena.acao("prox" if i < 5 else "ant"))
+    app.cena.i = app.cena.ids.index("neon_nights")
+    _bombear(app, 200)
+    _shot(app, "loja")
+    app.cena.acao("sair"); app.cena = None
+    assert "loja:cafe_satoshi" in app.console.executar("skin loja:cafe_satoshi")[0]
+    app.toast = None
+    _bombear(app, 400)
+    _shot(app, "skin_patrocinada")
+    assert app.status()["patrocinado"] is True
+    porta = os.environ["TAMAGOSHI_API_PORT"]
+    html_s = urllib.request.urlopen(f"http://127.0.0.1:{porta}/stream", timeout=3).read().decode()
+    assert "PATROCINADO" in html_s and "/sprite.png" in html_s
+    png_s = urllib.request.urlopen(f"http://127.0.0.1:{porta}/sprite.png", timeout=3).read()
+    assert png_s[:8] == b"\x89PNG\r\n\x1a\n"
+    app.cfg["skin"] = "padrao"; app.cache_sprites.clear()
+    app.eventos.append(("twitch", "viewer42", "!moon"))
+    app._processar_eventos()
+    assert app.stream["ultimo"] == "viewer42: !moon" and app.estado_forcado[0] == "moon"
+    assert not app.evento_twitch("spammer", "!rekt")  # cooldown
+    assert "spammer: !rekt" in app.status()["stream"]["chat"]
+    chrome = shutil.which("google-chrome") or shutil.which("chromium")
+    if os.environ.get("SHOTS") and chrome:
+        app.frase_atual = "valeu pelo !moon, viewer42!"
+        subprocess.run([chrome, "--headless=new", "--no-sandbox", "--disable-gpu", "--hide-scrollbars",
+                        "--default-background-color=29366fff", "--window-size=600,400", "--virtual-time-budget=4000",
+                        f"--screenshot={SHOTS / 'stream_overlay.png'}", f"http://127.0.0.1:{porta}/stream"],
+                       capture_output=True, timeout=60)
+
     # foto Pro: ETH cyberpunk em TO THE MOON com sparkline
     for w in app.root.winfo_children():
         if w.winfo_class() == "Toplevel":

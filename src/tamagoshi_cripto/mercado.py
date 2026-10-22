@@ -58,6 +58,8 @@ class MixinMercado:
     def _evento_mercado(self, ev):
         if ev[0] == "baleia":
             self.baleia(ev[1])
+        elif ev[0] == "twitch":
+            self.evento_twitch(ev[1], ev[2])
         elif ev[0] == "noticias":
             self.manchetes = ev[1]
         elif ev[0] == "saldo_multi":

@@ -1,0 +1,15 @@
+{
+  "nome": "Noites de Bruxa",
+  "tipo": "sazonal",
+  "tier": "pro",
+  "autor": "Tamagoshi Cripto",
+  "creditos": "arte: equipe Tamagoshi",
+  "licenca_arte": "MIT",
+  "temporada": {
+    "de": "10-01",
+    "ate": "11-02"
+  },
+  "preco_sugerido_brl": 0,
+  "descricao": "abóbora, roxo e chapéu de bruxa. incluso no Pro.",
+  "id": "halloween"
+}

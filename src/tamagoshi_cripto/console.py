@@ -47,6 +47,7 @@ AJUDA = [
     "  ai set <url> [chave] [modelo] / ai off",
     "  export          stats públicos (card do GitHub)",
     "  card            gera card SVG animado",
+    "  shop / redeem <código>  loja de skins",
     "  clear / exit",
 ]
 
@@ -262,6 +263,15 @@ class Console:
     def cmd_card(self, a):
         f = getattr(self.ctx, "gerar_card", None)
         return f() if f else ["card só na janela"]
+
+    # ---- v1.4 fase 4: loja ----
+    def cmd_shop(self, a):
+        if a[:1] == ["open"]:
+            return self._so_janela("abrir_loja")
+        return self._so_janela("loja_linhas")
+
+    def cmd_redeem(self, a):
+        return self._so_janela("resgatar", a[0]) if a else ["uso: redeem SKIN-XXXX-XXXXXXXXXXXX"]
 
     # ---- v1.4 fase 2: mercado ----
     def cmd_paper(self, a):

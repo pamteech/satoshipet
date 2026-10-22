@@ -793,3 +793,100 @@ class Corretora(_Cena):
                                                 ("VENDER", "sell:all", "#ef7d57"))):
             self.botao(10 + i * (w + 2), H - 66, 10 + i * (w + 2) + w, H - 40, rot, fundo=cor_b, tag=tag)
         self.botao(L // 2 - 40, H - 36, L // 2 + 40, H - 10, "SAIR", fundo="#94b0c2", tag="sair")
+
+
+class Loja(_Cena):
+    """Loja de skins: um pacote por página, preview animado, selo do tipo, créditos e destrave."""
+
+    def __init__(self, app):
+        super().__init__(app)
+        self.ids = [p for p, m in app.catalogo.items() if app.pack_visivel(m)]
+        self.i = 0
+        self.acabou = False
+        self.alvos = []
+        self.msg = ""
+
+    def tecla(self, e):
+        if e.keysym in ("Left", "h"):
+            self.i = max(0, self.i - 1)
+        elif e.keysym in ("Right", "l"):
+            self.i = min(len(self.ids) - 1, self.i + 1)
+        elif e.keysym in ("Escape", "q"):
+            self.acabou = True
+        elif e.keysym == "Return" and self.ids:
+            self.acao("usar")
+
+    def acao(self, tag):
+        a = self.app
+        if tag == "sair":
+            self.acabou = True
+        elif tag == "ant":
+            self.i = max(0, self.i - 1)
+        elif tag == "prox":
+            self.i = min(len(self.ids) - 1, self.i + 1)
+        elif tag == "usar":
+            self.msg = a.usar_pack(self.ids[self.i])[0]
+        elif tag == "codigo":
+            a._menu_resgatar()
+        elif tag == "pro":
+            a.ativar_pro()
+
+    def tick(self):
+        self.t += 1
+        return not self.acabou
+
+    def desenhar(self):
+        from . import loja
+        a, c, L, H = self.app, self.app.cv, self.app.LARG, self.app.ALT
+        self.alvos = []
+        c.delete("all")
+        a._moldura(2, 2, L - 2, H - 2, "#29213f", borda=TINTA, luz="#3e3466", sombra="#1a1c2c")
+        a._txt(L // 2, 16, "LOJA DE SKINS", "#ffcd75", sombra=TINTA)
+        if not self.ids:
+            a._txt(L // 2, H // 2, "nenhum pacote disponível", "#94b0c2")
+            self.botao(L // 2 - 40, H - 38, L // 2 + 40, H - 12, "SAIR", fundo="#94b0c2", tag="sair")
+            return
+        pid = self.ids[self.i]
+        m = a.catalogo[pid]
+        a._txt(L // 2, 30, f"{self.i + 1}/{len(self.ids)}", "#566c86")
+        # vitrine
+        a._moldura(L // 2 - 56, 40, L // 2 + 56, 146, "#1d1730", luz="#333c57")
+        f = self.t // 3 % 4
+        im = self.img((pid, f), lambda: Image.open(loja.folha(m, a.cfg["moeda"])).convert("RGBA").crop(
+            (f * 48, 48, f * 48 + 48, 96)).resize((96, 96), Image.NEAREST))
+        c.create_image(L // 2, 94, image=im)
+        cor_tipo = {"sazonal": "#ef7d57", "colab": "#41a6f6", "patrocinado": "#ffcd75"}[m["tipo"]]
+        rot = loja.ROTULO_TIPO[m["tipo"]]
+        a._moldura(L // 2 - len(rot) * 4 - 8, 138, L // 2 + len(rot) * 4 + 8, 156, cor_tipo)
+        a._txt(L // 2, 148, rot, TINTA)
+        if self.i > 0:
+            self.botao(10, 80, 38, 106, "<", fundo="#94b0c2", tag="ant")
+        if self.i < len(self.ids) - 1:
+            self.botao(L - 38, 80, L - 10, 106, ">", fundo="#94b0c2", tag="prox")
+        a._txt(L // 2, 168, m["nome"], "#f4f4f4", sombra=TINTA)
+        y = 178
+        linhas = [m.get("creditos", "")]
+        if m["tipo"] == "patrocinado":
+            linhas.append("patrocínio: " + m.get("patrocinador", "?"))
+        if m.get("revenue_share"):
+            rs = m["revenue_share"]
+            linhas.append(f"{rs.get('artista', 0)}% artista / {rs.get('projeto', 0)}% projeto")
+        mc = (L - 20) // 8
+        for l in linhas:
+            a._txt(L // 2, y, l, "#94b0c2", anchor="n", max_chars=mc)
+            y += 10 * len(a.fonte.quebrar(l, mc)) + 4
+        liberado = a.pack_liberado(pid)
+        ativo = a.cfg.get("skin") == "loja:" + pid
+        if self.msg:
+            a._txt(L // 2, H - 76, self.msg[:32], "#a7f070")
+        if liberado:
+            self.botao(20, H - 66, L - 20, H - 42, "EM USO" if ativo else "USAR", fundo="#38b764",
+                       ativo=not ativo, tag="usar")
+        elif m["tier"] == "pro":
+            self.botao(20, H - 66, L // 2 - 2, H - 42, "PRO", fundo="#ffcd75", tag="pro")
+            self.botao(L // 2 + 2, H - 66, L - 20, H - 42, "CÓDIGO", fundo="#73eff7", tag="codigo")
+        else:
+            preco = m.get("preco_sugerido_brl")
+            self.botao(20, H - 66, L - 20, H - 42, f"CÓDIGO" + (f" (R${preco:.2f})".replace(".", ",") if preco
+                                                                 else ""), fundo="#73eff7", tag="codigo")
+        self.botao(L // 2 - 40, H - 38, L // 2 + 40, H - 12, "SAIR", fundo="#94b0c2", tag="sair")

@@ -16,7 +16,7 @@ from tkinter import messagebox, simpledialog
 
 from PIL import Image
 
-from . import __version__, api, engajamento, genetica, mercado, papel, arts, cenas, config, conquistas, crashlog, juice, licencas, updates, evolucao, license, logic, lore, onchain, plugins, ranking, recursos, share, sistema, sons
+from . import __version__, api, engajamento, genetica, lojinha, mercado, papel, arts, cenas, config, conquistas, crashlog, juice, licencas, updates, evolucao, license, logic, lore, onchain, plugins, ranking, recursos, share, sistema, sons
 from .console import SPRITE, Console
 from .fonte import FontePixel
 from .sprites import FRAMES, LINHAS, SKINS_SECRETAS, nome_folha
@@ -60,7 +60,7 @@ def carregar_frames(caminho, escala, crt=False, chapeu=None, genes=None, fantasm
     return frames
 
 
-class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado):
+class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado, lojinha.MixinLoja):
     def __init__(self, opcoes=None):
         op = opcoes or {}
         self.cfg = config.carregar()
@@ -70,6 +70,7 @@ class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado):
         crashlog.instalar()
         self.pro = self._pro_inicial()
         self.plugins = plugins.descobrir(op.get("skins_dir"))
+        self._init_loja(op.get("loja_dir"))
         self._aplicar_limites_free()
 
         self.precos, self.erro = {}, None
@@ -157,7 +158,8 @@ class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado):
         threading.Thread(target=self.loop_lore, daemon=True).start()
         threading.Thread(target=self.loop_onchain, daemon=True).start()
         threading.Thread(target=self.loop_mercado, daemon=True).start()
-        self.api = api.iniciar(self.status) if (self.cfg.get("api", True) and not op.get("sem_api")) else None
+        self.iniciar_twitch()
+        self.api = api.iniciar(self.status, folha=self.folha_png) if (self.cfg.get("api", True) and not op.get("sem_api")) else None
         self.root.after(1000, self.atualizar_tela)
         self.root.after(FRAME_MS, self.animar)
         self.root.after(FRASE_MS, self.trocar_frase)
@@ -299,6 +301,8 @@ class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado):
 
     # ---------- Free vs Pro ----------
     def _skin_permitida(self, sk):
+        if sk.startswith("loja:"):
+            return self.pack_liberado(sk[5:])
         if sk == "padrao" or sk.startswith("plugin:"):
             return sk == "padrao" or sk in self.plugins
         if sk in SKINS_SECRETAS:
@@ -350,6 +354,11 @@ class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado):
             v[chave] = tk.BooleanVar(value=bool(self.cfg.get(chave, True)))
             mm.add_checkbutton(label=rot, variable=v[chave], command=lambda c=chave: self.alternar_opcao(c, self.vars_op_m[c]))
         m.add_cascade(label="Mercado", menu=mm)
+        ml = tk.Menu(m, tearoff=0)
+        ml.add_command(label="Abrir loja de skins", command=self.abrir_loja)
+        ml.add_command(label="Resgatar código...", command=self._menu_resgatar)
+        ml.add_command(label="Overlay de streamer (OBS + Twitch)...", command=self.config_twitch)
+        m.add_cascade(label="Loja de skins", menu=ml)
         ma = tk.Menu(m, tearoff=0)  # aparência e acessibilidade
         self.var_escala = tk.IntVar(value=self.escala)
         for e in range(1, 7):
@@ -395,6 +404,13 @@ class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado):
                            command=lambda sk=sk: self.trocar_skin(sk))
         for sk in sorted(self.cfg.get("segredos", [])):
             ms.add_command(label=f"{sk}  [secreta]", command=lambda sk=sk: self.trocar_skin(sk))
+        packs = [pid for pid in self.catalogo if self.pack_liberado(pid)]
+        if packs:
+            ms.add_separator()
+            for pid in packs:
+                m = self.catalogo[pid]
+                ms.add_command(label=f"{m['nome']}  [loja" + (", patrocinado]" if m["tipo"] == "patrocinado" else "]"),
+                               command=lambda pid=pid: self.trocar_skin("loja:" + pid))
         if self.plugins:
             ms.add_separator()
             for pid, meta in self.plugins.items():
@@ -424,6 +440,7 @@ class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado):
         self.cfg["skin"] = sk
         config.salvar(self.cfg)
         self._desenhar()
+        return f"skin: {sk}"
 
     def configuracoes(self):
         if not self._exige_pro():
@@ -646,7 +663,7 @@ class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado):
 
     def skins(self):
         return [sk for sk in arts.SKINS_DISPONIVEIS + list(self.cfg.get("segredos", [])) + list(self.plugins)
-                if self._skin_permitida(sk)]
+                + ["loja:" + p for p in self.catalogo] if self._skin_permitida(sk)]
 
     def alternar_sats(self, ligar=None):
         atual = self.cfg.get("unidade") == "sats"
@@ -769,6 +786,10 @@ class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado):
                        if k in ("total", "pnl", "pnl_pct")} | {"aviso": papel.AVISO})
             if (self.cfg.get("papel") or {}).get("hist") else None,
             "carteiras": {"eth": self.saldos_multi.get("eth"), "sol": self.saldos_multi.get("sol")},
+            "frase": self.frase_atual,
+            "patrocinado": bool((self.pack_ativo() or {}).get("tipo") == "patrocinado"),
+            "stream": {"ultimo": self.stream.get("ultimo"), "t": self.stream.get("t"),
+                       "chat": list(self.stream.get("chat", []))},
         }
 
     def nome_pet(self):
@@ -1010,6 +1031,9 @@ class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado):
         moeda, skin = self.cfg["moeda"], self.cfg["skin"]
         if skin.startswith("plugin:"):
             return self.plugins[skin]["_folha"]
+        if skin.startswith("loja:") and skin[5:] in self.catalogo:
+            from . import loja
+            return loja.folha(self.catalogo[skin[5:]], moeda)
         caminho = recursos.ASSETS / "sprites" / nome_folha(moeda, skin, self.estagio)
         if not caminho.exists():  # estágio sem folha? volta pro adulto, ninguém fica invisível
             caminho = recursos.ASSETS / "sprites" / nome_folha(moeda, skin, "adulto")
@@ -1025,7 +1049,7 @@ class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado):
 
     def _dna(self):
         # skins de plugin/secretas mantêm as cores do artista; o DNA vale pras skins oficiais
-        g = self.genes() if not self.cfg["skin"].startswith("plugin:") else None
+        g = self.genes() if not self.cfg["skin"].startswith(("plugin:", "loja:")) else None
         return {"genes": g, "fantasma": bool(self.cfg.get("fantasma"))}
 
     def _chave_dna(self):
@@ -1181,6 +1205,10 @@ class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado):
         titulo = "FANTASMA" if self.cfg.get("fantasma") else arts.TITULOS[self.estado]
         self._txt(L // 2, self.Y_NOME, f"{nome} - {titulo}", "#94b0c2" if self.cfg.get("fantasma") else cor,
                   max_chars=(L - 12) // 8, sombra=C_TINTA)
+        pk = self.pack_ativo()
+        if pk and pk["tipo"] == "patrocinado":  # transparência: marca sempre aparece como PATROCINADO
+            self._moldura(8, self.Y_SPRITE, 8 + 11 * 8 + 10, self.Y_SPRITE + 16, "#ffcd75", luz="#fff4c0")
+            self._txt(13, self.Y_SPRITE + 4, "PATROCINADO", C_TINTA, anchor="nw")
         self._txt(10, self.Y_VIDA + 2, "VIDA", "#f4f4f4", anchor="nw", sombra=C_TINTA)
         vida = self.conq.vida
         for i in range(5):
