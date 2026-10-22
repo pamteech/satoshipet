@@ -55,7 +55,7 @@ class MixinMercado:
                             pass
             self._atualizar_fiat()
             n += 1
-            time.sleep(30)
+            self.dormir_rede(30)
 
     def _atualizar_fiat(self):
         """Cotação em R$/US$ das moedas com carteira, a cada ~3 min (erro = espera o dobro)."""

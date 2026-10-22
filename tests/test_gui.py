@@ -607,6 +607,25 @@ def executar():
     app.console.executar("saldo on"); app.cfg["saldo_fiat"] = "auto"
     assert not any(k in app.cfg for k in ("saldo", "saldos", "saldo_sats", "carteiras"))
     _shot(app, "saldo")
+    # v1.6: dica no hover, evolução Pokémon, transição e economia
+    zs = app._zonas()
+    x0, y0, x1, y1 = zs["vida"]
+    app._mouse_move(type("E", (), {"x": (x0 + x1) // 2, "y": (y0 + y1) // 2})())
+    _bombear(app, 600)
+    assert app.dica and app.dica[0] == "vida" and app.cv.find_withtag("fx")
+    app._mouse_sai()
+    app.iniciar_evolucao("ovo", app.estagio)
+    assert app.fx_evo is not None
+    _gif(app, "evolucao", n=8)
+    assert app.fx_evo is None or app.fx_evo.t >= 6
+    app.fx_evo = None
+    app.transicao("dissolve")
+    app._desenhar()
+    assert len(app.cv.find_withtag("fx")) > 100
+    app.fx_trans = None
+    app.modo_energia = "bateria"
+    assert app.fator_frame() == 2 and app.fator_rede() == 2
+    app.modo_energia = "normal"
     app.toast = None
     app.manchetes = _news.buscar()
     app._desenhar()  # estabiliza o humor (troca de humor sorteia frase nova)

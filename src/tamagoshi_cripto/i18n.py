@@ -77,6 +77,21 @@ PREFIXOS = [
 ]
 
 EN = {
+    "EVOLUIU!": "EVOLVED!", "Modo economia": "Power saver",
+    "Corações = vida. Alimente (blocos) e faça carinho pra encher.": "Hearts = life. Feed (blocks) and pet to refill.",
+    "Barra de XP: blocos, carinho e tempo com você fazem o bicho evoluir.":
+        "XP bar: blocks, pets and time with you make it evolve.",
+    "Preço ao vivo (CoinGecko) e variação desde que o app abriu.": "Live price (CoinGecko) and change since the app opened.",
+    "Taxa da mempool (sat/vB). Fee alta = bicho com fome e suando.": "Mempool fee (sat/vB). High fee = hungry, sweaty pet.",
+    "Fear & Greed: 0 = pânico, 100 = euforia do mercado.": "Fear & Greed: 0 = panic, 100 = market euphoria.",
+    "Hashrate da rede Bitcoin: o poder dos mineradores.": "Bitcoin network hashrate: the miners' power.",
+    "Altura do último bloco. NHAC = blocos que o bicho já comeu.": "Latest block height. NHAC = blocks your pet ate.",
+    "Gas do Ethereum em gwei: quanto custa mexer na rede.": "Ethereum gas in gwei: what it costs to use the network.",
+    "Saldo watch-only (só leitura). 'saldo off' esconde: ••••": "Watch-only balance (read only). 'saldo off' hides it: ••••",
+    "Paper trading: dinheiro FICTÍCIO, só pra treinar.": "Paper trading: FAKE money, practice only.",
+    "Saldo watch-only (só leitura).": "Watch-only balance (read only).",
+    "PRO: 5 moedas, alertas, gráfico e skins premium.": "PRO: 5 coins, alerts, chart and premium skins.",
+    "Link de compra (afiliado). Use com juízo: DYOR!": "Buy link (affiliate). Be wise: DYOR!",
     # ---- menu ----
     "Trocar moeda": "Change coin", "Trocar skin": "Change skin", "Ajustes... (S)": "Settings... (S)",
     "Conquistas": "Achievements", "Console hacker (`)": "Hacker console (`)",

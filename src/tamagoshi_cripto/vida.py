@@ -48,7 +48,8 @@ class MixinVida:
         self.cfg["evolucao"] = self.evo.d
         novo = evolucao.estagio(self.evo.xp, self.conq.d["crashes"])
         if novo != self.estagio:
-            self.estagio = novo
+            velho, self.estagio = self.estagio, novo
+            self.iniciar_evolucao(velho, novo)
             self.toast = [f"EVOLUIU: {evolucao.NOMES[novo]}!", 26]
             self.reacao = FRAMES * 3
             self.som.tocar("evoluir")

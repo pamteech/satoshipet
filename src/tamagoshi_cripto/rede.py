@@ -109,7 +109,7 @@ class MixinRede:
                 except Exception:
                     pass
             n += 1
-            time.sleep(60)
+            self.dormir_rede(60)
 
     def _processar_eventos(self):
         with self.lock:
@@ -171,7 +171,7 @@ class MixinRede:
             except Exception as erro:
                 self.erro = "Sem sinal da API"
                 print("API deu ruim (igual sua carteira):", erro)
-            time.sleep(espera)
+            self.dormir_rede(espera)
 
     def loop_lore(self):
         while True:

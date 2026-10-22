@@ -62,6 +62,7 @@ class Ajustes(_Cena):
                 Item("Mostrar em sats ", lambda: _sim(cfg.get("unidade") == "sats"), "bool", lambda: a.alternar_sats()),
                 Item("Som", lambda: _sim(not cfg.get("mudo")), "bool", self._mudar_som),
                 b(("Música", "musica")),
+                b(("Modo economia", "economia")),
                 Item("Iniciar c/ sistema", lambda: _sim(a.autostart_ligado()), "bool", a.alternar_autostart,
                      ativo=a.autostart_suportado),
             ]

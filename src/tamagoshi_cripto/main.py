@@ -29,6 +29,7 @@ from . import (
     sistema,
     sons,
 )
+from .animacao import MixinAnimacao
 from .console import Console
 from .desenho import MixinDesenho
 from .entrada import MixinEntrada
@@ -51,7 +52,7 @@ from .sprites import FRAMES
 from .vida import MixinVida
 
 
-class Tamagoshi(MixinVida, MixinDesenho, MixinEntrada, MixinMenus, MixinRede,
+class Tamagoshi(MixinAnimacao, MixinVida, MixinDesenho, MixinEntrada, MixinMenus, MixinRede,
                 engajamento.MixinEngajamento, mercado.MixinMercado, lojinha.MixinLoja):
     def __init__(self, opcoes=None):
         op = opcoes or {}
@@ -107,6 +108,7 @@ class Tamagoshi(MixinVida, MixinDesenho, MixinEntrada, MixinMenus, MixinRede,
         self.ultimo_erro = None
         self.escala = max(1, min(6, int(self.cfg.get("escala", 3))))
         self._init_mercado()
+        self._init_efeitos()
         self._medidas()
 
         self.root = tk.Tk()
@@ -138,6 +140,7 @@ class Tamagoshi(MixinVida, MixinDesenho, MixinEntrada, MixinMenus, MixinRede,
         for b in ("<Button-3>", "<Button-2>", "<Control-Button-1>"):  # Mac: botão direito = Button-2/ctrl-clique
             self.cv.bind(b, self.abrir_menu)
         self.root.bind("<Key>", self._tecla)
+        self._iniciar_efeitos()
 
         x, y = self.cfg.get("posicao", [100, 100])
         self.root.geometry(f"+{x}+{y}")
@@ -217,15 +220,21 @@ class Tamagoshi(MixinVida, MixinDesenho, MixinEntrada, MixinMenus, MixinRede,
         self.root.after(1000, self.atualizar_tela)
 
     def animar(self):
-        self.root.after(FRAME_MS, self.animar)
+        self.root.after(FRAME_MS * self.fator_frame(), self.animar)
         if isinstance(self.cena, cenas.PegaSats):
             return  # o jogo tem o próprio loop de 50 ms
+        if self.modo_energia == "pausa" and not self.cena:
+            self._processar_eventos()  # tela travada/ninguém olhando: não desenha nada (CPU ~0)
+            return
+        self._tick_efeitos()
         if self.cena:
             if not self.cena.tick():
                 self.cena = None
+            self._checar_cena()
             self.juice.tick()
             self._desenhar()
             return
+        self._checar_cena()
         self.frame = (self.frame + 1) % FRAMES
         self.juice.tick()
         self.rodizio += 1

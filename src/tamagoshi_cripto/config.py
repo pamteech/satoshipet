@@ -75,6 +75,7 @@ PADRAO = {
     "carteira_eth": "",      # endereço PÚBLICO (watch-only)
     "carteira_sol": "",      # endereço PÚBLICO (watch-only)
     "saldo_fiat": "auto",    # v1.6: auto (R$ em pt, US$ no resto) | brl | usd
+    "economia": True,        # v1.6: bateria = menos FPS; tela travada = pausa
     "saldo_oculto": False,   # v1.6: True = mostra •••• (modo gravação). O SALDO em si nunca vai pro disco.
     "baleias": True,         # alerta de baleia (mempool.space, sem chave)
     "baleia_btc": 50,        # tx acima de X BTC = susto

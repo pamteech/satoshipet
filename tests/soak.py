@@ -237,7 +237,7 @@ def rodar(horas=6, semente=1, verbose=False):
         assert len(app.juice.p) <= 400, len(app.juice.p)
         assert len(app.cache_sprites) <= 40, len(app.cache_sprites)
         assert len(app.stream["chat"]) <= 5
-        assert not app.eventos
+        assert not app.eventos, (app.eventos, app.modo_energia, type(app.cena).__name__)
         if erros:
             raise erros[0][1]
     assert not falhas_console, falhas_console[:10]

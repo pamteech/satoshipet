@@ -5,6 +5,11 @@
 - **SALDO no painel**: carteiras watch-only BTC/ETH/SOL viram `SALDO 0.0123 BTC ≈ R$ 7.450` (R$ em pt-BR, US$ no resto; Ajustes > "Saldo em").
 - **Esconder saldo** (`saldo off` / Ajustes): mostra `••••`, ideal pra gravar vídeo. Marcos (0.01 BTC, 1 ETH...) ganham comemoração leve.
 - Saldo vive só na memória: fora do disco, do status, da API local, do card, ranking, overlay e IA. Cotação BRL/USD a cada ~3 min com backoff.
+- **Transições pixel**: dissolve (Bayer 4x4), wipe diagonal e mosaico entre telas (onboarding, ajustes, cenas) e na troca de humor MOON/REKT.
+- **Evolução estilo Pokémon**: silhueta piscando forma velha/nova cada vez mais rápido, flash, brilhos em órbita, som e "EVOLUIU!".
+- **Idle vivo**: pisca (às vezes duas vezes), boceja e espreguiça quando fica parado/de madrugada, fidget, e a cabeça segue o mouse.
+- **Dicas no hover** (pt/EN) em corações, XP, preço, PRO, botão e nas linhas FEE/F&G/HASH/BLOCO/GAS/SALDO/PAPEL.
+- **Modo economia** (padrão ligado, Ajustes > Geral): na bateria FPS e rede pela metade; tela travada/ausente 15 min = pausa (CPU ~0) e rede 10x mais lenta; volta sozinho.
 - Mac: teclado funciona na janela sem borda; sprite aparece na janela transparente; idioma "auto" lê o idioma do macOS.
 
 ## 1.5.0 — "Quality" (2026-10-22)

@@ -98,6 +98,7 @@ class MixinDesenho:
     def _desenhar(self):
         if self.cena:
             self.cena.desenhar()
+            self._overlay_fx()
             return
         moeda = self.cfg["moeda"]
         ac = bool(self.cfg.get("alto_contraste"))
@@ -114,6 +115,7 @@ class MixinDesenho:
                 self.estado = novo
                 self.som.tocar(novo)
                 self._nova_frase()
+                self.transicao("mosaico" if novo == "rekt" else "wipe", 4)  # troca de humor com estilo
                 if novo in ("moon", "rekt") and self.cfg.get("juice", True):
                     self.juice.emitir(novo, self.LARG // 2, self.Y_SPRITE + self.S // 2, self.escala)
             linha_preco, linha_var = self._fmt_preco(moeda, preco), f"{'+' if var >= 0 else ''}{var:.2f}%"
@@ -150,7 +152,8 @@ class MixinDesenho:
         tremor = random.randint(-3, 3) if self.panico_t else 0
         sx, sy = self.juice.deslocamento() if self.cfg.get("juice", True) else (0, 0)
         cy = self.Y_SPRITE + self.S // 2
-        c.create_image(L // 2 + tremor + sx, cy + sy, image=img)
+        img, ix, iy = self._sprite_vivo(img, frames, dormindo)  # v1.6: piscar, olhar o mouse, evolução
+        c.create_image(L // 2 + tremor + sx + ix, cy + sy + iy, image=img)
         if self.cfg.get("juice", True):
             self.juice.desenhar(c)
         E = self.escala
@@ -236,6 +239,7 @@ class MixinDesenho:
         self._txt(L // 2, y + 18, "COMPRAR A QUEDA ANTES\nQUE ELE MORRA!", C_TINTA, tags=("botao",))
         if self.console_aberto:
             self._desenhar_console()
+        self._overlay_fx()
 
     def _infos_nerd(self, moeda):
         """Linhas que se revezam no painel: F&G, fee, bloco, hashrate, gas, carteira."""
