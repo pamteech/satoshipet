@@ -107,30 +107,53 @@ def exportar(pet):
     return PREFIXO + base64.urlsafe_b64encode(dados).decode().rstrip("=") + "-" + soma
 
 
+MAX_JSON = 4096
+
+
+def _int(v, lo, hi, padrao):
+    """int limitado; aceita só int/float finitos de verdade (bool e texto viram o padrão)."""
+    if isinstance(v, bool) or not isinstance(v, (int, float)) or v != v or v in (float("inf"), float("-inf")):
+        return padrao
+    return max(lo, min(hi, int(v)))
+
+
 def importar(codigo):
-    """Retorna (pet, erro). Valida checksum e genes (código de amigo é dado não confiável)."""
+    """Retorna (pet, erro). Valida checksum e genes (código de amigo é dado NÃO confiável:
+    o checksum só pega erro de cópia, qualquer um consegue forjar um)."""
     try:
-        c = codigo.strip()
+        c = (codigo or "").strip()
         if not c.startswith(PREFIXO):
             return None, "código de pet começa com TAMA1-"
+        if len(c) > 4096:
+            return None, "código grande demais"
         corpo, soma = c[len(PREFIXO):].rsplit("-", 1)
         dados = base64.urlsafe_b64decode(corpo + "=" * (-len(corpo) % 4))
         if hashlib.sha256(dados).hexdigest()[:6] != soma:
             return None, "código corrompido (checksum não bate). copiou inteiro?"
-        if len(dados) > 2048:
+        z = zlib.decompressobj()
+        bruto = z.decompress(dados, MAX_JSON + 1)  # anti zip-bomb: nunca descomprime mais que 4 KB
+        if len(bruto) > MAX_JSON or z.unconsumed_tail:
             return None, "código grande demais"
-        leve = json.loads(zlib.decompress(dados, bufsize=4096))
+        leve = json.loads(bruto)
     except Exception:
         return None, "código de pet inválido"
-    g = leve.get("g") or {}
+    if not isinstance(leve, dict) or not isinstance(leve.get("g"), dict):
+        return None, "código de pet inválido"
+    g = leve["g"]
     for k in GENES:
-        if g.get(k) not in GENES[k]:
+        if not isinstance(g.get(k), str) or g.get(k) not in GENES[k]:
             return None, f"gene inválido: {k}"
-    if g.get("moeda") not in ("BTC", "ETH", "SOL", "DOGE", "PEPE"):
+    if not isinstance(g.get("moeda"), str) or g.get("moeda") not in ("BTC", "ETH", "SOL", "DOGE", "PEPE"):
         return None, "moeda inválida"
-    est = leve.get("e") if leve.get("e") in ("ovo", "bebe", "adulto", "whale", "diamond") else "ovo"
-    return {"nome": str(leve.get("n", "anon"))[:12], "genes": g, "nivel": max(1, min(99, int(leve.get("lv", 1)))),
-            "xp": max(0, min(10_000_000, int(leve.get("xp", 0)))), "estagio": est}, None
+    genes = {k: g[k] for k in GENES}
+    genes.update(moeda=g["moeda"], geracao=_int(g.get("geracao"), 1, 999, 1),
+                 id=g["id"][:16] if isinstance(g.get("id"), str) else "%08x" % (hash(corpo) & 0xFFFFFFFF))
+    e = leve.get("e")
+    est = e if isinstance(e, str) and e in ("ovo", "bebe", "adulto", "whale", "diamond") else "ovo"
+    nome = leve.get("n")
+    nome = "".join(ch for ch in nome if ch.isprintable())[:12] if isinstance(nome, str) else ""
+    return {"nome": nome or "anon", "genes": genes, "nivel": _int(leve.get("lv"), 1, 99, 1),
+            "xp": _int(leve.get("xp"), 0, 10_000_000, 0), "estagio": est}, None
 
 
 # ---------------- aplicar no sprite (48x48, antes de ampliar) ----------------

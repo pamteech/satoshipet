@@ -572,6 +572,7 @@ class Cruzamento(_Cena):
 class Batalha(_Cena):
     """Batalha por turnos animada. Você escolhe o golpe (1-4 ou clique); o rival é IA."""
     BOTOES = ("PUMP", "HODL", "FUD", "ESPECIAL")
+    MAX_JOGADAS = 60
 
     def __init__(self, app, eu, rival, var_eu=0.0, var_rival=0.0, semente=None, auto=False):
         from . import batalha
@@ -611,6 +612,14 @@ class Batalha(_Cena):
         if dano:
             self.app.juice.tremor = 3 if df is self.a else 2
         self.vez = "b" if at is self.a else "a"
+        self.jogadas = getattr(self, "jogadas", 0) + 1
+        if df.vivo and self.jogadas >= self.MAX_JOGADAS:  # ninguém cai? decide no HP (sem luta infinita de HODL)
+            df.hp = 0 if df.hp / df.s["max_hp"] < at.hp / at.s["max_hp"] else df.hp
+            if df.vivo:
+                at.hp = 0
+                self.fim = "a" if at is self.b else "b"
+                self.app.fim_batalha(self.fim == "a", self.rival_pet)
+                return
         if not df.vivo:
             self.fim = "a" if df is self.b else "b"
             self.app.fim_batalha(self.fim == "a", self.rival_pet)

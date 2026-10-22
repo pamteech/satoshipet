@@ -89,6 +89,7 @@ class MixinMercado:
         self.juice.tremor = 6
         self.toast = [baleias.frase(b), 30, "ALERTA DE BALEIA"]
         self.link_balao = b["url"]
+        self.link_do_toast = True
         self.frase_atual = random.choice(["AAA UMA BALEIA!", "socorro, a baleia vai despejar!", "whale alert!!!"])
         return True
 
@@ -105,6 +106,7 @@ class MixinMercado:
             tit = tit[:maximo - 3].rsplit(" ", 1)[0] + "..."
         self.frase_atual = "NEWS: " + tit
         self.link_balao = m["link"]
+        self.link_do_toast = False
         return True
 
     def clique_balao(self):

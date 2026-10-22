@@ -164,6 +164,8 @@ class MixinEngajamento:
         return reg
 
     def renascer(self):
+        if not self.cfg.get("fantasma"):  # só fantasma renasce; vivo não perde XP por clique errado
+            return ["ele tá vivinho, não precisa renascer"]
         self.cfg["fantasma"] = False
         self.cfg["genes"] = genetica.aleatorio(moeda=self.cfg["moeda"])
         self._recomecar_vida(xp=0)

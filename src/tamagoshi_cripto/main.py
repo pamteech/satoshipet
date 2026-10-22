@@ -635,6 +635,7 @@ class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado, lojinha.Mixi
             p = linha.split()
             eco = " ".join(p[:3] + ["****"] * (len(p) > 3) + p[4:])
         self.console_linhas.append("> " + eco)
+        self.console.historico = self.console.historico[-100:]
         if linha.strip() in ("clear", "cls"):
             self.console_linhas = []
         elif linha.strip() in ("exit", "quit", "q"):
@@ -1342,6 +1343,8 @@ class Tamagoshi(engajamento.MixinEngajamento, mercado.MixinMercado, lojinha.Mixi
             self.toast[1] -= 1
             if self.toast[1] <= 0:
                 self.toast = None
+                if getattr(self, "link_do_toast", False):  # link da baleia morre junto com o toast
+                    self.link_balao = self.link_do_toast = None
         self._desenhar()
 
     def trocar_frase(self):

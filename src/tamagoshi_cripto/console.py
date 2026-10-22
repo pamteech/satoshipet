@@ -61,7 +61,8 @@ class Console:
         linha = linha.strip()
         if not linha:
             return []
-        self.historico.append(linha)
+        p = linha.split()
+        self.historico.append(" ".join(p[:3] + ["****"] + p[4:]) if p[:2] == ["ai", "set"] and len(p) > 3 else linha)
         try:
             partes = shlex.split(linha)
         except ValueError:
@@ -86,7 +87,9 @@ class Console:
             return [f"{cmd}: comando não encontrado. tenta 'help'"]
         try:
             return fn(args)
-        except Exception as e:  # rede caiu, API morreu... o console não pode morrer junto
+        except (OSError, TimeoutError) as e:  # ConnectionError/requests herdam de OSError
+            return [f"{cmd}: sem rede agora ({type(e).__name__}). tenta de novo daqui a pouco"]
+        except Exception as e:  # API mudou, bug nosso... o console não pode morrer junto
             return [f"erro: {e}"]
 
     # ---------------- comandos ----------------
