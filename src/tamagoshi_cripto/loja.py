@@ -17,7 +17,6 @@ import json
 import re
 from datetime import date
 from pathlib import Path
-from pathlib._local import PosixPath
 from typing import Any, Dict, List, Optional
 
 from . import license, recursos
@@ -28,12 +27,12 @@ RE_ID = re.compile(r"^[a-z0-9_]{3,24}$")
 ROTULO_TIPO = {"sazonal": "SAZONAL", "colab": "COLAB", "patrocinado": "PATROCINADO"}
 
 
-def pastas(extra: Any=None) -> List[PosixPath]:
+def pastas(extra: Any=None) -> List[Path]:
     p = [recursos.ASSETS / "loja", Path.home() / ".tamagoshi_cripto" / "loja"]
     return ([Path(extra)] if extra else []) + p
 
 
-def validar_pack(pasta: PosixPath) -> Any:
+def validar_pack(pasta: Path) -> Any:
     """(meta, erro). Regras de marca: disclosure 'patrocinado' obrigatório, autorização e vigência."""
     pasta = Path(pasta)
     try:
