@@ -1,0 +1,18 @@
+name: 🐣 New creature / skin
+description: Propose (or submit) a community creature
+labels: [creature, good first issue]
+body:
+  - type: input
+    attributes: { label: Name, placeholder: "Slime da Liquidez" }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Concept, description: "Which coin/meme? What happens in garimpando / moon / rekt?" }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: "Sprite sheet (192x192 PNG) or sketch", description: "Drag the image here. See CONTRIBUTING.md for the format." }
+  - type: checkboxes
+    attributes:
+      label: Checklist
+      options:
+        - label: Original art (no copyrighted characters / logos)
+        - label: Passes `pytest tests/test_logic.py::test_plugins` and `tamagoshi --list-skins` shows it

@@ -1,0 +1,9 @@
+name: ✨ Feature request
+description: Make the pet even more degen
+labels: [enhancement]
+body:
+  - type: textarea
+    attributes: { label: Idea }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Why would crypto nerds / devs love it? }

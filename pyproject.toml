@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tamagoshi-cripto"
+version = "1.0.0"
+description = "A pixel-art crypto pet that floats on your desktop (or lives in your terminal) and reacts to the market."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Pamella Soares" }]
+requires-python = ">=3.9"
+keywords = ["crypto", "bitcoin", "tamagotchi", "pixel-art", "desktop-pet", "tui", "tkinter"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: MacOS",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Environment :: X11 Applications",
+  "Environment :: Console",
+  "Topic :: Games/Entertainment",
+]
+dependencies = ["requests>=2.28", "Pillow>=10"]
+
+[project.optional-dependencies]
+tray = ["pystray>=0.19; sys_platform == 'win32' or sys_platform == 'darwin'"]
+dev = ["pytest>=7"]
+build = ["pyinstaller>=6"]
+
+[project.scripts]
+tamagoshi = "tamagoshi_cripto.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/OWNER/tamagoshi-cripto"
+Issues = "https://github.com/OWNER/tamagoshi-cripto/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+tamagoshi_cripto = ["assets/**/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]

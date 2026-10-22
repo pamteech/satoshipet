@@ -1,0 +1,20 @@
+{
+  "id": "slime",
+  "nome": "Slime da Liquidez",
+  "autor": "tamagoshi-cripto",
+  "descricao": "Criatura de exemplo da comunidade: uma pool de liquidez com sentimentos.",
+  "frases": {
+    "garimpando": [
+      "provendo liquidez...",
+      "impermanent loss? nunca ouvi"
+    ],
+    "moon": [
+      "APY de 9000%!",
+      "TVL nas alturas!"
+    ],
+    "rekt": [
+      "fui drenado...",
+      "rug pull na minha alma"
+    ]
+  }
+}

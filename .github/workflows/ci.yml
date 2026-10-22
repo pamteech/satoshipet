@@ -1,0 +1,41 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.9", "3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: System deps (Tk + virtual display)
+        run: sudo apt-get update && sudo apt-get install -y python3-tk xvfb
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Tests (logic + full GUI under xvfb)
+        env:
+          OFFLINE: "1"
+        run: xvfb-run -a pytest -q
+
+  smoke-macos-windows:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - name: Logic tests (GUI needs a real display)
+        env:
+          OFFLINE: "1"
+        run: pytest -q tests/test_logic.py
