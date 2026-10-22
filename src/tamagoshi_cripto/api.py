@@ -52,7 +52,9 @@ def publico(st: dict) -> dict:
     s = dict(st)
     if isinstance(s.get("carteira"), dict):
         s["carteira"] = dict(s["carteira"], endereco=_mascarar(s["carteira"].get("endereco")))
-    for k in ("email", "licenca", "ai_key", "device_id"):
+    if isinstance(s.get("carteira"), dict):
+        s["carteira"].pop("saldo_sats", None)  # saldo nunca sai do app (v1.6)
+    for k in ("email", "licenca", "ai_key", "device_id", "carteiras", "saldos", "saldo"):
         s.pop(k, None)
     return s
 

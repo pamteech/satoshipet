@@ -1,5 +1,12 @@
 # Changelog
 
+
+## [não lançado] v1.6 (em andamento)
+- **SALDO no painel**: carteiras watch-only BTC/ETH/SOL viram `SALDO 0.0123 BTC ≈ R$ 7.450` (R$ em pt-BR, US$ no resto; Ajustes > "Saldo em").
+- **Esconder saldo** (`saldo off` / Ajustes): mostra `••••`, ideal pra gravar vídeo. Marcos (0.01 BTC, 1 ETH...) ganham comemoração leve.
+- Saldo vive só na memória: fora do disco, do status, da API local, do card, ranking, overlay e IA. Cotação BRL/USD a cada ~3 min com backoff.
+- Mac: teclado funciona na janela sem borda; sprite aparece na janela transparente; idioma "auto" lê o idioma do macOS.
+
 ## 1.5.0 — "Quality" (2026-10-22)
 
 ### 🐛 Bugs corrigidos (achados pelo soak de 24h simuladas + fuzz)

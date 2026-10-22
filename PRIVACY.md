@@ -35,3 +35,6 @@ Resumo: **o bicho mora no seu computador.** Nada sai daqui sem você ligar. Sem 
 
 ## Apagar tudo
 Apague `~/.tamagoshi_cripto.json`, `~/.tamagoshi_api_token` e, se usou, a entrada `tamagoshi-cripto` do chaveiro.
+
+## Saldo das carteiras (v1.6)
+O saldo das carteiras watch-only é consultado em APIs públicas (mempool.space, publicnode, Solana RPC) e cotado na CoinGecko. Ele fica **só na memória**: não é salvo em disco, não aparece na API local, no card, no ranking, no overlay nem é enviado pra IA. `saldo off` esconde os valores na tela.

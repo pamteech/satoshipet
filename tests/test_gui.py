@@ -592,6 +592,21 @@ def executar():
     app.eventos += [("saldo_multi", "eth", 1.5), ("saldo_multi", "sol", 4.2), ("saldo_multi", "sol", 5.0)]
     app._processar_eventos()
     assert app.saldos_multi == {"eth": 1.5, "sol": 5.0} and "SOL" in app.toast[2]
+    # v1.6: SALDO no painel, com R$ e modo ••••; nunca no status (API/card/ranking/overlay/IA)
+    app.fiat_precos = {"ETH": {"brl": 20000.0, "usd": 4000.0}}
+    app.cfg["saldo_fiat"] = "brl"
+    infos = [t for t, _ in app._infos_nerd("BTC")]
+    assert "SALDO 1.5000 ETH ≈ R$ 30.000" in infos and "SALDO 5.0000 SOL" in infos
+    st_txt = json.dumps(app.status(), ensure_ascii=False)
+    assert "carteiras" not in st_txt and "saldo_sats" not in st_txt and "30.000" not in st_txt
+    pub = urllib.request.urlopen(f"http://127.0.0.1:{os.environ['TAMAGOSHI_API_PORT']}/status", timeout=3).read().decode()
+    assert "1.5" not in json.loads(pub).get("carteira", {}).__repr__() and "carteiras" not in pub
+    assert "ESCONDIDOS" in app.console.executar("saldo off")[-1]
+    assert all("••••" in t for t, _ in app.linhas_saldo())
+    app._desenhar()
+    app.console.executar("saldo on"); app.cfg["saldo_fiat"] = "auto"
+    assert not any(k in app.cfg for k in ("saldo", "saldos", "saldo_sats", "carteiras"))
+    _shot(app, "saldo")
     app.toast = None
     app.manchetes = _news.buscar()
     app._desenhar()  # estabiliza o humor (troca de humor sorteia frase nova)

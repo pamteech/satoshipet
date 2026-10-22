@@ -305,8 +305,8 @@ class MixinVida:
                     "sats_por_dolar": onchain.sats_por_dolar(btc)},
             "eth": {"gas_gwei": round(self.gas, 2) if self.gas else None},
             "fng": {"valor": self.fng[0], "rotulo": self.fng[1]} if self.fng else None,
-            "carteira": {"endereco": self.cfg.get("carteira") or None,
-                         "saldo_sats": self.saldo["total"] if self.saldo else None},
+            # saldo NUNCA entra aqui (status vai pra API local, card, ranking, overlay e IA)
+            "carteira": {"endereco": self.cfg.get("carteira") or None},
             "genes": {k: v for k, v in self.genes().items() if k in genetica.GENES},
             "raridade": genetica.raridade(self.genes())[0],
             "hardcore": bool(self.cfg.get("hardcore")), "fantasma": bool(self.cfg.get("fantasma")),
@@ -314,7 +314,6 @@ class MixinVida:
             "papel": ({k: round(v, 2) for k, v in papel.resumo(self.cfg["papel"], self.precos).items()
                        if k in ("total", "pnl", "pnl_pct")} | {"aviso": papel.AVISO})
             if (self.cfg.get("papel") or {}).get("hist") else None,
-            "carteiras": {"eth": self.saldos_multi.get("eth"), "sol": self.saldos_multi.get("sol")},
             "frase": self.frase_atual,
             "patrocinado": bool((self.pack_ativo() or {}).get("tipo") == "patrocinado"),
             "stream": {"ultimo": self.stream.get("ultimo"), "t": self.stream.get("t"),

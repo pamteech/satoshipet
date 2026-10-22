@@ -251,10 +251,7 @@ class MixinDesenho:
             out.append((f"HASH {onchain.formatar_hashrate(self.hash)}", "#a7f070"))
         if moeda == "ETH" and self.gas:
             out.append((f"GAS {self.gas:.1f} gwei", "#73eff7"))
-        if self.saldo:
-            out.append((f"WALLET {self.saldo['total']:,} sats".replace(",", "."), "#ffcd75"))
-        for rede, v in self.saldos_multi.items():
-            out.append((f"WALLET {v:.4f} {rede.upper()}", "#ffcd75"))
+        out += self.linhas_saldo()  # v1.6: SALDO 0.0123 BTC ≈ R$ 7.450 (ou ••••)
         if (self.cfg.get("papel") or {}).get("hist"):
             r = papel.resumo(self.cfg["papel"], self.precos)
             out.append((f"PAPEL {r['pnl_pct']:+.2f}% (ficticio)", "#38b764" if r["pnl"] >= 0 else "#b13e53"))

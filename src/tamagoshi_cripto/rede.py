@@ -139,7 +139,9 @@ class MixinRede:
                     self._comer(h)
                 self.cfg["onchain"] = self.estomago.d
             elif ev[0] == "saldo":
+                antes = self.saldo["total"] / 1e8 if self.saldo else None
                 self.saldo = ev[1]
+                self._comemorar_marco("BTC", antes, ev[1]["total"] / 1e8)
                 delta = self.vigia.atualizar(ev[1]["total"])
                 if delta > 0:
                     self.reacao = FRAMES * 3

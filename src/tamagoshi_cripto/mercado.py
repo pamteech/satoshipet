@@ -7,7 +7,7 @@ import random
 import time
 import webbrowser
 
-from . import baleias, cenas, config, multichain, noticias, papel
+from . import baleias, cenas, config, i18n, multichain, noticias, papel, saldo
 
 BALEIA_INTERVALO = 5 * 60   # no máximo 1 susto a cada 5 min (o bicho tem coração fraco)
 
@@ -16,7 +16,9 @@ class MixinMercado:
     def _init_mercado(self):
         self.manchetes = []
         self.link_balao = None
-        self.saldos_multi = {}      # {"eth": 1.23, "sol": 4.5}
+        self.saldos_multi = {}      # {"eth": 1.23, "sol": 4.5}  (só memória, nunca disco)
+        self.fiat_precos = {}       # {"BTC": {"brl": .., "usd": ..}}
+        self._fiat_backoff = saldo.Backoff()
         self.radar = baleias.Radar(self.cfg.get("baleia_btc", 50))
         self.ultima_baleia = 0.0
 
@@ -51,8 +53,60 @@ class MixinMercado:
                                 self.eventos.append(("saldo_multi", rede, v))
                         except Exception:
                             pass
+            self._atualizar_fiat()
             n += 1
             time.sleep(30)
+
+    def _atualizar_fiat(self):
+        """Cotação em R$/US$ das moedas com carteira, a cada ~3 min (erro = espera o dobro)."""
+        sims = list(self.saldos_vivos())
+        if not sims or not self._fiat_backoff.hora():
+            return
+        try:
+            p = saldo.buscar_fiat(sims)
+            with self.lock:
+                self.fiat_precos = p
+            self._fiat_backoff.ok()
+        except Exception:
+            self._fiat_backoff.erro()
+
+    def saldos_vivos(self):
+        """{"BTC": 0.0123, "ETH": 1.5} - só memória. NUNCA entra no status()/API/card/ranking."""
+        out = {}
+        if self.cfg.get("carteira") and getattr(self, "saldo", None):
+            out["BTC"] = self.saldo["total"] / 1e8
+        for rede in ("eth", "sol"):
+            if self.cfg.get("carteira_" + rede) and self.saldos_multi.get(rede) is not None:
+                out[rede.upper()] = self.saldos_multi[rede]
+        return out
+
+    def linhas_saldo(self):
+        fiat = saldo.fiat_efetiva(self.cfg.get("saldo_fiat"), i18n.atual())
+        return saldo.linhas(self.saldos_vivos(), self.fiat_precos, fiat, bool(self.cfg.get("saldo_oculto")))
+
+    def _comemorar_marco(self, sim, antes, agora):
+        m = saldo.marco_novo(sim, antes, agora)
+        if m is None:
+            return
+        self.reacao = max(getattr(self, "reacao", 0), 12)
+        txt = "carteira cresceu!" if self.cfg.get("saldo_oculto") else f"{m:g} {sim} na carteira!"
+        self.toast = [txt, 22, "MARCO!"]
+
+    def comando_saldo(self, args):
+        """console: saldo [on|off|brl|usd|auto]"""
+        a = (args[0].lower() if args else "")
+        if a in ("off", "hide", "esconder"):
+            self.cfg["saldo_oculto"] = True
+        elif a in ("on", "show", "mostrar"):
+            self.cfg["saldo_oculto"] = False
+        elif a in saldo.FIATS:
+            self.cfg["saldo_fiat"] = a
+        elif a:
+            return ["uso: saldo [on|off|brl|usd|auto]"]
+        config.salvar(self.cfg)
+        ls = [t for t, _ in self.linhas_saldo()] or ["nenhuma carteira watch-only (wallet <endereço público>)"]
+        return ls + [("valores ESCONDIDOS (saldo on mostra)" if self.cfg.get("saldo_oculto") else "saldo off esconde")
+                     + " · só memória, nunca sai daqui"]
 
     # ---------- eventos (thread da GUI) ----------
     def _evento_mercado(self, ev):
@@ -66,6 +120,7 @@ class MixinMercado:
             _, rede, v = ev
             antes = self.saldos_multi.get(rede)
             self.saldos_multi[rede] = v
+            self._comemorar_marco(rede.upper(), antes, v)
             if antes is not None and abs(v - antes) > 1e-9:
                 sim = rede.upper()
                 if v > antes:

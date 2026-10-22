@@ -93,6 +93,10 @@ class Ajustes(_Cena):
                 Item("Carteira SOL", lambda: (cfg.get("carteira_sol") or i18n.t("nenhuma"))[:10], "texto",
                      lambda s: self._dizer(a.carteira_multi("sol", s.strip() or "-")),
                      inicial=lambda: cfg.get("carteira_sol", "")),
+                Item("Saldo em", lambda: {"auto": "auto", "brl": "R$", "usd": "US$"}[cfg.get("saldo_fiat", "auto")],
+                     "escolha", self._mudar_fiat),
+                Item("Esconder saldo", lambda: _sim(cfg.get("saldo_oculto")), "bool",
+                     lambda: a.alternar_opcao("saldo_oculto")),
             ]
         if self.aba == 3:
             return [
@@ -183,6 +187,12 @@ class Ajustes(_Cena):
         alvo[lado] = v
         self.app.aplicar_alertas(alvo.get("acima"), alvo.get("abaixo"))
         self._dizer("salvo!")
+
+    def _mudar_fiat(self, d: int) -> None:
+        ops = ["auto", "brl", "usd"]
+        atual = self.app.cfg.get("saldo_fiat", "auto")
+        self.app.cfg["saldo_fiat"] = ops[(ops.index(atual) + d) % 3] if atual in ops else "auto"
+        config.salvar(self.app.cfg)
 
     def _carteira(self, s: str) -> None:
         self._dizer(self.app.aplicar_carteira(s))

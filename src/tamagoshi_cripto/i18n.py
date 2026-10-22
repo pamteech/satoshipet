@@ -73,7 +73,7 @@ PREFIXOS = [
     ("patrocínio: ", "sponsor: "), ("skin: ", "skin: "), ("unidade: ", "unit: "), ("moeda trocada: ", "coin changed: "),
     ("comprou ", "bought "), ("vendeu ", "sold "), ("você não tem ", "you don't have "),
     ("saldo fictício insuficiente", "not enough fake balance"), ("HARDCORE: morre em ~", "HARDCORE: dies in ~"),
-    ("Tamanho ", "Size "), ("nível ", "level "), ("idioma: ", "language: "),
+    ("SALDO ", "BALANCE "), ("Tamanho ", "Size "), ("nível ", "level "), ("idioma: ", "language: "),
 ]
 
 EN = {
@@ -131,7 +131,8 @@ EN = {
     "TAB/setas - ENTER muda - ESC sai": "TAB/arrows - ENTER - ESC exits",
     "salvo!": "saved!", "precisa do Pro": "needs Pro", "valor inválido": "invalid value",
     "nada sai do seu PC sem você ligar": "nothing leaves your PC unless you opt in",
-    "Carteira ETH": "ETH wallet", "Carteira SOL": "SOL wallet", "Código da loja": "Shop code", "Canal Twitch": "Twitch channel",
+    "Carteira ETH": "ETH wallet", "Carteira SOL": "SOL wallet", "Saldo em": "Balance in", "Esconder saldo": "Hide balance",
+    "MARCO!": "MILESTONE!", "carteira cresceu!": "wallet grew!", "Código da loja": "Shop code", "Canal Twitch": "Twitch channel",
     "Servidor + Apelido": "Server + Nickname", "INFO": "INFO", "CONQUISTAS": "ACHIEVEMENTS", "OPS": "OOPS",
     "CÓDIGO DO PET": "PET CODE", "ATUALIZAÇÕES": "UPDATES", "RELATÓRIO": "REPORT", "PERIGO!": "DANGER!",
     "NOVA VERSÃO!": "NEW VERSION!", "ALERTA DE BALEIA": "WHALE ALERT", "LICENÇA": "LICENSE",

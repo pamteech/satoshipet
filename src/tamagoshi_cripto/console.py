@@ -25,6 +25,7 @@ AJUDA = [
     "  gas             gas do ETH (gwei)",
     "  wallet [addr]   carteira watch-only",
     "  sats            alterna USD/sats",
+    "  saldo [on|off|brl|usd]  saldo watch-only (off = ••••)",
     "  skin <x>        troca skin",
     "  coin <x>        troca moeda",
     "  neofetch        info do sistema (do bicho)",
@@ -153,6 +154,10 @@ class Console:
         if not a:
             return self.ctx.carteira(None)
         return self.ctx.carteira(a[0])
+
+    def cmd_saldo(self, a):
+        f = getattr(self.ctx, "comando_saldo", None)
+        return f(a) if f else ["saldo só na janela (por enquanto)"]
 
     def cmd_sats(self, a):
         return [self.ctx.alternar_sats()]
