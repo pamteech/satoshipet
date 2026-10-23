@@ -146,3 +146,29 @@ def test_nada_de_nome_antigo_nas_novidades():
     for nome in ("roupas.py", "marcos.py"):
         txt = (raiz / nome).read_text(encoding="utf-8").lower()
         assert "tamagoshi" not in txt and "tamagotchi" not in txt
+
+
+@pytest.fixture
+def idioma():
+    yield i18n.definir
+    i18n.definir("pt")
+
+
+def test_frases_de_marco_em_en_e_pt(idioma):
+    idioma("pt")
+    m = marcos.pendente(T0, [], T0 + 30 * D)
+    assert m["frase"] == "parabéns pra mim! 1 mês de vida" and m["titulo"] == "1 MÊS!"
+    idioma("en")
+    m = marcos.pendente(T0, [], T0 + 30 * D)
+    assert m["frase"] == "happy birthday to me! 1 month old" and m["titulo"] == "1 MONTH!"
+    assert marcos.pendente(T0, [], T0 + 7 * D)["frase"] == "1 week of HODL together!"
+    assert marcos.pendente(T0, [], T0 + 3 * 365 * D)["frase"] == "3 years! not even mt. gox took me down"
+
+
+def test_ath_formatado_por_idioma(idioma):
+    idioma("pt")
+    assert marcos.texto_ath(126500.4) == "BTC bateu US$ 126.500. WAGMI!"
+    assert marcos.dinheiro_usd(1_234_567) == "US$ 1.234.567"
+    idioma("en")
+    assert marcos.texto_ath(126500.4) == "BTC hit $126,500. WAGMI!"
+    assert marcos.dinheiro_usd(999) == "$999"

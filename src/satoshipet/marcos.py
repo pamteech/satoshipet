@@ -4,6 +4,8 @@ from __future__ import annotations
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
+from . import i18n
+
 DIA = 86400
 # (dias, nome curto, efeito)
 MARCOS: List[Tuple[int, str, str]] = [
@@ -47,7 +49,32 @@ def pendente(nasceu_em: float, feitos: List[int], agora: Optional[float] = None)
         return None
     d, nome, fx = alc[-1]
     return {"dias": d, "nome": nome, "fx": fx, "alcancados": [m[0] for m in lista(dias) if m[0] <= dias],
-            "frase": FRASES[fx].format(n=nome), "conquista": CONQ_MARCO.get(d)}
+            "frase": frase(fx, nome), "titulo": nome_i18n(nome).upper() + "!", "conquista": CONQ_MARCO.get(d)}
+
+
+def nome_i18n(nome: str) -> str:
+    """"1 semana" -> "1 week" no EN (anos: "3 anos" -> "3 years"). PT fica igual."""
+    if i18n.atual() != "en":
+        return nome
+    n, _, unidade = nome.partition(" ")
+    return f"{n} " + {"semana": "week", "mês": "month", "dias": "days", "meses": "months", "ano": "year",
+                      "anos": "years"}.get(unidade, unidade)
+
+
+def frase(fx: str, nome: str) -> str:
+    """Linha do balão no idioma do app (o molde passa pelo i18n, o nome também)."""
+    return i18n.t(FRASES[fx]).format(n=nome_i18n(nome))
+
+
+def dinheiro_usd(v: float) -> str:
+    """pt: US$ 126.500 | en: $126,500."""
+    if i18n.atual() == "en":
+        return f"${v:,.0f}"
+    return "US$ " + f"{v:,.0f}".replace(",", ".")
+
+
+def texto_ath(v: float) -> str:
+    return i18n.t("BTC bateu {v}. WAGMI!").format(v=dinheiro_usd(v))
 
 
 def checar_ath(cfg: Dict[str, Any], ath_api: Optional[float], preco: Optional[float],

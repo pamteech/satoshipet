@@ -6,6 +6,7 @@
 - **Festa de ATH do BTC**: o ATH da CoinGecko (sem chave, a cada 6 h) ou o preço ao vivo acima dele soltam fogos e a medalha "Festa do ATH". Na 1ª vez o app só aprende o ATH. Depois é uma festa por ATH novo, no máximo uma a cada 20 h, mesmo num rali.
 - **Efeito `efeitos.Festa`** (confete, bolo com vela piscando e fogos), desenhado em blocos no Canvas como as outras transições. Com "Reduzir movimento" fica parado; no modo economia dura metade e tem metade das partículas.
 - **Roupinhas de época** (`roupas.py` + arte em `juice.ARTES`): Halloween (27/10 a 02/11), Whitepaper + Halloween (31/10), Natal (dezembro), Ano Novo (31/12 a 02/01, cartola), Genesis (03/01, coroa do bloco 0), Carnaval (sábado até a quarta de cinzas, pela Páscoa), Pizza Day (22/05, chapéu de pizza) e o bloco do halving. Funcionam em todas as moedas e estágios. O ajuste "Chapéus de época" virou "Roupinhas de época".
+- Balões dos aniversários e da festa de ATH seguem o idioma do app (pt/EN), e o valor do ATH sai no formato de cada idioma: `US$ 126.500` no pt, `$126,500` no EN.
 - CLI: `--outfit AAAA-MM-DD` mostra a roupinha da data e sai. `--date AAAA-MM-DD` (ou `SATOSHIPET_DATE`) abre o app fingindo que é aquele dia.
 - Config v5: quem não tinha `nasceu_em` ganha a data da 1ª conquista registrada (ou hoje); campos novos `marcos`, `ath_btc` e `ath_btc_festa`.
 - Prévias: `xvfb-run -a python3 tools/preview_v18.py <pasta>`.

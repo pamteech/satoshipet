@@ -222,7 +222,7 @@ class MixinMundo:
         if not m:
             return None
         self.cfg["marcos"] = sorted(set(self.cfg["marcos"]) | set(m["alcancados"]))
-        self.festa(m["fx"], m["nome"].upper() + "!", m["frase"], m["conquista"])
+        self.festa(m["fx"], m["titulo"], m["frase"], m["conquista"])
         from . import config
         config.salvar(self.cfg)
         return m
@@ -230,7 +230,7 @@ class MixinMundo:
     def checar_ath_btc(self, ath_api, preco=None, agora=None):
         novo = marcos.checar_ath(self.cfg, ath_api, preco or self.precos.get("BTC"), agora)
         if novo:
-            self.festa("fogos", "NOVO ATH!", f"BTC bateu US$ {novo:,.0f}. WAGMI!", "ath_festa")
+            self.festa("fogos", "NOVO ATH!", marcos.texto_ath(novo), "ath_festa")
             from . import config
             config.salvar(self.cfg)
         return novo
