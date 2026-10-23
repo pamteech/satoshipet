@@ -33,6 +33,12 @@ LISTA = {
     "baleia_cedo": ("Acordou com baleia", "Alerta de baleia nos 10 min depois de abrir o app"),
     "bloco_halving": ("Bloco do Halving", "Comeu o bloco do halving"),
     "medo_extremo": ("Medo Extremo", "Viu o Fear & Greed em medo extremo (<= 20)"),
+    # v1.8: aniversários
+    "aniv_semana": ("Primeira Semana", "O bicho fez 1 semana"),
+    "aniv_mes": ("Mesversário", "O bicho fez 1 mês"),
+    "aniv_100d": ("100 Blocos de Dias", "O bicho fez 100 dias"),
+    "aniv_ano": ("1 Ano de HODL", "O bicho fez 1 ano"),
+    "ath_festa": ("Festa do ATH", "Comemorou um novo All-Time High do BTC"),
 }
 
 # v1.7: medalhas 8x8 (pixel). "1" = cor da medalha, "2" = brilho
@@ -45,6 +51,13 @@ BADGES = {
                       [".111111.", "11222211", "12211221", "12122121", "12211221", "12222221", "11222211", ".111111."]),
     "medo_extremo": ("#5d275d", [".111111.", "11111111", "11211211", "11111111", "11122111", "11211211", "11111111", ".1.11.1."]),
 }
+_BOLO8 = ["...22...", "...1....", ".111111.", ".122221.", ".111111.", ".122221.", "11111111", "........"]
+BADGES["aniv_semana"] = ("#41a6f6", _BOLO8)
+BADGES["aniv_mes"] = ("#ef7d57", _BOLO8)
+BADGES["aniv_100d"] = ("#a7f070", _BOLO8)
+BADGES["aniv_ano"] = ("#ffcd75", _BOLO8)
+BADGES["ath_festa"] = ("#ffcd75",
+                       ["1..1..1.", ".1.1.1..", "..111...", "1111111.", "..111...", ".1.1.1..", "1..1..1.", "........"])
 BADGE_PADRAO = ("#ffcd75", ["..1111..", ".122221.", "12211221", "12122121", "12211221", ".122221.", "..1111..", ".11..11."])
 
 

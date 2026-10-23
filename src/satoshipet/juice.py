@@ -11,12 +11,9 @@ from .pixel import rgb
 
 # ---------------- chapéus de época ----------------
 def chapeu_do_dia(hoje=None):
-    d = hoje or dt.date.today()
-    if (d.month == 10 and d.day >= 1) or (d.month == 11 and d.day <= 2):
-        return "halloween"
-    if d.month == 12 and d.day <= 26:
-        return "natal"
-    return None
+    """v1.8: o calendário das roupinhas mora em roupas.py (Halloween, Natal, Ano Novo, Pizza Day...)."""
+    from . import roupas
+    return roupas.roupa_do_dia(hoje)
 
 
 def _topo_cabeca(fr, min_larg=10):
@@ -94,19 +91,76 @@ PLUMAS = [  # carnaval: tiara de plumas
     ".1233333333333321.",
     "..11111111111111..",
 ]
+# ---- v1.8: roupinhas de época novas ----
+BRUXA_PAPER = [  # 31/10: bruxa + whitepaper (folha branca na aba, "B" laranja)
+    "........11........",
+    ".......1221.......",
+    "......12231.......",
+    ".....122231.......",
+    ".....1222231......",
+    "....12222231......",
+    "....122222231.....",
+    "...1222222231.....",
+    "...14444444441....",
+    "..1444466644441...",
+    ".1122222622222211.",
+    "111111111111111111",
+]
+CARTOLA = [  # ano novo: cartola com faixa dourada e estrelinha
+    ".........5.......",
+    "....11111111.....",
+    "....12222221.....",
+    "....12222221.....",
+    "....12222221.....",
+    "....12222221.....",
+    "....13333331.....",
+    "....14444441.....",
+    "..111111111111...",
+    ".12222222222221..",
+    "..111111111111...",
+]
+PIZZA = [  # pizza day: fatia de chapéu (borda, queijo e calabresa)
+    "1111111111111111",
+    "1555555555555551",
+    "1333333333333331",
+    ".12222222222221.",
+    ".12242222242221.",
+    "..122222222221..",
+    "..122242222221..",
+    "...1222222221...",
+    "...1224222221...",
+]
+GENESIS = [  # genesis: coroa com o bloco 0 no meio
+    "..1.....111.....1..",
+    ".151...12221...151.",
+    ".1551..12321..1551.",
+    ".15551.12221.15551.",
+    ".155551.111.155551.",
+    ".1555555555555551..",
+    ".1544444444444451..",
+    ".1555555555555551..",
+    "..11111111111111...",
+]
 CORES_CHAPEU = {
     "festa": {"1": "preto", "2": "celeste", "3": "amarelo", "5": "branco"},
     "carnaval": {"1": "preto", "2": "amarelo", "3": "laranja", "4": "verde", "5": "celeste"},
     "halloween": {"1": "preto", "2": "roxo", "3": "vinho", "4": "laranja", "5": "amarelo"},
     "natal": {"1": "preto", "2": "vinho", "3": "laranja", "5": "branco"},
+    "whitepaper": {"1": "preto", "2": "roxo", "3": "vinho", "4": "branco", "6": "laranja"},
+    "ano_novo": {"1": "preto", "2": "grafite", "3": "amarelo", "4": "laranja", "5": "amarelo"},
+    "pizza": {"1": "preto", "2": "amarelo", "3": "laranja", "4": "vinho", "5": "vinho"},
+    "genesis": {"1": "preto", "2": "laranja", "3": "branco", "4": "laranja", "5": "amarelo"},
+    "halving": {"1": "preto", "2": "verde", "3": "amarelo", "5": "branco"},
 }
+ARTES = {"halloween": BRUXA, "natal": NOEL, "festa": FESTA, "carnaval": PLUMAS, "whitepaper": BRUXA_PAPER,
+         "ano_novo": CARTOLA, "pizza": PIZZA, "genesis": GENESIS, "halving": FESTA}
 
 
 def aplicar_chapeu(fr, tipo):
     """fr: frame RGBA 48x48 (cópia é devolvida)."""
     if tipo not in CORES_CHAPEU:
         return fr
-    arte = {"halloween": BRUXA, "natal": NOEL, "festa": FESTA, "carnaval": PLUMAS}[tipo]
+    arte = ARTES[tipo]
     cores = CORES_CHAPEU[tipo]
     out = fr.copy()
     cx, topo = _topo_cabeca(fr)

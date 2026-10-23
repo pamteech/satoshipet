@@ -8,7 +8,7 @@ import time
 
 import requests
 
-from . import acessibilidade, calendario, clima, conquistas, i18n, lan
+from . import acessibilidade, calendario, clima, conquistas, i18n, lan, marcos
 from .config import MOEDAS
 from .graficos import C_TINTA, carregar_frames
 
@@ -30,6 +30,7 @@ class MixinMundo:
         self._evento_avisado = None
         self._ultimo_calendario = 0.0
         self._ath_t = 0.0
+        self._ath_pendente = None
         self._foco_dica = -1
 
     def _iniciar_mundo(self):
@@ -132,13 +133,18 @@ class MixinMundo:
         if time.time() - self._ath_t < 6 * 3600:
             return
         moeda = self.cfg["moeda"]
+        ids = sorted({MOEDAS[moeda], MOEDAS["BTC"]})
         r = requests.get("https://api.coingecko.com/api/v3/coins/markets",
-                         params={"vs_currency": "usd", "ids": MOEDAS[moeda]}, timeout=10,
-                         headers={"User-Agent": "SatoshiPet/1.7"})
+                         params={"vs_currency": "usd", "ids": ",".join(ids)}, timeout=10,
+                         headers={"User-Agent": "SatoshiPet/1.8"})
         r.raise_for_status()
-        lst = r.json()
-        if lst and lst[0].get("ath"):
-            self.conq_mercado.ath[moeda] = float(lst[0]["ath"])
+        por_id = {x.get("id"): x for x in r.json() or []}
+        x = por_id.get(MOEDAS[moeda])
+        if x and x.get("ath"):
+            self.conq_mercado.ath[moeda] = float(x["ath"])
+        b = por_id.get(MOEDAS["BTC"])
+        if b and b.get("ath"):
+            self._ath_pendente = (float(b["ath"]), float(b.get("current_price") or 0))  # GUI consome no tick
         self._ath_t = time.time()
 
     def loop_lan(self):
@@ -187,6 +193,11 @@ class MixinMundo:
         if time.time() - self._ultimo_calendario > 60:
             self._ultimo_calendario = time.time()
             self._checar_calendario()
+            self._checar_marcos()
+        if self._ath_pendente:
+            ath, preco = self._ath_pendente
+            self._ath_pendente = None
+            self.checar_ath_btc(ath, preco)
 
     def iniciar_visita(self, amigo, lado=None):
         self._ultima_visita = time.time()
@@ -204,6 +215,25 @@ class MixinMundo:
                 self.toast = [random.choice(self.evento["frases"]), 26, self.evento["nome"]]
                 self.cache_sprites.clear()  # chapéu do evento
                 self.anunciar(self.evento["nome"])
+
+    # ---------- v1.8: aniversários e ATH ----------
+    def _checar_marcos(self, agora=None):
+        m = marcos.pendente(self.cfg.get("nasceu_em") or 0, self.cfg.setdefault("marcos", []), agora)
+        if not m:
+            return None
+        self.cfg["marcos"] = sorted(set(self.cfg["marcos"]) | set(m["alcancados"]))
+        self.festa(m["fx"], m["nome"].upper() + "!", m["frase"], m["conquista"])
+        from . import config
+        config.salvar(self.cfg)
+        return m
+
+    def checar_ath_btc(self, ath_api, preco=None, agora=None):
+        novo = marcos.checar_ath(self.cfg, ath_api, preco or self.precos.get("BTC"), agora)
+        if novo:
+            self.festa("fogos", "NOVO ATH!", f"BTC bateu US$ {novo:,.0f}. WAGMI!", "ath_festa")
+            from . import config
+            config.salvar(self.cfg)
+        return novo
 
     def frase_evento(self):
         h = calendario.halving(self.estomago.d.get("altura"))
@@ -230,6 +260,8 @@ class MixinMundo:
         novas += self.conq_mercado.bloco(self.estomago.d.get("altura") or 0)
         for c in novas:
             self._comemorar(self.conq.especial(c))
+        if p and moeda == "BTC" and "ath_vivo" in novas:  # v1.8: ATH ao vivo também vira festa
+            self.checar_ath_btc(None, p)
 
     # ---------- desenho ----------
     def _clima_atual(self):

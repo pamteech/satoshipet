@@ -75,7 +75,7 @@ class Ajustes(_Cena):
             return [
                 Item("Tamanho", lambda: f"{a.escala}x", "numero", lambda d: a.mudar_escala(a.escala + d)),
                 b(("Alto contraste", "alto_contraste")), b(("Paleta dia/noite", "dia_noite")),
-                b(("Chapéus de época", "chapeus")), b(("Tremidinha", "juice")), b(("Efeito CRT", "crt")),
+                b(("Roupinhas de época", "chapeus")), b(("Tremidinha", "juice")), b(("Efeito CRT", "crt")),
                 b(("Reduzir movimento", "reduzir_movimento")),
                 Item("Fonte grande", lambda: _sim(cfg.get("fonte_grande")), "bool", self._fonte_grande),
                 b(("Voz (leitor)", "voz")),

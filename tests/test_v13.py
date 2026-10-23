@@ -209,7 +209,7 @@ def test_sons_chiptune(tmp_path):
 
 # ---------------- juice ----------------
 def test_chapeus_e_periodos():
-    assert juice.chapeu_do_dia(dt.date(2026, 10, 22)) == "halloween"
+    assert juice.chapeu_do_dia(dt.date(2026, 10, 29)) == "halloween"
     assert juice.chapeu_do_dia(dt.date(2026, 12, 20)) == "natal"
     assert juice.chapeu_do_dia(dt.date(2026, 7, 1)) is None
     fr = Image.open(recursos.ASSETS / "sprites" / "BTC_padrao.png").convert("RGBA").crop((0, 0, 48, 48))

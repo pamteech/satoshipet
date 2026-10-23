@@ -15,6 +15,7 @@ from . import (
     onchain,
     papel,
     recursos,
+    roupas,
 )
 from .console import SPRITE
 from .graficos import (
@@ -327,7 +328,9 @@ class MixinDesenho:
         return self.cache_sprites[chave]
 
     def _chapeu(self):
-        return (self.chapeu_evento() or juice.chapeu_do_dia()) if self.cfg.get("chapeus", True) else None
+        if not self.cfg.get("chapeus", True):  # Ajustes > "Roupinhas de época"
+            return None
+        return roupas.roupa_do_dia(roupas.hoje(), self.estomago.d.get("altura")) or self.chapeu_evento()
 
     def _caminho_folha(self):
         moeda, skin = self.cfg["moeda"], self.cfg["skin"]

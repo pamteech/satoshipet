@@ -197,3 +197,104 @@ def zona(x: int, y: int, m: dict) -> Optional[str]:
         if x0 <= x <= x1 and y0 <= y <= y1:
             return chave
     return None
+
+
+# ---------------- v1.8: festas (aniversário / marcos / ATH) ----------------
+CORES_FESTA = ("#ffcd75", "#ef7d57", "#b13e53", "#38b764", "#41a6f6", "#73eff7", "#f4f4f4", "#a43fd6")
+BOLO = [  # 1 contorno, 2 massa, 3 glacê, 4 vela, 5 chama, 6 confeito
+    "......5......",
+    ".....545.....",
+    "......4......",
+    "......4......",
+    "..111111111..",
+    ".13333333331.",
+    ".13633363331.",
+    ".12222222221.",
+    ".13333333331.",
+    ".12222622221.",
+    ".12222222221.",
+    "1111111111111",
+]
+COR_BOLO = {"1": "#1a1c2c", "2": "#ef7d57", "3": "#f4f4f4", "4": "#41a6f6", "5": "#ffcd75", "6": "#b13e53"}
+TIPOS_FESTA = ("confete", "bolo", "fogos")
+
+
+class Festa:
+    """Comemoração curta: confete caindo, bolo com vela piscando ou fogos estourando + título.
+
+    leve=True (reduzir movimento): nada se mexe, só o bolo/estrelas paradas e o título.
+    economia=True (bateria): metade das partículas e metade da duração.
+    """
+
+    DURACAO = 24  # ~4,3 s a 180 ms
+
+    def __init__(self, tipo: str = "confete", titulo: str = "", semente: int = 0,
+                 leve: bool = False, economia: bool = False):
+        self.tipo = tipo if tipo in TIPOS_FESTA else "confete"
+        self.titulo, self.leve, self.economia = titulo, leve, economia
+        self.duracao = self.DURACAO // 2 if economia else self.DURACAO
+        self.t = 0
+        rng = random.Random(semente)
+        n = 10 if economia else 22
+        self.pecas = [(rng.random(), rng.random() * 0.6, rng.randint(1, 3), rng.choice(CORES_FESTA)) for _ in range(n)]
+        self.estouros = [(0.2 + rng.random() * 0.6, 0.12 + rng.random() * 0.25, rng.randint(0, 8),
+                          rng.choice(CORES_FESTA)) for _ in range(3 if economia else 5)]
+
+    @property
+    def viva(self) -> bool:
+        return self.t < self.duracao
+
+    def tick(self) -> None:
+        self.t += 1
+
+    def confete(self, largura: int, altura: int) -> List[Tuple[int, int, str]]:
+        t = 0 if self.leve else self.t
+        out = []
+        for fx, fy, vel, cor in self.pecas:
+            y = int((fy + t * 0.035 * vel) * altura) % max(1, altura)
+            x = int(fx * largura + (0 if self.leve else math.sin(t * 0.6 + fx * 9) * 4))
+            out.append((x, y, cor))
+        return out
+
+    def fogos(self, largura: int, altura: int) -> List[Tuple[int, int, str]]:
+        """Cada estouro: sobe (rastro) e abre num anel de 8 pontos que cresce e some."""
+        out = []
+        for fx, fy, atraso, cor in self.estouros:
+            t = 12 if self.leve else self.t - atraso
+            if t < 0:
+                continue
+            cx, cy = int(fx * largura), int(fy * altura)
+            if t < 4:
+                out.append((cx, int(cy + (4 - t) * altura * 0.08), "#f4f4f4"))
+                continue
+            r = (t - 3) * 5 if not self.leve else 14
+            if r > 40:
+                continue
+            for i in range(8):
+                a = i * math.pi / 4
+                out.append((int(cx + math.cos(a) * r), int(cy + math.sin(a) * r), cor))
+        return out
+
+    def desenhar(self, cv: Any, largura: int, altura: int, cx: int, cy: int, raio: int, E: int,
+                 txt: Callable[..., None]) -> None:
+        q = max(2, E)
+        if self.tipo == "confete":
+            for x, y, cor in self.confete(largura, altura):
+                cv.create_rectangle(x, y, x + q, y + q, fill=cor, width=0, tags=("fx",))
+        elif self.tipo == "fogos":
+            for x, y, cor in self.fogos(largura, altura):
+                cv.create_rectangle(x, y, x + q, y + q, fill=cor, width=0, tags=("fx",))
+        else:
+            b = max(3, E + 1)
+            x0 = cx + raio - len(BOLO[0]) * b // 2
+            y0 = cy + raio - len(BOLO) * b
+            chama = self.leve or self.t % 2 == 0
+            for j, linha in enumerate(BOLO):
+                for i, ch in enumerate(linha):
+                    if ch in COR_BOLO and (ch != "5" or chama):
+                        cv.create_rectangle(x0 + i * b, y0 + j * b, x0 + (i + 1) * b, y0 + (j + 1) * b,
+                                            fill=COR_BOLO[ch], width=0, tags=("fx",))
+            for x, y, cor in self.confete(largura, altura)[:8]:
+                cv.create_rectangle(x, y, x + q, y + q, fill=cor, width=0, tags=("fx",))
+        if self.titulo and (self.leve or self.t % 6 < 5):
+            txt(largura // 2, max(8, cy - raio - 18), self.titulo, "#ffcd75", escala=2, sombra=COR_TRANS)

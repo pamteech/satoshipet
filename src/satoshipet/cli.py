@@ -25,12 +25,28 @@ def parser():
     p.add_argument("--status", action="store_true", help="imprime o JSON de uma instância rodando e sai")
     p.add_argument("--frames", type=int, default=0, help="(TUI) sai depois de N frames; útil pra testes")
     p.add_argument("--list-skins", action="store_true", help="lista skins disponíveis e sai")
+    p.add_argument("--date", metavar="AAAA-MM-DD", help="finge que hoje é essa data (preview das roupinhas)")
+    p.add_argument("--outfit", metavar="AAAA-MM-DD", help="mostra qual roupinha vale nessa data e sai")
     p.add_argument("--version", action="version", version=f"satoshipet {__version__}")
     return p
 
 
 def main(argv=None):
     a = parser().parse_args(argv)
+    if a.date or a.outfit:
+        import datetime as _dt
+        import os
+        try:
+            d = _dt.date.fromisoformat(a.outfit or a.date)
+        except ValueError:
+            print("data inválida, use AAAA-MM-DD", file=sys.stderr)
+            return 2
+        if a.outfit:
+            from . import roupas
+            r = roupas.roupa_do_dia(d)
+            print(f"{d.isoformat()}: {r} - {roupas.NOMES[r]}" if r else f"{d.isoformat()}: sem roupinha")
+            return 0
+        os.environ["SATOSHIPET_DATE"] = d.isoformat()
     if a.config:
         from pathlib import Path
         config.CONFIG_PATH = Path(a.config).expanduser()

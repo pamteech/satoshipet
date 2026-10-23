@@ -1,4 +1,7 @@
-"""Gera prévias (GIF/PNG) da v1.7 (clima, eventos, conquistas, amigos, fonte grande) em modo headless: xvfb-run -a python tools/preview_fx.py <pasta>"""
+"""Gera prévias (GIF/PNG) da v1.7 (clima, eventos, conquistas, amigos, fonte grande).
+
+Headless: xvfb-run -a python tools/preview_v17.py <pasta>
+"""
 import os
 import subprocess
 import sys

@@ -12,6 +12,7 @@ class MixinAnimacao:
     def _init_efeitos(self):
         self.fx_trans = None        # efeitos.Transicao em andamento
         self.fx_evo = None          # efeitos.Evolucao em andamento
+        self.fx_festa = None        # v1.8: efeitos.Festa (aniversário / ATH)
         self.idle = efeitos.Idle()
         self.mouse = None           # (x, y) relativo ao canvas, ou None
         self.dica = None            # [chave, frames parado em cima]
@@ -139,6 +140,26 @@ class MixinAnimacao:
         except Exception:
             self.fx_evo = None
 
+    # ---------- v1.8: festas ----------
+    def festa(self, tipo, titulo, frase=None, conquista=None):
+        """Bolo/confete/fogos + título + balão. Reduzir movimento = versão parada; bateria = curta."""
+        if self.cfg.get("juice", True):
+            # com balão o título já vai no topo do balão; o letreiro grande só aparece sem balão
+            self.fx_festa = efeitos.Festa(tipo, "" if frase else i18n.t(titulo), semente=int(time.time()),
+                                          leve=self.movimento_reduzido(),
+                                          economia=self.modo_energia != "normal")
+        if frase:
+            self.toast = [frase, 26, titulo]
+        self.anunciar(titulo)
+        try:
+            self.som.tocar("conquista")
+        except Exception:
+            pass
+        if conquista:
+            self._comemorar(self.conq.especial(conquista))
+            if frase:
+                self.toast = [frase, 26, titulo]  # o balão da festa vence o da medalha
+
     def _sprite_vivo(self, img, frames, dormindo):
         """Troca/move o sprite: evolução > piscar/bocejo. Retorna (img, dx, dy)."""
         if self.fx_evo:
@@ -163,6 +184,8 @@ class MixinAnimacao:
         if self.fx_evo and not self.cena:
             cx, cy = L // 2, self.Y_SPRITE + self.S // 2
             self.fx_evo.desenhar(c, L, A, cx, cy, self.S // 2, self.escala, self._txt)
+        if self.fx_festa and not self.cena and not self.fx_evo:
+            self.fx_festa.desenhar(c, L, A, L // 2, self.Y_SPRITE + self.S // 2, self.S // 2, self.escala, self._txt)
         if not self.cena:
             self._desenhar_dica()
         if self.fx_trans:
@@ -177,6 +200,10 @@ class MixinAnimacao:
             self.fx_evo.tick()
             if not self.fx_evo.viva:
                 self.fx_evo = None
+        if self.fx_festa:
+            self.fx_festa.tick()
+            if not self.fx_festa.viva:
+                self.fx_festa = None
         if self.dica:
             self.dica[1] += 1
         noite = time.localtime().tm_hour >= 23 or time.localtime().tm_hour < 6

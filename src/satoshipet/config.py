@@ -60,7 +60,10 @@ PADRAO = {
     "musica": False,         # bgm chiptune (desligada por padrão)
     "volume": 0.35,
     "dia_noite": True,
-    "chapeus": True,         # chapéus de época (halloween/natal)
+    "chapeus": True,         # roupinhas de época (v1.8: halloween, natal, ano novo, pizza day, genesis...)
+    "marcos": [],            # v1.8: aniversários já comemorados (em dias: 7, 30, 100...)
+    "ath_btc": 0.0,          # v1.8: último ATH do BTC conhecido (festa só quando sobe)
+    "ath_btc_festa": 0,
     "alto_contraste": False,
     "juice": True,           # tremidinha e partículas
     "api_escrita": False,    # v1.5: POST /pet e /feed (com token). Desligado por padrão
@@ -99,7 +102,7 @@ PADRAO = {
 }
 
 
-VERSAO_CONFIG = 4
+VERSAO_CONFIG = 5
 
 
 def migrar(cfg: Dict[str, Any]) -> Dict[str, Any]:
@@ -125,7 +128,14 @@ def migrar(cfg: Dict[str, Any]) -> Dict[str, Any]:
         if not cfg.get("nasceu_em"):
             import time
             cfg["nasceu_em"] = int(time.time())
-    cfg["versao_config"] = VERSAO_CONFIG
+    if v < 5:  # v1.7 -> v1.8: aniversário precisa de data de nascimento; sem ela, a 1ª vez que o vimos
+        if not cfg.get("nasceu_em"):
+            vistos = [int(t) for t in ((cfg.get("progresso") or {}).get("desbloqueadas") or {}).values()
+                      if isinstance(t, (int, float)) and t > 0]
+            import time
+            cfg["nasceu_em"] = min(vistos) if vistos else int(time.time())
+        cfg.setdefault("marcos", [])
+        cfg["versao_config"] = VERSAO_CONFIG
     return cfg
 
 

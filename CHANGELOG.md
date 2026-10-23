@@ -1,6 +1,15 @@
 # Changelog
 
 
+## [não lançado] v1.8 (em andamento)
+- **Aniversários e marcos** (`marcos.py`): 1 semana (confete), 1 mês (bolo), 100 dias (fogos), 6 meses, 1 ano, 500 e 1000 dias, e todo ano depois. Se o app ficou fechado, comemora só o maior marco (sem 5 bolos seguidos). Medalhas novas: Primeira Semana, Mesversário, 100 Blocos de Dias, 1 Ano de HODL.
+- **Festa de ATH do BTC**: o ATH da CoinGecko (sem chave, a cada 6 h) ou o preço ao vivo acima dele soltam fogos e a medalha "Festa do ATH". Na 1ª vez o app só aprende o ATH. Depois é uma festa por ATH novo, no máximo uma a cada 20 h, mesmo num rali.
+- **Efeito `efeitos.Festa`** (confete, bolo com vela piscando e fogos), desenhado em blocos no Canvas como as outras transições. Com "Reduzir movimento" fica parado; no modo economia dura metade e tem metade das partículas.
+- **Roupinhas de época** (`roupas.py` + arte em `juice.ARTES`): Halloween (27/10 a 02/11), Whitepaper + Halloween (31/10), Natal (dezembro), Ano Novo (31/12 a 02/01, cartola), Genesis (03/01, coroa do bloco 0), Carnaval (sábado até a quarta de cinzas, pela Páscoa), Pizza Day (22/05, chapéu de pizza) e o bloco do halving. Funcionam em todas as moedas e estágios. O ajuste "Chapéus de época" virou "Roupinhas de época".
+- CLI: `--outfit AAAA-MM-DD` mostra a roupinha da data e sai. `--date AAAA-MM-DD` (ou `SATOSHIPET_DATE`) abre o app fingindo que é aquele dia.
+- Config v5: quem não tinha `nasceu_em` ganha a data da 1ª conquista registrada (ou hoje); campos novos `marcos`, `ath_btc` e `ath_btc_festa`.
+- Prévias: `xvfb-run -a python3 tools/preview_v18.py <pasta>`.
+
 ## [não lançado] v1.7 (em andamento)
 - **Novo nome: SatoshiPet** (antes "Tamagoshi Cripto"). Pacote Python `satoshipet`, comando `satoshipet` (o `tamagoshi` segue como apelido deprecado), `SatoshiPet.app` / `SatoshiPet.exe`, bundle id `com.pamtech.satoshipet`, repo `pamteech/satoshipet`. **Nada se perde**: na 1ª abertura o app COPIA `~/.tamagoshi_cripto.json`, `~/.tamagoshi_cripto/` e `~/.tamagoshi_api_token` pros nomes novos (`~/.satoshipet*`; o antigo fica de backup), traz a chave da IA do chaveiro antigo e troca o "iniciar com o sistema" antigo pelo novo. Chaves Pro e códigos SKIN- antigos continuam valendo; variáveis `TAMAGOSHI_*` ainda são aceitas.
 - **Clima real** (Open-Meteo, sem chave, DESLIGADO por padrão): cidade (geocoding Open-Meteo) ou `lat,lon` em Ajustes > Geral; "auto" por IP (ipwho.is) só se você escolher. Chuva + guarda-chuva, óculos escuros no sol (em cima dos olhos detectados na folha), neve, neblina pontilhada, tempestade com relâmpago, estrelas e lua à noite. Atualiza a cada ~30 min, cache, backoff, offline usa o último clima.

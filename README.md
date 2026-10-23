@@ -78,13 +78,19 @@ Truecolor half-block rendering (`▀`), live prices, `space` to pet, `c` to cycl
 ```
 satoshipet [--tui] [--coin BTC|ETH|SOL|DOGE|PEPE] [--skin NAME|plugin:ID] [--scale 1-6]
           [--crt] [--mute] [--config PATH] [--skins-dir DIR] [--no-tray] [--no-api] [--status]
-          [--list-skins] [--version]
+          [--list-skins] [--date YYYY-MM-DD] [--outfit YYYY-MM-DD] [--version]
 ```
 
 ### Controls
 - **Drag**: hold left click · **Pet**: click the creature (jump + hearts + sound) · **Menu**: right click (or ctrl-click on Mac)
 - **Keyboard** (widget focused): `h j k l` move 10 px, `H J K L` 50 px, <kbd>`</kbd> console, `S` settings, `M` menu, `Tab` tooltips
 - Menu: coin, skin, watch-only wallet, console, show in sats, settings, price alerts, achievements, mute, CRT, start at login, hide to tray, activate Pro, quit
+
+### New in v1.8 🎂 (unreleased)
+- **Birthdays & milestones**: your pet celebrates 1 week, 1 month, 100 days, 6 months, 1 year, 500 and 1000 days, and every year after that, with confetti, a cake with a blinking candle or fireworks, plus a speech bubble and a badge. Older saves get a birth date from the first time we saw the pet.
+- **BTC all-time high party**: when CoinGecko (no API key) reports a new BTC ATH, or the live price beats it, you get fireworks. Once per new ATH, at most one party a day.
+- **Seasonal outfits** for every coin and every stage (egg to Diamond Hands): Halloween (Oct 27 to Nov 2), Whitepaper Day + Halloween (Oct 31), Christmas (December), New Year (Dec 31 to Jan 2), Genesis Block (Jan 3), Carnaval (Brazil, computed from Easter), Bitcoin Pizza Day (May 22) and the halving block. Turn them off in Settings > "Seasonal outfits". Preview a date with `--outfit 2026-10-31`, or run the app as if it were that day with `--date 2026-12-31` (or `SATOSHIPET_DATE`).
+- Reduce motion shows a still version of each party, and power saver makes it shorter with fewer particles.
 
 ### New in v1.7 🌦️ (unreleased)
 - **New name: SatoshiPet** (formerly "Tamagoshi Cripto"). Your pet, settings and Pro key carry over automatically on first launch.
@@ -334,6 +340,8 @@ satoshipet --tui      # no terminal
 
 **Free:** Satoshinho (BTC), animações, carinho, vida em corações, conquistas, sons 8-bit, Fear & Greed, contagem do halving (5 carinhos no Satoshinho), código konami (skin secreta), criaturas da comunidade, modo terminal e botão de afiliado.
 **Pro:** ETH, SOL, DOGE e PEPE na janela, skins premium, limites e preço de referência configuráveis, alertas de preço, mini gráfico e "abrir ao iniciar".
+
+**Novidades v1.8 (em andamento):** **aniversários** do bicho (1 semana, 1 mês, 100 dias, 6 meses, 1 ano e todo ano depois) com confete, bolo com vela ou fogos, balão e medalha; **festa de ATH do BTC** (CoinGecko, sem chave, uma vez por ATH novo); **roupinhas de época** em todas as moedas e estágios: Halloween, Whitepaper Day, Natal, Ano Novo, Genesis, Carnaval, Pizza Day e halving. Desliga em Ajustes > "Roupinhas de época". `--outfit AAAA-MM-DD` mostra a roupinha do dia e `--date AAAA-MM-DD` abre o app fingindo que é aquela data.
 
 **Novidades v1.7 (em andamento):** **novo nome: SatoshiPet** (antes "Tamagoshi Cripto"; seu pet, ajustes e chave Pro vêm junto na 1ª abertura); **clima de verdade** (Open-Meteo, desligado por padrão; cidade/lat,lon ou auto por IP) com chuva e guarda-chuva, óculos no sol, neve, neblina e céu estrelado; **calendário cripto** (Genesis, Pizza Day, Whitepaper, Natal, Carnaval e o **halving** com contagem); **conquistas de mercado** com medalhas pixel; **amigos na LAN** (opt-in, só nome/espécie/skin/humor); **acessibilidade**: reduzir movimento, fonte grande, voz opcional, `M` abre o menu e `Tab` passeia pelas dicas.
 
