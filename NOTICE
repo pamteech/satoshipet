@@ -1,0 +1,13 @@
+SatoshiPet
+
+Third-party assets
+- Press Start 2P font by CodeMan38, SIL Open Font License 1.1
+  (src/tamagoshi_cripto/assets/fonts/OFL.txt). The bitmap atlas pixel8.json is
+  derived from it and distributed under the same OFL terms.
+- Sweetie 16 palette by GrafxKid (CC0).
+
+Open-core note
+- All code and art in this repository are MIT. The "Pro" features are unlocked
+  by a license key verified against a secret that is NOT part of this repository
+  (it is injected only into official release builds). Official Pro license keys
+  are sold separately and are not covered by this license.
