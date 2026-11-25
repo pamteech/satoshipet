@@ -1,11 +1,10 @@
-# Publica site/ no GitHub Pages. Só roda manualmente (workflow_dispatch) até você ligar o Pages:
-#   Settings → Pages → Source: "GitHub Actions". Depois, se quiser deploy automático, descomente o push.
+# Publica site/ no GitHub Pages (source: GitHub Actions).
 name: Site (GitHub Pages)
 on:
   workflow_dispatch:
-  # push:
-  #   branches: [main]
-  #   paths: ["site/**"]
+  push:
+    branches: [main]
+    paths: ["site/**", ".github/workflows/pages.yml"]
 permissions:
   contents: read
   pages: write

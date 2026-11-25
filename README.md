@@ -4,7 +4,8 @@
 
 **A pixel-art crypto pet that floats on your desktop (or lives in your terminal) and feels the market harder than you do.**
 
-[![CI](https://github.com/pamteech/satoshipet/actions/workflows/ci.yml/badge.svg)](https://github.com/pamteech/satoshipet/actions/workflows/ci.yml)
+[![testes](https://img.shields.io/github/actions/workflow/status/pamteech/satoshipet/ci.yml?label=testes&labelColor=0D0B1E&color=39FF88)](https://github.com/pamteech/satoshipet/actions/workflows/ci.yml)
+[![Demo](https://img.shields.io/badge/demo-GitHub%20Pages-A855F7?labelColor=0D0B1E)](https://pamteech.github.io/satoshipet/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)
@@ -237,7 +238,7 @@ No wallet, e-mail, price or IP is stored. `rank` shows the top 10, `rank off` st
 The server is a ~200-line stdlib app in [`server/`](server/) (SQLite, rate limit, Dockerfile). See its README.
 
 ### Landing page
-[`site/`](site/) is a static page (GitHub Pages-ready) with a live in-browser demo of the pet (CoinGecko +
+The live demo is at [pamteech.github.io/satoshipet](https://pamteech.github.io/satoshipet/). [`site/`](site/) is the static page with a live in-browser demo of the pet (CoinGecko +
 mempool.space), Free vs Pro table, downloads, a Gumroad button, FAQ, EN/PT toggle and OG/Twitter cards.
 Edit `site/config.js` (repo, downloads, Gumroad, ranking URL). Preview: `cd site && python -m http.server 8765`.
 
